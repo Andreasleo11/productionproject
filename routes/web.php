@@ -3,9 +3,9 @@
 use App\Http\Controllers\FileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\PEController;
 use App\Http\Controllers\OperatorController;
 use App\Http\Controllers\InitialBarcodeController;
+use App\Http\Controllers\MasterItemController;
 use App\Http\Controllers\SOController;
 
 /*
@@ -19,7 +19,11 @@ use App\Http\Controllers\SOController;
 |
 */
 
-Route::view('/', 'welcome');
+// Route::view('/', 'welcome');
+
+Route::get('/', function () {
+    return redirect()->route('login');
+});
 
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
@@ -58,5 +62,4 @@ Route::get('/so/index', [SOController::class, 'index'])->name('so.index');
 Route::get('/so/process/{docNum}', [SOController::class, 'process'])->name('so.process');
 Route::post('/so/scan', [SOController::class, 'scanBarcode'])->name('so.scanBarcode');
 Route::get('/update-so-data/{docNum}', [SOController::class, 'updateSoData'])->name('update.so.data');
-require __DIR__.'/auth.php';
-
+require __DIR__ . '/auth.php';
