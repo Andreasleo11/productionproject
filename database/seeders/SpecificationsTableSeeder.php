@@ -15,6 +15,7 @@ class SpecificationsTableSeeder extends Seeder
     public function run(): void
     {
         $timestamp = Carbon::now();
+        DB::table('specifications')->truncate();
         DB::table('specifications')->insert([
             [
                 'name' => 'Operator',
@@ -23,6 +24,11 @@ class SpecificationsTableSeeder extends Seeder
             ],
             [
                 'name' => 'Machine',
+                'created_at' => $timestamp,
+                'updated_at' => $timestamp,
+            ],
+            [
+                'name' => 'PE',
                 'created_at' => $timestamp,
                 'updated_at' => $timestamp,
             ],

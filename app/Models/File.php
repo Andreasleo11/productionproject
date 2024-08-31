@@ -15,5 +15,4 @@ class File extends Model
         'mime_type',
         'size'
     ];
-
 }
