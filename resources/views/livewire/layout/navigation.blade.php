@@ -33,12 +33,15 @@ new class extends Component {
                         {{ __('Dashboard') }}
                     </x-nav-link>
                 </div>
-                <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('master-item.index')" :active="request()->routeIs('master-item.index')" wire:navigate>
-                        {{ __('Master Item') }}
-                    </x-nav-link>
-                </div>
+
+                @if (auth()->user()->specification->name === 'PE')
+                    <!-- Navigation Links -->
+                    <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                        <x-nav-link :href="route('master-item.index')" :active="request()->routeIs('master-item.index')" wire:navigate>
+                            {{ __('Master Item') }}
+                        </x-nav-link>
+                    </div>
+                @endif
             </div>
 
             <!-- Settings Dropdown -->
