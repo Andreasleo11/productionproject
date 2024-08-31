@@ -49,4 +49,9 @@ class User extends Authenticatable
     }
 
 
+
+    public function specification()
+    {
+        return $this->belongsTo(Specification::class);
+    }
 }

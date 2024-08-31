@@ -7,7 +7,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str; 
+use Illuminate\Support\Str;
 
 class UsersTableSeeder extends Seeder
 {
@@ -17,7 +17,7 @@ class UsersTableSeeder extends Seeder
     public function run(): void
     {
         $timestamp = Carbon::now();
-
+        DB::table('users')->truncate();
         DB::table('users')->insert([
             [
                 'specification_id' => 1, // assuming a valid specification_id exists
@@ -25,6 +25,16 @@ class UsersTableSeeder extends Seeder
                 'email' => 'admin@daijo.co.id',
                 'email_verified_at' => $timestamp,
                 'password' => Hash::make('Administrator'), // Use bcrypt or another hashing method
+                'remember_token' => Str::random(10),
+                'created_at' => $timestamp,
+                'updated_at' => $timestamp,
+            ],
+            [
+                'specification_id' => 3, // assuming a valid specification_id exists
+                'name' => 'PE',
+                'email' => 'pe@daijo.co.id',
+                'email_verified_at' => $timestamp,
+                'password' => Hash::make('PE'), // Use bcrypt or another hashing method
                 'remember_token' => Str::random(10),
                 'created_at' => $timestamp,
                 'updated_at' => $timestamp,
@@ -148,7 +158,8 @@ class UsersTableSeeder extends Seeder
                 'remember_token' => Str::random(10),
                 'created_at' => $timestamp,
                 'updated_at' => $timestamp,
-            ],   [
+            ],
+            [
                 'specification_id' => 2,
                 'name' => '0240A',
                 'email' => '0240A@daijo.co.id',
