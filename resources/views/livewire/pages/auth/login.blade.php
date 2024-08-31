@@ -5,9 +5,23 @@ use App\Providers\RouteServiceProvider;
 use Illuminate\Support\Facades\Session;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
+use App\Models\User;
+
+
+$users = User::get();
 
 new #[Layout('layouts.guest')] class extends Component {
     public LoginForm $form;
+    public $users;
+    /**
+     * Handle an incoming authentication request.
+     */
+    public function mount()
+    {
+        // Load users for the select dropdown
+        $this->users = User::all();
+    }
+    
 
     /**
      * Handle an incoming authentication request.
@@ -42,17 +56,20 @@ new #[Layout('layouts.guest')] class extends Component {
         <!-- Machine Select -->
         <div class="mb-4">
             <x-input-label for="machine" :value="__('Select Machine')" />
-            <select id="machine"
+            <select id="user"
                 class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
-                name="machine" disabled>
-                <option value="">-- Select a machine --</option>
-                <option value="A">Machine A</option>
-                <option value="B">Machine B</option>
-                <option value="C">Machine C</option>
+                name="user">
+                <option value="">-- Select a user --</option>
+                @foreach ($users as $user)
+                    <option value="{{ $user->id }}" data-email="{{ $user->email }}" data-name="{{ $user->name }}">
+                        {{ $user->name }}
+                    </option>
+                @endforeach
             </select>
             <x-input-error :messages="$errors->get('selectedMachine')" class="mt-2" />
         </div>
 
+        <!-- Email Address -->
         <!-- Email Address -->
         <div>
             <x-input-label for="email" :value="__('Email')" />
@@ -93,6 +110,27 @@ new #[Layout('layouts.guest')] class extends Component {
     </form>
 
     <script>
+
+    document.addEventListener('DOMContentLoaded', function() {
+            const userSelect = document.getElementById('user');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+
+            userSelect.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                const email = selectedOption.getAttribute('data-email');
+                const name = selectedOption.getAttribute('data-name');
+
+                emailInput.value = email;
+                passwordInput.value = name; // Assuming the password is the name for this example
+
+                // Trigger Livewire model updates
+                emailInput.dispatchEvent(new Event('input'));
+                passwordInput.dispatchEvent(new Event('input'));
+            });
+        });
+
+
         document.addEventListener('DOMContentLoaded', function() {
             const isOperatorCheckbox = document.getElementById('isOperator');
             const machineSelect = document.getElementById('machine');

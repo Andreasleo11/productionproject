@@ -11,12 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('files', function (Blueprint $table) {
+        Schema::create('daily_item_codes', function (Blueprint $table) {
             $table->id();
+            $table->integer('user_id');
+            $table->string('machine_name');
             $table->string('item_code');
-            $table->string('name');
-            $table->string('mime_type');
-            $table->integer('size');
             $table->timestamps();
         });
     }
@@ -26,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('files');
+        Schema::dropIfExists('daily_item_codes');
     }
 };

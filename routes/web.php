@@ -1,6 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\PEController;
+use App\Http\Controllers\OperatorController;
+use App\Http\Controllers\InitialBarcodeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,4 +27,15 @@ Route::view('profile', 'profile')
     ->middleware(['auth'])
     ->name('profile');
 
+
+Route::get('index', [HomeController::class, 'index'])->name('index');
+
+Route::get('operator/updatepage', [OperatorController::class, 'index'])->name('operator.index');
+
+Route::post('/assign-item-code', [OperatorController::class, 'assignItemCode'])->name('itemcode.assign');
+
+
+Route::get('/barcodes', [InitialBarcodeController::class, 'index'])->name('barcode.index');
+Route::post('/barcodes/generate', [InitialBarcodeController::class, 'generate'])->name('barcode.generate');
 require __DIR__.'/auth.php';
+
