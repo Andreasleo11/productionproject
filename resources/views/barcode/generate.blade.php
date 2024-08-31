@@ -15,7 +15,7 @@
             margin: 0;
             padding: 0;
             display: flex;
-            flex-wrap: wrap;
+            flex-direction: column; /* Stack barcodes vertically */
         }
 
         .barcode-label {
@@ -24,14 +24,14 @@
             border: 1px solid #000; /* Add border */
             padding: 10px;
             margin-bottom: 20px;
-            width: calc(50% - 20px); /* Two barcodes per row */
-            margin-right: 20px;
+            width: 100%; /* Full width for each barcode */
             page-break-inside: avoid;
             box-sizing: border-box; /* Include border in width calculation */
         }
 
         .barcode-label img {
-            max-width: 100px;
+            max-width: 150px; /* Adjusted width for better fit */
+            height: auto; /* Maintain aspect ratio */
             margin-right: 20px; /* Add space between image and text */
         }
 
@@ -58,13 +58,13 @@
             }
 
             .barcode-label {
-                width: calc(50% - 10mm);
-                margin-right: 10mm;
+                width: 100%; /* Ensure full width for print */
+                margin-right: 0; /* No margin needed for print */
                 border-width: 0.5mm; /* Thinner border for print */
             }
 
             .barcode-label img {
-                max-width: 80px;
+                max-width: 120px; /* Adjusted size for print */
                 margin-right: 15px; /* Adjusted space for print */
             }
 
@@ -81,16 +81,17 @@
 <body>
     <h1>Generated Barcodes</h1>
 
-    @for($i = 0; $i < $labelCount; $i++)
-        <div class="barcode-label">
-            <img src="{{ asset('images/' . $item->item_code . '.png') }}" alt="{{ $item->item_code }}">
-            <div class="barcode-details">
-                <p><strong>Item Code:</strong> {{ $item->item_code }}</p>
-                <p><strong>Item Name:</strong> {{ $item->item_name }}</p>
-                <p><strong>Barcode:</strong> {!! DNS1D::getBarcodeHTML($item->item_code . '\t', 'C128') !!}</p>
+    @foreach($items as $item)
+        @for($i = 0; $i < $labelCount; $i++)
+            <div class="barcode-label">
+                <img src="{{ asset('images/' . $item->item_code . '.png') }}" alt="{{ $item->item_code }}">
+                <div class="barcode-details">
+                    <p><strong>Item Code:</strong> {{ $item->item_code }}</p>
+                    <p><strong>Item Name:</strong> {{ $item->item_name }}</p>
+                    <p><strong>Barcode:</strong> {!! DNS1D::getBarcodeHTML($item->item_code . '\t', 'C128') !!}</p>
+                </div>
             </div>
-        </div>
-    @endfor
-
+        @endfor
+    @endforeach
 </body>
 </html>

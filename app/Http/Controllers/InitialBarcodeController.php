@@ -11,6 +11,7 @@ class InitialBarcodeController extends Controller
     public function index()
     {
         $tipeMesins = MasterListItem::distinct()->pluck('tipe_mesin');
+        // dd($tipeMesins);
         
         return view('barcode.index', compact('tipeMesins'));
     }
@@ -23,7 +24,46 @@ class InitialBarcodeController extends Controller
 
         // Fetch items with the selected tipe_mesin
         $items = MasterListItem::where('tipe_mesin', $request->tipe_mesin)->get();
+        $labelCount = 1;
         
-        return view('barcode.generate', compact('items'));
+        return view('barcode.generate', compact('items', 'labelCount'));
+    }
+
+    public function manualgenerate()
+    {
+        return view('generatemanualbarcode');
+    }
+
+    public function generateBarcode(Request $request)
+    {
+        $request->validate([
+            'item_code' => 'required|string',
+            'quantity' => 'required|integer',
+            'warehouse' => 'required|string',
+            'label' => 'required|integer',
+        ]);
+    
+        $item_code = $request->input('item_code');
+        $quantity = $request->input('quantity');
+        $warehouse = $request->input('warehouse');
+        $labelCount = $request->input('label');
+    
+        $barcodes = [];
+    
+        $barcodeGenerator = new DNS1D();
+    
+        for ($i = 1; $i <= $labelCount; $i++) {
+            $barcodeData = "{$item_code}\t{$quantity}\t{$warehouse}\t{$i}";
+            $barcode = $barcodeGenerator->getBarcodeHTML($barcodeData, 'C128');
+    
+            $barcodes[] = [
+                'barcode' => $barcode,
+                'item_code' => $item_code,
+                'quantity' => $quantity,
+                'label' => $i
+            ];
+        }
+    
+        return view('barcode_result', compact('barcodes'));
     }
 }

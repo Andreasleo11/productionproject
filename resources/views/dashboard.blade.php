@@ -3,6 +3,14 @@
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ __('Dashboard') }}
         </h2>
+        <tr>
+        <h2>
+            <a href="{{route('barcode.index')}}"class="button">List Item Machine</a>
+        </h2>
+        <tr>
+        <h2>
+        <a href="{{route('so.index')}}"class="button">SO Barocde</a>
+        </h2>
     </x-slot>
 
     <div class="py-12">

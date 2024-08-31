@@ -5,6 +5,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PEController;
 use App\Http\Controllers\OperatorController;
 use App\Http\Controllers\InitialBarcodeController;
+use App\Http\Controllers\SOController;
 
 /*
 |--------------------------------------------------------------------------
@@ -37,5 +38,15 @@ Route::post('/assign-item-code', [OperatorController::class, 'assignItemCode'])-
 
 Route::get('/barcodes', [InitialBarcodeController::class, 'index'])->name('barcode.index');
 Route::post('/barcodes/generate', [InitialBarcodeController::class, 'generate'])->name('barcode.generate');
+
+
+Route::get('/manualbarcodes', [InitialBarcodeController::class, 'manualgenerate'])->name('manualbarcode.index');
+Route::post('/generate-barcode', [InitialBarcodeController::class, 'generateBarcode'])->name('generate.barcode');
+
+
+Route::get('/so/index', [SOController::class, 'index'])->name('so.index');
+Route::get('/so/process/{docNum}', [SOController::class, 'process'])->name('so.process');
+Route::post('/so/scan', [SOController::class, 'scanBarcode'])->name('so.scanBarcode');
+Route::get('/update-so-data/{docNum}', [SOController::class, 'updateSoData'])->name('update.so.data');
 require __DIR__.'/auth.php';
 
