@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DailyItemCodeController;
 use App\Http\Controllers\FileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
@@ -56,6 +57,8 @@ Route::post('/barcodes/generate', [InitialBarcodeController::class, 'generate'])
 
 Route::get('/manualbarcodes', [InitialBarcodeController::class, 'manualgenerate'])->name('manualbarcode.index');
 Route::post('/generate-barcode', [InitialBarcodeController::class, 'generateBarcode'])->name('generate.barcode');
+
+Route::get('/daily-item-codes/', [DailyItemCodeController::class, 'index'])->name('daily-item-code.index');
 
 
 Route::get('/so/index', [SOController::class, 'index'])->name('so.index');

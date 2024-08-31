@@ -34,6 +34,27 @@ new class extends Component {
                     </x-nav-link>
                 </div>
 
+                @if (auth()->user()->specification->name === 'Operator')
+                    <!-- Navigation Links -->
+                    <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                        <x-nav-link :href="route('barcode.index')" :active="request()->routeIs('barcode.index')" wire:navigate>
+                            {{ __('Barcode Index') }}
+                        </x-nav-link>
+                    </div>
+
+                    <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                        <x-nav-link :href="route('so.index')" :active="request()->routeIs('so.index')" wire:navigate>
+                            {{ __('SO Index') }}
+                        </x-nav-link>
+                    </div>
+
+                    <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                        <x-nav-link :href="route('daily-item-code.index')" :active="request()->routeIs('daily-item-code.index')" wire:navigate>
+                            {{ __('Daily Item Codes') }}
+                        </x-nav-link>
+                    </div>
+                @endif
+
                 @if (auth()->user()->specification->name === 'PE')
                     <!-- Navigation Links -->
                     <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
@@ -65,9 +86,9 @@ new class extends Component {
                     </x-slot>
 
                     <x-slot name="content">
-                        <x-dropdown-link :href="route('profile')" wire:navigate>
+                        {{-- <x-dropdown-link :href="route('profile')" wire:navigate>
                             {{ __('Profile') }}
-                        </x-dropdown-link>
+                        </x-dropdown-link> --}}
 
                         <!-- Authentication -->
                         <button wire:click="logout" class="w-full text-start">
