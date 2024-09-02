@@ -88,7 +88,7 @@
                 <div class="barcode-details">
                     <p><strong>Item Code:</strong> {{ $item->item_code }}</p>
                     <p><strong>Item Name:</strong> {{ $item->item_name }}</p>
-                    <p><strong>Barcode:</strong> {!! DNS1D::getBarcodeHTML($item->item_code . '\t', 'C128') !!}</p>
+                    <p><strong>Barcode:</strong> {!! DNS1D::getBarcodeHTML($item->item_code, 'C128') !!}</p>
                 </div>
             </div>
         @endfor

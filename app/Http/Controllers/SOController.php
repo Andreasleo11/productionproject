@@ -10,7 +10,20 @@ class SOController extends Controller
 {
     public function index()
     {
-        $docNums = SoData::select('doc_num')->distinct()->get();
+        $docNums = SoData::select('doc_num')
+            // ->where(function($query) {
+            //     $query->where('is_done', 0)
+            //         ->orWhereNull('is_done');
+            // })
+            ->distinct()
+            ->get();
+        // $docNums = SoData::select('doc_num')
+        // ->where(function($query) {
+        //     $query->where('is_done', 0)
+        //         ->orWhereNull('is_done');
+        // })
+        // ->distinct()
+        // ->get();
         // dd($docNums);
         return view('soindex', compact('docNums'));
     }
@@ -30,6 +43,7 @@ class SOController extends Controller
                     ->orWhereNull('is_done'); // Handle null values as well
             })
             ->doesntExist(); // If no such record exists, then all are done
+
 
         $data = SoData::with('scannedData')->where('doc_num', $docNum)
             ->get()
