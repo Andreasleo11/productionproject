@@ -11,20 +11,8 @@ class SOController extends Controller
     public function index()
     {
         $docNums = SoData::select('doc_num')
-            // ->where(function($query) {
-            //     $query->where('is_done', 0)
-            //         ->orWhereNull('is_done');
-            // })
             ->distinct()
             ->get();
-            // $docNums = SoData::select('doc_num')
-            // ->where(function($query) {
-            //     $query->where('is_done', 0)
-            //         ->orWhereNull('is_done');
-            // })
-            // ->distinct()
-            // ->get();
-        // dd($docNums);
         return view('soindex', compact('docNums'));
     }
 
@@ -43,37 +31,37 @@ class SOController extends Controller
                     ->orWhereNull('is_done'); // Handle null values as well
             })
             ->doesntExist(); // If no such record exists, then all are done
-        
-        
+
+
         $data = SoData::with('scannedData')->where('doc_num', $docNum)
-        ->get()
-        ->groupBy('item_code')
-        ->map(function ($group) use ($docNum){
-            // Sum the quantities for each item_code
-            $totalQuantity = $group->sum('quantity');
+            ->get()
+            ->groupBy('item_code')
+            ->map(function ($group) use ($docNum) {
+                // Sum the quantities for each item_code
+                $totalQuantity = $group->sum('quantity');
 
-            // Keep one entry and update the quantity
-            $entry = $group->first();
-            $entry->quantity = $totalQuantity;
+                // Keep one entry and update the quantity
+                $entry = $group->first();
+                $entry->quantity = $totalQuantity;
 
-            $scannedCount = ScannedData::where('doc_num', $docNum)
-                ->where('item_code', $entry->item_code)
-                ->count();
+                $scannedCount = ScannedData::where('doc_num', $docNum)
+                    ->where('item_code', $entry->item_code)
+                    ->count();
 
-            $entry->scannedCount = $scannedCount;
+                $entry->scannedCount = $scannedCount;
 
-            $packagingQuantity = $entry->packaging_quantity; // Assuming `packaging_quantity` is a field in your SoData model
+                $packagingQuantity = $entry->packaging_quantity; // Assuming `packaging_quantity` is a field in your SoData model
 
-            // Check if scannedCount equals quantity / packaging_quantity and update is_finish
-            if ($packagingQuantity > 0 && $scannedCount === ($totalQuantity / $packagingQuantity)) {
-                $entry->is_finish = 1;
-            } else {
-                $entry->is_finish = 0; // Optionally set is_finish to 0 if the condition is not met
-            }
+                // Check if scannedCount equals quantity / packaging_quantity and update is_finish
+                if ($packagingQuantity > 0 && $scannedCount === ($totalQuantity / $packagingQuantity)) {
+                    $entry->is_finish = 1;
+                } else {
+                    $entry->is_finish = 0; // Optionally set is_finish to 0 if the condition is not met
+                }
 
-            return $entry;
-        })
-        ->values(); // Reset the keys after grouping
+                return $entry;
+            })
+            ->values(); // Reset the keys after grouping
         foreach ($data as $entry) {
             SoData::where('id', $entry->id)->update([
                 'is_finish' => $entry->is_finish
@@ -85,15 +73,14 @@ class SOController extends Controller
         // Pass the data to the view
 
         $scandatas = ScannedData:: // Order by item_code
-        orderBy('label')  // Then order by label
-        ->get()
-        ->groupBy('item_code'); 
+            orderBy('label')  // Then order by label
+            ->get()
+            ->groupBy('item_code');
         return view('soresults', compact('data', 'docNum', 'date', 'customer', 'scandatas', 'allFinished', 'allDone'));
     }
 
     public function scanBarcode(Request $request)
     {
-        // dd($request->all());
         $request->validate([
             'item_code' => 'required|string',
             'quantity' => 'required|integer',
@@ -139,8 +126,9 @@ class SOController extends Controller
             'label' => $label,
         ]);
 
-        return redirect()->back();
+        return redirect()->back()->with('success', 'Barcode scanned successfully');
     }
+
 
 
     public function updateSoData($docNum)
