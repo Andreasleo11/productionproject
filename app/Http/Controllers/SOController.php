@@ -11,20 +11,8 @@ class SOController extends Controller
     public function index()
     {
         $docNums = SoData::select('doc_num')
-            // ->where(function($query) {
-            //     $query->where('is_done', 0)
-            //         ->orWhereNull('is_done');
-            // })
             ->distinct()
             ->get();
-        // $docNums = SoData::select('doc_num')
-        // ->where(function($query) {
-        //     $query->where('is_done', 0)
-        //         ->orWhereNull('is_done');
-        // })
-        // ->distinct()
-        // ->get();
-        // dd($docNums);
         return view('soindex', compact('docNums'));
     }
 
