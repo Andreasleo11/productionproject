@@ -59,7 +59,7 @@ Route::get('/manualbarcodes', [InitialBarcodeController::class, 'manualgenerate'
 Route::post('/generate-barcode', [InitialBarcodeController::class, 'generateBarcode'])->name('generate.barcode');
 
 Route::get('/daily-item-codes/', [DailyItemCodeController::class, 'index'])->name('daily-item-code.index');
-
+Route::post('/apply-item-code/{machine_id}', [DailyItemCodeController::class, 'applyItemCode'])->name('apply-item-code');
 
 Route::get('/so/index', [SOController::class, 'index'])->name('so.index');
 Route::get('/so/process/{docNum}', [SOController::class, 'process'])->name('so.process');

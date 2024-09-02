@@ -11,13 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('files', function (Blueprint $table) {
-            $table->id();
-            $table->string('machine_name');
-            $table->string('name');
-            $table->string('mime_type');
-            $table->integer('size');
-            $table->timestamps();
+        Schema::table('daily_item_codes', function (Blueprint $table) {
+            $table->dropColumn('machine_name');
         });
     }
 
@@ -26,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('files');
+        Schema::table('daily_item_codes', function (Blueprint $table) {
+            $table->string('machine_name');
+        });
     }
 };

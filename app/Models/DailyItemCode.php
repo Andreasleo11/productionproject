@@ -11,7 +11,6 @@ class DailyItemCode extends Model
 
     protected $fillable = [
         'user_id',
-        'machine_name',
         'item_code'
     ];
 
