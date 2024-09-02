@@ -83,23 +83,27 @@
         <p>Not all items are finished yet.</p>
     @endif
 
-    <form id="barcode-form" method="POST" action="{{ route('so.scanBarcode') }}">
-        @csrf
-        <input type="hidden" name="so_number" value="{{ $docNum }}">
-        <label for="item_code">Item Code:</label>
-        <input type="text" id="item_code" name="item_code" required>
-        <br>
-        <label for="quantity">Quantity:</label>
-        <input type="number" id="quantity" name="quantity" required>
-        <br>
-        <label for="warehouse">Warehouse:</label>
-        <input type="text" id="warehouse" name="warehouse" required>
-        <br>
-        <label for="label">Label:</label>
-        <input type="number" id="label" name="label" required>
-        <br>
-        <button type="submit">Scan Barcode</button>
-    </form>
+    @if(!$allDone)
+        <form id="barcode-form" method="POST" action="{{ route('so.scanBarcode') }}">
+            @csrf
+            <input type="hidden" name="so_number" value="{{ $docNum }}">
+            <label for="item_code">Item Code:</label>
+            <input type="text" id="item_code" name="item_code" required>
+            <br>
+            <label for="quantity">Quantity:</label>
+            <input type="number" id="quantity" name="quantity" required>
+            <br>
+            <label for="warehouse">Warehouse:</label>
+            <input type="text" id="warehouse" name="warehouse" required>
+            <br>
+            <label for="label">Label:</label>
+            <input type="number" id="label" name="label" required>
+            <br>
+            <button type="submit">Scan Barcode</button>
+        </form>
+    @else
+        <p>All items are done. No more barcodes can be scanned.</p>
+    @endif
 
 
     <h2>Scanned Data</h2>
