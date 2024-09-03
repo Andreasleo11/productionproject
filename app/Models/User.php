@@ -45,7 +45,7 @@ class User extends Authenticatable
 
     public function dailyItemCode()
     {
-        return $this->hasOne(DailyItemCode::class);
+        return $this->hasMany(DailyItemCode::class);
     }
 
 
@@ -53,5 +53,10 @@ class User extends Authenticatable
     public function specification()
     {
         return $this->belongsTo(Specification::class);
+    }
+
+    public function jobs()
+    {
+        return $this->hasOne(MachineJob::class);
     }
 }
