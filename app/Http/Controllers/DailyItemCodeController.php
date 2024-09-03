@@ -46,12 +46,14 @@ class DailyItemCodeController extends Controller
           
             $itemcode = $request->input('item_codes')[$index];
             $datas = SpkMaster::where('item_code', $itemCode)->get();
-            $stanpack = MasterListItem::where('item_code', $itemCode)->get();
-            
+            $master = MasterListItem::where('item_code', $itemCode)->first();
+            $stanpack = $master->standart_packaging_list;
+           
             $totalPlannedQuantity = $datas->sum('planned_quantity');
             $totalCompletedQuantity = $datas->sum('completed_quantity');
 
             $final = $quantity % $stanpack;
+            // dd($final);
             $finalquantity = $quantity;
             if($final === 0 )
             {

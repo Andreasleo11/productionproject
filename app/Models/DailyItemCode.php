@@ -30,4 +30,9 @@ class DailyItemCode extends Model
     {
         return $this->hasMany(SpkMaster::class);
     }
+
+    public function masterItem()
+    {
+        return $this->hasOne(MasterListItem::class, 'item_Code', 'item_code');
+    }
 }

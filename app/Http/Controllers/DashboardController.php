@@ -16,8 +16,8 @@ class DashboardController extends Controller
         // dd($user);
         // Check if the user's specification_id is 2
         if ($user->specification_id == 2) {
-           $datas = DailyItemCode::where('user_id', $user->id)->get();
-           dd($datas);
+           $datas = DailyItemCode::where('user_id', $user->id)->with('masterItem')->get();
+        //    dd($datas);
             // Check if the user has a related dailyItemCode and retrieve the item_code
             $itemCode = $user->jobs->item_code ?? null;
 
