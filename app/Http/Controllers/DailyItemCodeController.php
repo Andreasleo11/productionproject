@@ -68,6 +68,60 @@ class DailyItemCodeController extends Controller
 
         // Save the data to the DailyItemCodes table
         foreach ($validatedData['item_codes'] as $index => $itemCode) {
+
+            $quantity = $validatedData['quantities'][$index];
+            $itemcode = $validatedData['item_codes'][$index];
+            $datas = SpkMaster::where('item_code', $itemcode)->get();
+            $master = MasterListItem::where('item_code', $itemcode)->first();
+            $stanpack = $master->standart_packaging_list;
+
+            $totalPlannedQuantity = $datas->sum('planned_quantity');
+            $totalCompletedQuantity = $datas->sum('completed_quantity');
+
+            $final = $quantity % $stanpack;
+
+            $finalQuantity = $quantity;
+
+            if ($final === 0) {
+                $loss_package_quantity = 0;
+            } else {
+                $loss_package_quantity = $quantity - $final;
+            }
+
+            // Calculate the difference
+            $max_quantity = $totalPlannedQuantity - $totalCompletedQuantity;
+            // dd($max_quantity);
+            if ($quantity > $max_quantity) {
+                return redirect()->back()->with('alert', "Quantity exceeds SPK with a maximum of $max_quantity.");
+            } else {
+
+                // $spks = SpkMaster::where('item_code', $itemCode)->orderBy('post_date')->get();
+
+                // $remainingQuantity = $quantity;
+
+                // foreach ($spks as $spk) {
+                //     // Calculate the available quantity to complete
+                //     $availableQuantity = $spk->planned_quantity - $spk->completed_quantity;
+
+                //     if ($remainingQuantity <= 0) {
+                //         break;
+                //     }
+
+                //     if ($remainingQuantity > $availableQuantity) {
+                //         // If remaining quantity is greater than available, complete this SPK
+                //         $spk->completed_quantity = $spk->planned_quantity;
+                //         $remainingQuantity -= $availableQuantity;
+                //     } else {
+                //         // If remaining quantity is less or equal, just add to completed_quantity and finish
+                //         $spk->completed_quantity += $remainingQuantity;
+                //         $remainingQuantity = 0;
+                //     }
+
+                //     // Save the SPK with the updated completed quantity
+                //     $spk->save();
+                // }
+            }
+
             // Initialize adjustedQuantity with default value
             $adjustedQuantity = $validatedData['quantities'][$index];
 
