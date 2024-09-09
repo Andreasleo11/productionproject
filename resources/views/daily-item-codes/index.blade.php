@@ -19,12 +19,11 @@
     <div class="py-12">
         <div class="mx-auto sm:px-6 lg:px-8">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <h1 class="text-2xl font-bold mb-6">Daily Item Codes Index</h1>
-                <!-- Create Button -->
-                <div class="mb-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h1 class="text-2xl font-bold">Daily Item Codes Index</h1>
                     <a href="{{ route('daily-item-code.create') }}"
                         class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                        + Create New Item Code
+                        Assign Item Code
                     </a>
                 </div>
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
