@@ -76,6 +76,7 @@ class SOController extends Controller
             orderBy('label')  // Then order by label
             ->get()
             ->groupBy('item_code');
+            // dd($data);
         return view('soresults', compact('data', 'docNum', 'date', 'customer', 'scandatas', 'allFinished', 'allDone'));
     }
 
