@@ -60,7 +60,7 @@ class DailyItemCodeController extends Controller
                 $loss_package_quantity = 0;
             }
             else{
-                $loss_package_quantity = $quantity - $final;
+                $loss_package_quantity = $final;
             }
 
             // Calculate the difference
@@ -72,31 +72,31 @@ class DailyItemCodeController extends Controller
             }
             else{
 
-                $spks = SpkMaster::where('item_code', $itemCode)->orderBy('post_date')->get();
+                // $spks = SpkMaster::where('item_code', $itemCode)->orderBy('post_date')->get();
     
-                $remainingQuantity = $quantity;
+                // $remainingQuantity = $quantity;
             
-                foreach ($spks as $spk) {
-                    // Calculate the available quantity to complete
-                    $availableQuantity = $spk->planned_quantity - $spk->completed_quantity;
+                // foreach ($spks as $spk) {
+                //     // Calculate the available quantity to complete
+                //     $availableQuantity = $spk->planned_quantity - $spk->completed_quantity;
             
-                    if ($remainingQuantity <= 0) {
-                        break;
-                    }
+                //     if ($remainingQuantity <= 0) {
+                //         break;
+                //     }
             
-                    if ($remainingQuantity > $availableQuantity) {
-                        // If remaining quantity is greater than available, complete this SPK
-                        $spk->completed_quantity = $spk->planned_quantity;
-                        $remainingQuantity -= $availableQuantity;
-                    } else {
-                        // If remaining quantity is less or equal, just add to completed_quantity and finish
-                        $spk->completed_quantity += $remainingQuantity;
-                        $remainingQuantity = 0;
-                    }
-            
-                    // Save the SPK with the updated completed quantity
-                    $spk->save();
-                }
+                //     if ($remainingQuantity > $availableQuantity) {
+                //         // If remaining quantity is greater than available, complete this SPK
+                //         $spk->completed_quantity = $spk->planned_quantity;
+                //         $remainingQuantity -= $availableQuantity;
+                //     } else {
+                //         // If remaining quantity is less or equal, just add to completed_quantity and finish
+                //         $spk->completed_quantity += $remainingQuantity;
+                //         $remainingQuantity = 0;
+                //     }
+                    
+                //     // Save the SPK with the updated completed quantity
+                //     $spk->save();
+                // }
 
             
 
@@ -115,7 +115,7 @@ class DailyItemCodeController extends Controller
                         DailyItemCode::create([
                             'user_id' => $request->input('user_id'),
                             'item_code' => $itemCode,
-                            'quantity' => $adjustedQuantity,
+                            'quantity' => $quantity,
                             'final_quantity' => $finalquantity,
                             'loss_package_quantity' => 0,
                             'actual_quantity' => $adjustedQuantity,
