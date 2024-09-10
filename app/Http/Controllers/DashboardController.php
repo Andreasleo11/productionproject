@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
-use App\Models\File; 
+use App\Models\File;
 use App\Models\DailyItemCode;
 use App\Models\MachineJob;
 use App\Models\MasterListItem;

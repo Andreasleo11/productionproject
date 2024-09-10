@@ -13,12 +13,16 @@ class DailyItemCode extends Model
 
     protected $fillable = [
         'user_id',
-        'item_code', 
+        'item_code',
         'quantity',
         'final_quantity',
         'loss_package_quantity',
         'actual_quantity',
-        'is_done'
+        'shift',
+        'start_time',
+        'end_time',
+        'is_done',
+        'schedule_date'
     ];
 
     public function user()

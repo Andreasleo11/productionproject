@@ -48,8 +48,6 @@ class User extends Authenticatable
         return $this->hasMany(DailyItemCode::class);
     }
 
-
-
     public function specification()
     {
         return $this->belongsTo(Specification::class);
