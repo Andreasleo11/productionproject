@@ -88,6 +88,8 @@ class DashboardController extends Controller
                                 $uniquedata[$key] = [
                                     'spk' => $data->spk_number,
                                     'item_code' => $data->item_code,
+                                    'item_perpack' => $perpack,
+                                    'available_quantity' => $available_quantity,
                                     'count' => 1,
                                     'start_label' => $start_label, // Set start_label for this SPK
                                     'end_label' => $labelstart, // Initially, end_label is the same as start_label
@@ -115,6 +117,8 @@ class DashboardController extends Controller
                                 $uniquedata[$key] = [
                                     'spk' => $data->spk_number,
                                     'item_code' => $data->item_code,
+                                    'item_perpack' => $perpack,
+                                    'available_quantity' => $available_quantity,
                                     'count' => 1,
                                     'start_label' => $start_label,
                                     'end_label' => $labelstart,
@@ -138,6 +142,7 @@ class DashboardController extends Controller
                     $data['scannedData'] = $scannedCount;
                 }
                 // dd($uniquedata); 
+
                              
             } else {
                 $files = collect(); // Return an empty collection if no item_code is found
@@ -170,7 +175,7 @@ class DashboardController extends Controller
 
         $verified_data = DailyItemCode::where('user_id', $user->id)->get();
         $itemCodeExists = $verified_data->contains('item_code', $itemCode);
-
+        // dd($itemCodeExists);
         if ($itemCodeExists) {
             // Find the machine job record related to the user
             $machineJob = MachineJob::where('user_id', $user->id)->first();
@@ -407,8 +412,10 @@ class DashboardController extends Controller
             return redirect()->back();
     }
     
-    public function resetJobs()
+    public function resetJobs(Request $request)
     {
+        $uniquedata = json_decode($request->input('uniquedata'), true);
+        dd($uniquedata);
         // Get the currently authenticated user
         $user = auth()->user();
 
