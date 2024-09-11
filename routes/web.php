@@ -32,32 +32,31 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
-    Route::post('/dashboard/update-machine-job', [DashboardController::class, 'updateMachineJob'])->name('update.machine_job');
-    Route::get('/generate-barcode/{item_code}/{quantity}', [DashboardController::class, 'itemCodeBarcode'])->name('generate.itemcode.barcode');
-    Route::post('/process/itemproduction', [DashboardController::class, 'procesProductionBarcodes'])->name('process.productionbarcode');
-    Route::get('/reset-jobs', [DashboardController::class, 'resetJobs'])->name('reset.jobs');
+Route::post('/dashboard/update-machine-job', [DashboardController::class, 'updateMachineJob'])->name('update.machine_job');
+Route::get('/generate-barcode/{item_code}/{quantity}', [DashboardController::class, 'itemCodeBarcode'])->name('generate.itemcode.barcode');
+Route::post('/process/itemproduction', [DashboardController::class, 'procesProductionBarcodes'])->name('process.productionbarcode');
+Route::get('/reset-jobs', [DashboardController::class, 'resetJobs'])->name('reset.jobs');
 
+Route::get('barcode/index', [BarcodeController::class, 'index'])->name('barcode.base.index');
+Route::get('barcode/inandout/index', [BarcodeController::class, 'inandoutpage'])->name('inandout.index');
+Route::get('barcode/missing/index', [BarcodeController::class, 'missingbarcodeindex'])->name('missingbarcode.index');
+Route::post('barcode/missing/generate', [BarcodeController::class, 'missingbarcodegenerator'])->name('generateBarcodeMissing');
 
-    Route::get('barcode/index', [BarcodeController::class, 'index'])->name('barcode.base.index');
-    Route::get('barcode/inandout/index', [BarcodeController::class, 'inandoutpage'])->name('inandout.index');
-    Route::get('barcode/missing/index', [BarcodeController::class, 'missingbarcodeindex'])->name('missingbarcode.index');
-    Route::post('barcode/missing/generate', [BarcodeController::class, 'missingbarcodegenerator'])->name('generateBarcodeMissing');
+Route::post('barcode/process/save', [BarcodeController::class, 'processInAndOut'])->name('process.in.and.out');
 
-    Route::post('barcode/process/save', [BarcodeController::class, 'processInAndOut'])->name('process.in.and.out');
+Route::post('process/inandoutbarcode', [BarcodeController::class, 'storeInAndOut'])->name('processbarcodeinandout');
+Route::get('indexbarcode', [BarcodeController::class, 'indexBarcode'])->name('barcodeindex');
+Route::post('packaging-barcode-generate', [BarcodeController::class, 'generateBarcode'])->name('generatepackagingbarcode');
 
-    Route::post('process/inandoutbarcode', [BarcodeController::class, 'storeInAndOut'])->name('processbarcodeinandout');
-    Route::get('indexbarcode', [BarcodeController::class, 'indexBarcode'])->name('barcodeindex');
-    Route::post('packaging-barcode-generate', [BarcodeController::class, 'generateBarcode'])->name('generatepackagingbarcode');
+Route::get('barcode/list', [BarcodeController::class, 'barcodelist'])->name('list.barcode');
 
-    Route::get('barcode/list', [BarcodeController::class, 'barcodelist'])->name('list.barcode');
+Route::get('barcode/latest/item', [BarcodeController::class, 'latestitemdetails'])->name('updated.barcode.item.position');
 
-    Route::get('barcode/latest/item', [BarcodeController::class, 'latestitemdetails'])->name('updated.barcode.item.position');
+Route::get('barcode/historytable', [BarcodeController::class, 'historybarcodelist'])->name('barcode.historytable');
 
-    Route::get('barcode/historytable', [BarcodeController::class, 'historybarcodelist'])->name('barcode.historytable');
-
-    Route::get('/barcode/filter', [BarcodeController::class, 'filter'])->name('barcode.filter');
-    Route::get('barcode/latest/item', [BarcodeController::class, 'latestitemdetails'])->name('updated.barcode.item.position');
-    Route::get('barcode/stockall/{location?}', [BarcodeController::class, 'stockall'])->name('stockallbarcode');
+Route::get('/barcode/filter', [BarcodeController::class, 'filter'])->name('barcode.filter');
+Route::get('barcode/latest/item', [BarcodeController::class, 'latestitemdetails'])->name('updated.barcode.item.position');
+Route::get('barcode/stockall/{location?}', [BarcodeController::class, 'stockall'])->name('stockallbarcode');
 
 // Route::view('pe/upload-files', 'upload-files')
 //     ->middleware(['auth', 'verified'])
@@ -97,4 +96,5 @@ Route::get('/so/index', [SOController::class, 'index'])->name('so.index');
 Route::get('/so/process/{docNum}', [SOController::class, 'process'])->name('so.process');
 Route::post('/so/scan', [SOController::class, 'scanBarcode'])->name('so.scanBarcode');
 Route::get('/update-so-data/{docNum}', [SOController::class, 'updateSoData'])->name('update.so.data');
+
 require __DIR__ . '/auth.php';
