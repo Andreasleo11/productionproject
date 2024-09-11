@@ -243,14 +243,11 @@
                                 <form method="GET" action="{{ route('reset.jobs') }}">
                                 <input type="hidden" name="uniquedata" value="{{ json_encode($uniquedata) }}">
                                     <button type="submit" class="bg-green-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-green-600 transition duration-300 ease-in-out">
-=======
                                         class="w-full py-2 px-4 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 transition">
->>>>>>> Stashed changes
                                         Done
                                     </button>
                                 </form>
                             @else
-<<<<<<< Updated upstream
                                 <!-- Optionally, show a message if the condition is not met -->
                                 <form method="GET" action="{{ route('reset.jobs') }}">
                                 <input type="hidden" name="uniquedata" value="{{ json_encode($uniquedata) }}">
@@ -259,9 +256,8 @@
                                     </button>
                                 </form>
                                 <p>Item belum discan semua</p>
-=======
                                 <p class="mt-4 text-red-500">Item belum discan semua</p>
->>>>>>> Stashed changes
+
                             @endif
                         </div>
 
@@ -315,7 +311,7 @@
     @endif
 
     {{-- JS for focusing on form inputs --}}
-    {{-- <script>
+     <script>
         document.addEventListener('DOMContentLoaded', (event) => {
             const spkCodeElement = document.getElementById('spk_code');
             const itemCodeElement = document.getElementById('item_code');
@@ -326,5 +322,5 @@
                 itemCodeElement.focus();
             }
         });
-    </script> --}}
+    </script> 
 </x-app-layout>
