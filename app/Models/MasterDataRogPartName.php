@@ -5,13 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class MachineJob extends Model
+class MasterDataRogPartName extends Model
 {
     use HasFactory;
-    public $timestamps = false;
-    
-    protected $fillable = [
-        'item_code'
-    ];
-
 }

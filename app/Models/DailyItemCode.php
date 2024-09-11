@@ -37,6 +37,6 @@ class DailyItemCode extends Model
 
     public function masterItem()
     {
-        return $this->hasOne(MasterListItem::class, 'item_Code', 'item_code');
+        return $this->hasOne(MasterListItem::class, 'item_code', 'item_code');
     }
 }

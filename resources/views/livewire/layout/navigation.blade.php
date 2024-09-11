@@ -53,6 +53,56 @@ new class extends Component {
                             {{ __('Daily Item Codes') }}
                         </x-nav-link>
                     </div>
+
+                    <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex relative">
+                        <button id="storeDropdownButton"
+                            class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
+                            Store
+                            <svg class="ml-2 -mr-0.5 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <!-- Dropdown Menu -->
+                        <div id="storeDropdownMenu"
+                            class="absolute mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 hidden">
+                            <div class="py-1">
+                                <x-nav-link :href="route('barcodeindex')" :active="request()->routeIs('barcodeindex')" wire:navigate>
+                                    {{ __('Create Barcode') }}
+                                </x-nav-link>
+                                <x-nav-link :href="route('inandout.index')" :active="request()->routeIs('inandout.index')" wire:navigate>
+                                    {{ __('Scan Barcode') }}
+                                </x-nav-link>
+                                <x-nav-link :href="route('list.barcode')" :active="request()->routeIs('list.barcode')" wire:navigate>
+                                    {{ __('Report History') }}
+                                </x-nav-link>
+                                <x-nav-link :href="route('stockallbarcode')" :active="request()->routeIs('stockallbarcode')" wire:navigate>
+                                    {{ __('Stock Item') }}
+                                </x-nav-link>
+                                <x-nav-link :href="route('updated.barcode.item.position')" :active="request()->routeIs('updated.barcode.item.position')" wire:navigate>
+                                    {{ __('List All Item Barcode') }}
+                                </x-nav-link>
+                            </div>
+                        </div>
+                    </div>
+
+                    <script>
+                        document.getElementById('storeDropdownButton').addEventListener('click', function() {
+                            var dropdownMenu = document.getElementById('storeDropdownMenu');
+                            dropdownMenu.classList.toggle('hidden');
+                        });
+
+                        // Close dropdown when clicking outside
+                        window.onclick = function(event) {
+                            if (!event.target.matches('#storeDropdownButton')) {
+                                var dropdownMenu = document.getElementById('storeDropdownMenu');
+                                if (!dropdownMenu.classList.contains('hidden')) {
+                                    dropdownMenu.classList.add('hidden');
+                                }
+                            }
+                        };
+                    </script>
                 @endif
 
                 @if (auth()->user()->specification->name === 'PE')
