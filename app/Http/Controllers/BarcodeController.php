@@ -43,7 +43,7 @@ class BarcodeController extends Controller
     public function missingbarcodegenerator(Request $request)
     {
         $partNo = $request->input('partNo');
-        $partDetails = explode('/', $partNo);
+        $partDetails = preg_split('/\//', $partno, 2);
         $partNumber = $partDetails[0];
         $partName = $partDetails[1] ?? '';
 
