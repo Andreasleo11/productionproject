@@ -219,12 +219,19 @@
                             @if($canTriggerFunction)
                                 <!-- Button only shows if all scannedData match count -->
                                 <form method="GET" action="{{ route('reset.jobs') }}">
+                                <input type="hidden" name="uniquedata" value="{{ json_encode($uniquedata) }}">
                                     <button type="submit" class="bg-green-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-green-600 transition duration-300 ease-in-out">
                                         Done
                                     </button>
                                 </form>
                             @else
                                 <!-- Optionally, show a message if the condition is not met -->
+                                <form method="GET" action="{{ route('reset.jobs') }}">
+                                <input type="hidden" name="uniquedata" value="{{ json_encode($uniquedata) }}">
+                                    <button type="submit" class="bg-green-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-green-600 transition duration-300 ease-in-out">
+                                        Done
+                                    </button>
+                                </form>
                                 <p>Item belum discan semua</p>
                             @endif
 
