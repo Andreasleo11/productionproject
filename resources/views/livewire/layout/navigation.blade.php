@@ -53,16 +53,20 @@ new class extends Component {
                             {{ __('Daily Item Codes') }}
                         </x-nav-link>
                     </div>
-                    
+
                     <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex relative">
-                        <button id="storeDropdownButton" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
+                        <button id="storeDropdownButton"
+                            class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
                             Store
-                            <svg class="ml-2 -mr-0.5 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            <svg class="ml-2 -mr-0.5 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7" />
                             </svg>
                         </button>
                         <!-- Dropdown Menu -->
-                        <div id="storeDropdownMenu" class="absolute mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 hidden">
+                        <div id="storeDropdownMenu"
+                            class="absolute mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 hidden">
                             <div class="py-1">
                                 <x-nav-link :href="route('barcodeindex')" :active="request()->routeIs('barcodeindex')" wire:navigate>
                                     {{ __('Create Barcode') }}

@@ -23,144 +23,138 @@ class DashboardController extends Controller
         // dd($user);
         // Check if the user's specification_id is 2
         if ($user->specification_id == 2) {
-           $datas = DailyItemCode::where('user_id', $user->id)->with('masterItem')->get();
-           foreach($datas as $data)
-           {
-            $quantity = $data->first()->quantity;
-        //    dd($quantity);
-            // Check if the user has a related dailyItemCode and retrieve the item_code
-            $itemCode = $user->jobs->item_code ?? null;
+            $datas = DailyItemCode::where('user_id', $user->id)->with('masterItem')->get();
+            foreach ($datas as $data) {
+                $quantity = $data->first()->quantity;
+                //    dd($quantity);
+                // Check if the user has a related dailyItemCode and retrieve the item_code
+                $itemCode = $user->jobs->item_code ?? null;
 
-            // If an item_code exists, retrieve all files with the same item_code
-            if ($itemCode) {
-                $files = File::where('item_code', $itemCode)->get();
-                // $this->scanFromProduction($itemCode, $datas);
-                $datasnew = SpkMaster::where('item_code', $itemCode)->get();
-                $masteritem = MasterListItem::where('item_code', $itemCode)->get()->first();
-                $perpack = $masteritem->standart_packaging_list;
-                $label = (int) ceil($quantity / $perpack);
-                $uniquedata = [];
-                $labelstart = 0;
-                $previous_spk = null; // Variable to track the previous SPK
-                $start_label = null; // Variable to store start_label for each SPK
-                foreach ($datasnew as $data)
-                {
-                    $available_quantity = $data->planned_quantity - $data->completed_quantity;
-                    if($quantity <= $available_quantity) {
-                        $available_quantity = $quantity;
-                    }
-                    $deficit = 0;
-                    if($data->completed_quantity === 0) {
-                        $labelstart = 0;
-                    } else {
-                        $labelstart = ceil($data->completed_quantity / $perpack);
-                    }
-            
-                    if($deficit != 0) {
-                        $available_quantity -= $deficit;
+                // If an item_code exists, retrieve all files with the same item_code
+                if ($itemCode) {
+                    $files = File::where('item_code', $itemCode)->get();
+                    // $this->scanFromProduction($itemCode, $datas);
+                    $datasnew = SpkMaster::where('item_code', $itemCode)->get();
+                    $masteritem = MasterListItem::where('item_code', $itemCode)->get()->first();
+                    $perpack = $masteritem->standart_packaging_list;
+                    $label = (int) ceil($quantity / $perpack);
+                    $uniquedata = [];
+                    $labelstart = 0;
+                    $previous_spk = null; // Variable to track the previous SPK
+                    $start_label = null; // Variable to store start_label for each SPK
+                    foreach ($datasnew as $data) {
+                        $available_quantity = $data->planned_quantity - $data->completed_quantity;
+                        if ($quantity <= $available_quantity) {
+                            $available_quantity = $quantity;
+                        }
                         $deficit = 0;
-                    }
-            
-                    while ($available_quantity > 0) {
-                        if ($available_quantity >= $perpack) {
-                            // Assign a full label to this SPK
-                            $labelstart++;
-                            $labels[] = [
-                                'spk' => $data->spk_number,
-                                'item_code' => $data->item_code,
-                                'warehouse' => 'FG',
-                                'quantity' => $perpack,
-                                'label' => $labelstart,
-                            ];
-            
-                            // Check if SPK has changed
-                            if ($previous_spk !== $data->spk_number) {
-                                // If SPK has changed, set start_label and reset end_label
-                                $start_label = $labelstart;
-                                $previous_spk = $data->spk_number;
-                            }
-            
-                            $key = $data->spk_number . '|' . $data->item_code;
-                            if (isset($uniquedata[$key])) {
-                                $uniquedata[$key]['count']++;
-                                $uniquedata[$key]['end_label'] = $labelstart; // Update end_label as it progresses
-                            } else {
-                                $uniquedata[$key] = [
-                                    'spk' => $data->spk_number,
-                                    'item_code' => $data->item_code,
-                                    'item_perpack' => $perpack,
-                                    'available_quantity' => $available_quantity,
-                                    'count' => 1,
-                                    'start_label' => $start_label, // Set start_label for this SPK
-                                    'end_label' => $labelstart, // Initially, end_label is the same as start_label
-                                ];
-                            }
-            
-                            $available_quantity -= $perpack;
-                            $quantity -= $perpack;
+                        if ($data->completed_quantity === 0) {
+                            $labelstart = 0;
                         } else {
-                            // Assign a partial label to this SPK and move to the next
-                            $labelstart++;
-                            $labels[] = [
-                                'spk' => $data->spk_number,
-                                'item_code' => $data->item_code,
-                                'warehouse' => 'FG',
-                                'quantity' => $perpack,
-                                'label' => $labelstart,
-                            ];
-            
-                            $key = $data->spk_number . '|' . $data->item_code;
-                            if (isset($uniquedata[$key])) {
-                                $uniquedata[$key]['count']++;
-                                $uniquedata[$key]['end_label'] = $labelstart; // Update end_label for partial labels
-                            } else {
-                                $uniquedata[$key] = [
+                            $labelstart = ceil($data->completed_quantity / $perpack);
+                        }
+
+                        if ($deficit != 0) {
+                            $available_quantity -= $deficit;
+                            $deficit = 0;
+                        }
+
+                        while ($available_quantity > 0) {
+                            if ($available_quantity >= $perpack) {
+                                // Assign a full label to this SPK
+                                $labelstart++;
+                                $labels[] = [
                                     'spk' => $data->spk_number,
                                     'item_code' => $data->item_code,
-                                    'item_perpack' => $perpack,
-                                    'available_quantity' => $available_quantity,
-                                    'count' => 1,
-                                    'start_label' => $start_label,
-                                    'end_label' => $labelstart,
+                                    'warehouse' => 'FG',
+                                    'quantity' => $perpack,
+                                    'label' => $labelstart,
                                 ];
+
+                                // Check if SPK has changed
+                                if ($previous_spk !== $data->spk_number) {
+                                    // If SPK has changed, set start_label and reset end_label
+                                    $start_label = $labelstart;
+                                    $previous_spk = $data->spk_number;
+                                }
+
+                                $key = $data->spk_number . '|' . $data->item_code;
+                                if (isset($uniquedata[$key])) {
+                                    $uniquedata[$key]['count']++;
+                                    $uniquedata[$key]['end_label'] = $labelstart; // Update end_label as it progresses
+                                } else {
+                                    $uniquedata[$key] = [
+                                        'spk' => $data->spk_number,
+                                        'item_code' => $data->item_code,
+                                        'item_perpack' => $perpack,
+                                        'available_quantity' => $available_quantity,
+                                        'count' => 1,
+                                        'start_label' => $start_label, // Set start_label for this SPK
+                                        'end_label' => $labelstart, // Initially, end_label is the same as start_label
+                                    ];
+                                }
+
+                                $available_quantity -= $perpack;
+                                $quantity -= $perpack;
+                            } else {
+                                // Assign a partial label to this SPK and move to the next
+                                $labelstart++;
+                                $labels[] = [
+                                    'spk' => $data->spk_number,
+                                    'item_code' => $data->item_code,
+                                    'warehouse' => 'FG',
+                                    'quantity' => $perpack,
+                                    'label' => $labelstart,
+                                ];
+
+                                $key = $data->spk_number . '|' . $data->item_code;
+                                if (isset($uniquedata[$key])) {
+                                    $uniquedata[$key]['count']++;
+                                    $uniquedata[$key]['end_label'] = $labelstart; // Update end_label for partial labels
+                                } else {
+                                    $uniquedata[$key] = [
+                                        'spk' => $data->spk_number,
+                                        'item_code' => $data->item_code,
+                                        'item_perpack' => $perpack,
+                                        'available_quantity' => $available_quantity,
+                                        'count' => 1,
+                                        'start_label' => $start_label,
+                                        'end_label' => $labelstart,
+                                    ];
+                                }
+                                $deficit = $available_quantity;
+                                $available_quantity = 0;
                             }
-                            $deficit = $available_quantity;
-                            $available_quantity = 0;
                         }
                     }
-                }
-            
-                // Convert uniquedata to array format
-                $uniquedata = array_values($uniquedata);
-                foreach ($uniquedata as &$data) {
-                    // Query the production_scanned_data table for matching spk and item_code
-                    $scannedCount = ProductionScannedData::where('spk_code', $data['spk'])
-                        ->where('item_code', $data['item_code'])
-                        ->count();
-                
-                    // Add the scannedData count to the current $data array
-                    $data['scannedData'] = $scannedCount;
-                }
-                // dd($uniquedata); 
 
-                             
-            } else {
-                $files = collect(); // Return an empty collection if no item_code is found
+                    // Convert uniquedata to array format
+                    $uniquedata = array_values($uniquedata);
+                    foreach ($uniquedata as &$data) {
+                        // Query the production_scanned_data table for matching spk and item_code
+                        $scannedCount = ProductionScannedData::where('spk_code', $data['spk'])
+                            ->where('item_code', $data['item_code'])
+                            ->count();
+
+                        // Add the scannedData count to the current $data array
+                        $data['scannedData'] = $scannedCount;
+                    }
+                    // dd($uniquedata);
+
+                } else {
+                    $files = collect(); // Return an empty collection if no item_code is found
+                }
             }
-        }
-        
         } else {
             $files = collect(); // Return an empty collection if specification_id is not 2
         }
         // dd($files);
-        if($user->name === 'Administrator' || $user->name === 'PE')
-        {
+        if ($user->name === 'Administrator' || $user->name === 'PE') {
             return view('dashboard', compact('files'));
-        }
-        else{
+        } else {
             // dd($datas);
-        return view('dashboard', compact('files','datas', 'itemCode', 'uniquedata'));
-        // return view('dashboard', compact('files'));
+            return view('dashboard', compact('files', 'datas', 'itemCode', 'uniquedata'));
+            // return view('dashboard', compact('files'));
         }
     }
 
@@ -197,7 +191,7 @@ class DashboardController extends Controller
     //generate barcode for each item_code
     public function itemCodeBarcode($item_code, $quantity)
     {
-        
+
         $datas = SpkMaster::where('item_code', $item_code)->get();
         $masteritem = MasterListItem::where('item_code', $item_code)->first();
         $perpack = $masteritem->standart_packaging_list;
@@ -205,20 +199,20 @@ class DashboardController extends Controller
         $uniquedata = [];
         $previous_spk = null; // Variable to track the previous SPK
         $start_label = null; // Variable to store start_label for each SPK
-        
+
         foreach ($datas as $data) {
             $available_quantity = $data->planned_quantity - $data->completed_quantity;
-            if($quantity <= $available_quantity) {
+            if ($quantity <= $available_quantity) {
                 $available_quantity = $quantity;
             }
             $deficit = 0;
-            if($data->completed_quantity === 0) {
+            if ($data->completed_quantity === 0) {
                 $labelstart = 0;
             } else {
                 $labelstart = ceil($data->completed_quantity / $perpack);
             }
 
-            if($deficit != 0) {
+            if ($deficit != 0) {
                 $available_quantity -= $deficit;
                 $deficit = 0;
             }
@@ -290,7 +284,7 @@ class DashboardController extends Controller
 
         // Convert uniquedata to array format
         $uniquedata = array_values($uniquedata);
-    
+
         // dd($uniquedata);
 
         $barcodeGenerator = new DNS1D();
@@ -304,7 +298,7 @@ class DashboardController extends Controller
                 $labelData['quantity'],
                 $labelData['label']
             ]);
-    
+
             // Second barcode with subset of data
             $barcodeData2 = implode("\t", [
                 $labelData['item_code'],
@@ -312,13 +306,13 @@ class DashboardController extends Controller
                 $labelData['quantity'],
                 $labelData['label']
             ]);
-    
+
             $barcodes[] = [
-                'first' => $barcodeGenerator->getBarcodeHTML($barcodeData1, 'C128',0.8, 30),
-                'second' => $barcodeGenerator->getBarcodeHTML($barcodeData2, 'C128',0.8, 30)
+                'first' => $barcodeGenerator->getBarcodeHTML($barcodeData1, 'C128', 0.8, 30),
+                'second' => $barcodeGenerator->getBarcodeHTML($barcodeData2, 'C128', 0.8, 30)
             ];
         }
-    
+
         return view('barcodeMachineJob', compact('labels', 'barcodes'));
     }
 
@@ -366,8 +360,7 @@ class DashboardController extends Controller
             // If not found, add validation error
             if (!$found) {
                 $validator->errors()->add('spk_code', 'The provided SPK code or item code does not exist.');
-            }
-            else {
+            } else {
                 // dd('masuk sini');
                 // Check if the label is within the valid range
                 $start_label = (int) $found->start_label;
@@ -386,32 +379,32 @@ class DashboardController extends Controller
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
-            $spk_code = $request->input('spk_code');
-            $item_code = $request->input('item_code');
-            $quantity = $request->input('quantity');
-            $warehouse = $request->input('warehouse');
-            $label = $request->input('label');
-            
+        $spk_code = $request->input('spk_code');
+        $item_code = $request->input('item_code');
+        $quantity = $request->input('quantity');
+        $warehouse = $request->input('warehouse');
+        $label = $request->input('label');
 
-            $existingScan = ProductionScannedData::where('spk_code', $spk_code)->where('item_code', $item_code)
+
+        $existingScan = ProductionScannedData::where('spk_code', $spk_code)->where('item_code', $item_code)
             ->where('label', $label)
             ->first();
 
-            if ($existingScan) {
-                return redirect()->back()->withErrors(['error' => 'Data already scanned']);
-            }
-            // dd('aman sampe sini ?');
-            ProductionScannedData::create([
-                'spk_code' => $spk_code,
-                'item_code' => $item_code,
-                'quantity' => $quantity,
-                'warehouse' => $warehouse,
-                'label' => $label,
-            ]);
+        if ($existingScan) {
+            return redirect()->back()->withErrors(['error' => 'Data already scanned']);
+        }
+        // dd('aman sampe sini ?');
+        ProductionScannedData::create([
+            'spk_code' => $spk_code,
+            'item_code' => $item_code,
+            'quantity' => $quantity,
+            'warehouse' => $warehouse,
+            'label' => $label,
+        ]);
 
-            return redirect()->back();
+        return redirect()->back();
     }
-    
+
     public function resetJobs(Request $request)
     {
         $uniquedata = json_decode($request->input('uniquedata'), true);
