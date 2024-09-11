@@ -105,9 +105,10 @@ class BarcodeController extends Controller
         
         $partno = $request->partNo;
 
-        $partDetails = explode('/', $partno);
+        $partDetails = preg_split('/\//', $partno, 2);
         $partNumber = $partDetails[0];
         $partName = $partDetails[1] ?? '';
+        // dd($partName);
         $defaultquantity = 1;
         $defaultwarehouse = "IND";
         
@@ -146,7 +147,7 @@ class BarcodeController extends Controller
         }
        
         // Save the barcode as a PNG image inside the barcodes folder
-        $barcode->getBarcodePNGPath($barcodeData, 'C128', 2, 70, [0, 0, 0], false);
+        $barcode->getBarcodePNGPath($barcodeData, 'C128', 1, 40, [0, 0, 0], false);
 
 
         // Generate the HTML for the barcode
