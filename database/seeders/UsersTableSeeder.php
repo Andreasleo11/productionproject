@@ -549,6 +549,16 @@ class UsersTableSeeder extends Seeder
                 'created_at' => $timestamp,
                 'updated_at' => $timestamp,
             ],
+            [
+                'specification_id' => 4,
+                'name' => 'Store',
+                'email' => 'store@daijo.co.id',
+                'email_verified_at' => $timestamp,
+                'password' => Hash::make('store123'),
+                'remember_token' => Str::random(10),
+                'created_at' => $timestamp,
+                'updated_at' => $timestamp,
+            ],
         ]);
     }
 }

@@ -92,7 +92,8 @@
                 <option value="">Select Position</option>
                 <option value="Jakarta" {{ request('position') == 'Jakarta' ? 'selected' : '' }}>Jakarta</option>
                 <option value="Karawang" {{ request('position') == 'Karawang' ? 'selected' : '' }}>Karawang</option>
-                <option value="Customer" {{ request('position') == 'Customer' ? 'selected' : '' }}>Customer</option>
+                <option value="CustomerJakarta" {{ request('position') == 'CustomerJakarta' ? 'selected' : '' }}>CustomerJakarta</option>
+                <option value="CustomerKarawang" {{ request('position') == 'CustomerKarawang' ? 'selected' : '' }}>CustomerKarawang</option>
             </select>
         </div>
 
