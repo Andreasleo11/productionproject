@@ -149,7 +149,7 @@ class DashboardController extends Controller
             $files = collect(); // Return an empty collection if specification_id is not 2
         }
         // dd($files);
-        if ($user->name === 'Administrator' || $user->name === 'PE') {
+        if ($user->name === 'Administrator' || $user->name === 'PE' || $user->name === 'Store') {
             return view('dashboard', compact('files'));
         } else {
             // dd($datas);
