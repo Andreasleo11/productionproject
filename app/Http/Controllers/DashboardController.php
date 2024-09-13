@@ -20,6 +20,8 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
         $uniquedata = null;
+        $files = null;
+        $itemCode = null;
         // dd($user);
         // Check if the user's specification_id is 2
         if ($user->specification_id == 2) {

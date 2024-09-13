@@ -4,6 +4,11 @@
             {{ __('Dashboard') }}
         </h2>
     </x-slot> --}}
+  
+
+    @if($itemCode === null)
+    <h1> no itemcode</h1>
+    @endif
 
     @if (auth()->user()->specification->name === 'ADMINISTRATOR' || auth()->user()->specification->name === 'Operator')
         <div class="py-12">
@@ -77,6 +82,9 @@
                         @else
                             <span class="text-red-500">No item code scanned</span>
                         @endif
+                        @if($files === null)
+                         <h1> no files</h1>
+                        @else
                         <div class="my-4">
                             @foreach ($files as $file)
                                 <a href="{{ asset('files/' . $file->name) }}"
@@ -96,6 +104,7 @@
                                 </a>
                             @endforeach
                         </div>
+                        @endif
                         <script type="module">
                             Fancybox.bind('[data-fancybox="gallery"]', {
                                 Thumbs: {
