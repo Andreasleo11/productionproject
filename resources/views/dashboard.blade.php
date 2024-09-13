@@ -6,10 +6,6 @@
     </x-slot> --}}
   
 
-    @if($itemCode === null)
-    <h1> no itemcode</h1>
-    @endif
-
     @if (auth()->user()->specification->name === 'ADMINISTRATOR' || auth()->user()->specification->name === 'Operator')
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
