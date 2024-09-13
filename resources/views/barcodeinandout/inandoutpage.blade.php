@@ -1,48 +1,28 @@
 <x-app-layout>
-
-<div class="container">
-    <h1>Insert Warehouse Barcode Form</h1>
-    <form action="{{ route('process.in.and.out') }}" method="POST">
-        @csrf
-        
-        <div class="form-group">
-            <label for="warehouseType">Warehouse Type</label>
-            <select class="form-control" id="warehouseType" name="warehouseType" required>
-                <option value="" disabled selected>Select Warehouse Type</option>
-                <option value="in">In</option>
-                <option value="out">Out</option>
-            </select>
+    <div class="min-h-screen flex items-center justify-center bg-gray-100">
+        <div class="bg-white shadow-lg rounded-lg p-8 max-w-lg w-full">
+            <h1 class="text-2xl font-bold text-center text-gray-700 mb-6">Insert Warehouse Barcode Form</h1>
+            <form action="{{ route('process.in.and.out') }}" method="POST">
+                @csrf
+                <div class="mb-4">
+                    <label for="warehouseType" class="block text-sm font-medium text-gray-700 mb-2">Warehouse Type</label>
+                    <select class="form-control w-full border border-gray-300 p-2 rounded-md" id="warehouseType" name="warehouseType" required>
+                        <option value="" disabled selected>Select Warehouse Type</option>
+                        <option value="in">In</option>
+                        <option value="out">Out</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="location" class="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                    <select class="form-control w-full border border-gray-300 p-2 rounded-md" id="location" name="location" required>
+                        <option value="" disabled selected>Select Location</option>
+                        <option value="jakarta">Jakarta</option>
+                        <option value="karawang">Karawang</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md transition duration-200">Submit</button>
+            </form>
         </div>
-        <div class="form-group">
-            <label for="location">Location</label>
-            <select class="form-control" id="location" name="location" required>
-                <option value="" disabled selected>Select Location</option>
-                <option value="jakarta">Jakarta</option>
-                <option value="karawang">Karawang</option>
-            </select>
-        </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
-    </form>
-</div>
-
-
-
-<style>
-    .container {
-        margin-top: 20px;
-    }
-    .form-group {
-        margin-bottom: 15px;
-    }
-    .form-control {
-        width: 100%;
-        padding: 10px;
-        font-size: 16px;
-    }
-    .btn {
-        padding: 10px 20px;
-        font-size: 16px;
-    }
-</style>
-
+    </div>
 </x-app-layout>
+

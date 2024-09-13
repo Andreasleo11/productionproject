@@ -1,29 +1,35 @@
 @foreach ($result as $item)
-    <h2>Date Scan: {{ $item['dateScan'] }}</h2>
-    <p>No Dokumen: {{ $item['noDokumen'] }}</p>
-    <p>Tipe Barcode: {{ strtoupper($item['tipeBarcode']) }}</p>
-    <p>Location: {{ strtoupper($item['location']) }}</p>    
-    <table>
-        <thead>
-            <tr>
-                <th>Part No</th>
-                <th>Quantity</th>
-                <th>Label</th>
-                <th>Position</th>
-                <th>Scan Time</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach ($item[$item['noDokumen']] as $detail)
-                <tr>
-                    <td>{{ $detail['partNo'] }}</td>
-                    <td>{{ $detail['quantity']}}</td>
-                    <td>{{ $detail['label'] }}</td>
-                    <td>{{ $detail['position'] }}</td>
-                    <td>{{ $detail['scantime'] }}</td>
-                </tr>
-            @endforeach
-        </tbody>
-    </table>
-    <hr>
+    <div class="bg-white shadow-lg rounded-lg p-6 mb-8">
+        <h2 class="text-xl font-bold mb-2">Date Scan: {{ $item['dateScan'] }}</h2>
+        <p class="text-gray-700 mb-1"><strong>No Dokumen:</strong> {{ $item['noDokumen'] }}</p>
+        <p class="text-gray-700 mb-1"><strong>Tipe Barcode:</strong> {{ strtoupper($item['tipeBarcode']) }}</p>
+        <p class="text-gray-700 mb-4"><strong>Location:</strong> {{ strtoupper($item['location']) }}</p>    
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full table-auto border-collapse border border-gray-200">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="px-4 py-2 border border-gray-300 text-left">Part No</th>
+                        <th class="px-4 py-2 border border-gray-300 text-left">Quantity</th>
+                        <th class="px-4 py-2 border border-gray-300 text-left">Label</th>
+                        <th class="px-4 py-2 border border-gray-300 text-left">Position</th>
+                        <th class="px-4 py-2 border border-gray-300 text-left">Scan Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($item[$item['noDokumen']] as $detail)
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="px-4 py-2 border border-gray-300">{{ $detail['partNo'] }}</td>
+                            <td class="px-4 py-2 border border-gray-300">{{ $detail['quantity']}}</td>
+                            <td class="px-4 py-2 border border-gray-300">{{ $detail['label'] }}</td>
+                            <td class="px-4 py-2 border border-gray-300">{{ $detail['position'] }}</td>
+                            <td class="px-4 py-2 border border-gray-300">{{ $detail['scantime'] }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+
+        <hr class="my-6">
+    </div>
 @endforeach

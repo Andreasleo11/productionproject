@@ -1,52 +1,46 @@
 <x-app-layout>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barcode Data</title>
-    <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            border: 1px solid black;
-            padding: 8px;
-            text-align: left;
-        }
-    </style>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-</head>
-<body>
-    <h1>Barcode Data</h1>
+    <div class="min-h-screen flex flex-col items-center justify-center bg-gray-100">
+        <div class="w-full max-w-4xl bg-white shadow-lg rounded-lg p-8">
+            <h1 class="text-3xl font-bold text-center text-gray-700 mb-6">Barcode Data</h1>
 
-    <form id="filterForm">
-        <label for="tipeBarcode">Tipe Barcode:</label>
-        <select name="tipeBarcode" id="tipeBarcode">
-            <option value="">All</option>
-            <option value="IN">IN</option>
-            <option value="OUT">OUT</option>
-        </select>
+            <form id="filterForm" class="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0 mb-6">
+                <div class="w-full md:w-1/3">
+                    <label for="tipeBarcode" class="block text-sm font-medium text-gray-700">Tipe Barcode:</label>
+                    <select name="tipeBarcode" id="tipeBarcode" class="w-full border border-gray-300 rounded-md p-2 mt-1">
+                        <option value="">All</option>
+                        <option value="IN">IN</option>
+                        <option value="OUT">OUT</option>
+                    </select>
+                </div>
 
-        <label for="location">Location:</label>
-        <select name="location" id="location">
-            <option value="">All</option>
-            <option value="JAKARTA">JAKARTA</option>
-            <option value="KARAWANG">KARAWANG</option>
-        </select>
+                <div class="w-full md:w-1/3">
+                    <label for="location" class="block text-sm font-medium text-gray-700">Location:</label>
+                    <select name="location" id="location" class="w-full border border-gray-300 rounded-md p-2 mt-1">
+                        <option value="">All</option>
+                        <option value="JAKARTA">JAKARTA</option>
+                        <option value="KARAWANG">KARAWANG</option>
+                    </select>
+                </div>
 
+                <div class="w-full md:w-1/3">
+                    <label for="dateScan" class="block text-sm font-medium text-gray-700">Date Scan:</label>
+                    <input type="date" name="dateScan" id="dateScan" class="w-full border border-gray-300 rounded-md p-2 mt-1" />
+                </div>
+            </form>
 
-        <label for="dateScan">Date Scan:</label>
-        <input type="date" name="dateScan" id="dateScan">
+            <div class="flex justify-center">
+                <button type="button" id="filterButton" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md">
+                    Filter
+                </button>
+            </div>
 
-        <button type="button" id="filterButton">Filter</button>
-    </form>
-
-    <div id="barcodeData">
-        @include('barcodeinandout.partials.barcode_table', ['result' => $result])
+            <div id="barcodeData" class="mt-8">
+                @include('barcodeinandout.partials.barcode_table', ['result' => $result])
+            </div>
+        </div>
     </div>
 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
             $('#filterButton').on('click', function() {
@@ -71,8 +65,4 @@
             });
         });
     </script>
-</body>
-</html>
-
-
 </x-app-layout>
