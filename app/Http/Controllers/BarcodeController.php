@@ -309,6 +309,11 @@ class BarcodeController extends Controller
 
             
             if (!$exists) {
+                $scanTime = $data["scantime" . $counter];
+                // Replace comma with space and periods with colons
+                $scanTime = str_replace(['.', ','], [':', ' '], $scanTime);
+                // Parse the corrected date-time string
+                $formattedScanTime = \Carbon\Carbon::createFromFormat('d/m/Y H:i:s', $scanTime)->format('Y-m-d H:i:s');
                 BarcodePackagingDetail::create([
                     'masterId' => $idmaster,
                     'noDokumen' => $data['noDokumen'],
@@ -316,7 +321,7 @@ class BarcodeController extends Controller
                     'quantity' => $data['quantity'. $counter],
                     'label' => $label,
                     'position' => $data['position'],
-                    'scantime' => \Carbon\Carbon::parse($data["scantime" . $counter])->format('Y-m-d H:i:s'),
+                    'scantime' => $formattedScanTime,
                     ]);
                 }
             $counter++;
