@@ -20,7 +20,7 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
         $uniquedata = null;
-        $files = collect(); // Initialize $files as an empty collection
+        $files = null;
         $itemCode = null;
         // dd($user);
         // Check if the user's specification_id is 2
@@ -147,7 +147,7 @@ class DashboardController extends Controller
             }
         }
         // dd($files);
-        if ($user->name === 'Administrator' || $user->name === 'PE') {
+        if ($user->name === 'Administrator' || $user->name === 'PE' || $user->name === 'Store') {
             return view('dashboard', compact('files'));
         } else {
             return view('dashboard', compact('files', 'datas', 'itemCode', 'uniquedata'));

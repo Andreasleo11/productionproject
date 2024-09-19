@@ -40,6 +40,16 @@ class UsersTableSeeder extends Seeder
                 'updated_at' => $timestamp,
             ],
             [
+                'specification_id' => 4,
+                'name' => 'Store',
+                'email' => 'store@daijo.co.id',
+                'email_verified_at' => $timestamp,
+                'password' => Hash::make('Store'),
+                'remember_token' => Str::random(10),
+                'created_at' => $timestamp,
+                'updated_at' => $timestamp,
+            ],
+            [
                 'specification_id' => 2,
                 'name' => 'VTC',
                 'email' => 'VTC@daijo.co.id',

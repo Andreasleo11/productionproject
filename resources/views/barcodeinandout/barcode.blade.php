@@ -9,6 +9,7 @@
             font-family: Arial, sans-serif;
         }
         .barcode-container {
+            width: 75%;
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 20px;
@@ -101,7 +102,8 @@
             .barcode-container {
                 display: grid;
                 grid-template-columns: repeat(2, 1fr); /* 2 columns per row */
-                gap: 10px;
+                column-gap: 100px;
+                row-gap: 10px;
                 page-break-inside: avoid;
             }
             .barcode-item {
@@ -109,6 +111,7 @@
                 padding: 5px;
                 margin-bottom: 5px;
                 height: 190px; /* Adjusted height for print */
+                width: 260px;
                 box-sizing: border-box;
                 page-break-inside: avoid;
             }

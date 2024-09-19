@@ -43,7 +43,7 @@ class BarcodeController extends Controller
     public function missingbarcodegenerator(Request $request)
     {
         $partNo = $request->input('partNo');
-        $partDetails = explode('/', $partNo);
+        $partDetails = preg_split('/\//', $partno, 2);
         $partNumber = $partDetails[0];
         $partName = $partDetails[1] ?? '';
 
@@ -105,9 +105,10 @@ class BarcodeController extends Controller
         
         $partno = $request->partNo;
 
-        $partDetails = explode('/', $partno);
+        $partDetails = preg_split('/\//', $partno, 2);
         $partNumber = $partDetails[0];
         $partName = $partDetails[1] ?? '';
+        // dd($partName);
         $defaultquantity = 1;
         $defaultwarehouse = "IND";
         
@@ -146,7 +147,7 @@ class BarcodeController extends Controller
         }
        
         // Save the barcode as a PNG image inside the barcodes folder
-        $barcode->getBarcodePNGPath($barcodeData, 'C128', 2, 70, [0, 0, 0], false);
+        $barcode->getBarcodePNGPath($barcodeData, 'C128', 1, 40, [0, 0, 0], false);
 
 
         // Generate the HTML for the barcode
@@ -308,6 +309,11 @@ class BarcodeController extends Controller
 
             
             if (!$exists) {
+                $scanTime = $data["scantime" . $counter];
+                // Replace comma with space and periods with colons
+                $scanTime = str_replace(['.', ','], [':', ' '], $scanTime);
+                // Parse the corrected date-time string
+                $formattedScanTime = \Carbon\Carbon::createFromFormat('d/m/Y H:i:s', $scanTime)->format('Y-m-d H:i:s');
                 BarcodePackagingDetail::create([
                     'masterId' => $idmaster,
                     'noDokumen' => $data['noDokumen'],
@@ -315,7 +321,7 @@ class BarcodeController extends Controller
                     'quantity' => $data['quantity'. $counter],
                     'label' => $label,
                     'position' => $data['position'],
-                    'scantime' => \Carbon\Carbon::parse($data["scantime" . $counter])->format('Y-m-d H:i:s'),
+                    'scantime' => $formattedScanTime,
                     ]);
                 }
             $counter++;

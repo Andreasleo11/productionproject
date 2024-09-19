@@ -46,36 +46,35 @@
                 </div>
             </div>
         </div>
-    @elseif (auth()->user()->specification->name === 'PE')
-        <div class="flex justify-center items-center py-12">
-            <span class="text-2xl font-semibold text-gray-600">PE USER</span>
+    @elseif(auth()->user()->specification->name === 'ADMINISTRATOR' || auth()->user()->specification->name === 'PE')
+        <div class="flex justify-center items-center">
+            PE USER
         </div>
-    @elseif (auth()->user()->specification->name === 'Machine')
+    @elseif(auth()->user()->specification->name === 'Machine')
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div class="bg-white shadow overflow-hidden sm:rounded-lg p-6">
-                    <h2 class="text-3xl font-bold mb-4">Active Job</h2>
-                    <span class="text-lg">
-                        @if ($itemCode)
-                            <span class="text-green-500">{{ $itemCode }}</span>
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6 text-gray-900">
+
+
+                        <div class="text-4xl">Files</div>
+                            <span class="font-bold text-lg">Active Job: </span>
+                        @if($itemCode)
+                            <span class="text-blue-500">{{ $itemCode }}</span>
                         @else
                             <span class="text-red-500">No item code scanned</span>
                         @endif
-                    </span>
-
-                    @if ($files)
-                        <h3 class="text-2xl font-bold mt-8">Files</h3>
-                        <div class="space-y-4 mt-4">
-                            @forelse ($files as $file)
+                        @if($files === null)
+                         <h1> no files</h1>
+                        @else
+                        <div class="my-4">
+                            @foreach ($files as $file)
                                 <a href="{{ asset('files/' . $file->name) }}"
-                                    class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-500">
+                                    class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                     {{ $file->name }}
                                 </a>
-                            @empty
-                                <span class="text-red-400">No files for this item code yet</span>
-                            @endforelse
+                            @endforeach
                         </div>
-                    @endif
 
                     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-8">
                         @foreach ($files as $file)
@@ -143,13 +142,14 @@
 
                     @if ($uniquedata != null)
                         <div class="mt-8">
-                            <h3 class="text-2xl font-bold mb-4">Unique Data Table</h3>
-                            <table class="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
-                                <thead class="bg-gray-100">
-                                    <tr>
-                                        <th class="py-3 px-4 text-left font-medium text-gray-700">SPK</th>
-                                        <th class="py-3 px-4 text-left font-medium text-gray-700">Item Code</th>
-                                        <th class="py-3 px-4 text-left font-medium text-gray-700">Scanned Data</th>
+                            <div class="text-4xl">Assigned Daily Item Codes</div>
+                            <table class="min-w-full bg-white border border-gray-200 mt-4">
+                                <thead>
+                                    <tr class="bg-gray-100">
+                                        <th class="py-2 px-4 border-b text-left">Item Code</th>
+                                        <th class="py-2 px-4 border-b text-left">Quantity</th>
+                                        <th class="py-2 px-4 border-b text-left">Loss Package Quantity</th>
+                                        <th class="py-2 px-4 border-b text-left">Actual Quantity</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -162,11 +162,6 @@
                                             <td class="py-3 px-4">{{ $data['item_code'] }}</td>
                                             <td class="py-3 px-4">{{ $data['scannedData'] }}/{{ $data['count'] }}</td>
                                         </tr>
-                                        @if ($data['scannedData'] != $data['count'])
-                                            @php
-                                                $canTriggerFunction = false;
-                                            @endphp
-                                        @endif
                                     @endforeach
                                 </tbody>
                             </table>
@@ -251,10 +246,12 @@
             const itemCodeElement = document.getElementById('item_code');
 
             if (spkCodeElement) {
+                // If spk_code element is present, focus on it
                 spkCodeElement.focus();
             } else if (itemCodeElement) {
+                // If spk_code is not present but item_code is, focus on item_code
                 itemCodeElement.focus();
             }
         });
-    </script> --}}
+    </script>
 </x-app-layout>
