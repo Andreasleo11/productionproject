@@ -10,6 +10,7 @@ use App\Http\Controllers\InitialBarcodeController;
 use App\Http\Controllers\MasterItemController;
 use App\Http\Controllers\SOController;
 use App\Http\Controllers\BarcodeController;
+use App\Livewire\ItemSearch;
 
 /*
 |--------------------------------------------------------------------------

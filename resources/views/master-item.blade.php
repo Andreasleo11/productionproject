@@ -1,113 +1,10 @@
 <x-app-layout>
-    <!-- Alert Notification -->
-    <div id="successAlert"
-        class="fixed top-5 right-5 w-full max-w-sm bg-green-100 shadow-lg rounded-lg overflow-hidden p-4 items-center space-x-3 hidden">
-        <!-- Check Icon -->
-        <div class="flex-shrink-0">
-            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-            </svg>
-        </div>
-        <!-- Message -->
-        <div class="flex-grow">
-            <span id="alertMessage" class="text-green-900 font-medium"></span>
-        </div>
-        <!-- Close Button -->
-        <button onclick="closeAlert()" class="text-green-900 focus:outline-none ml-3">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
-        </button>
-    </div>
-
-    <script>
-        function showAlert(message) {
-            const alertElement = document.getElementById('successAlert');
-            const messageElement = document.getElementById('alertMessage');
-            messageElement.textContent = message;
-            alertElement.classList.remove('hidden');
-
-            setTimeout(function() {
-                alertElement.classList.add('hidden');
-            }, 5000); // Auto-hide after 5 seconds
-        }
-
-        function closeAlert() {
-            document.getElementById('successAlert').classList.add('hidden');
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            @if (session('success'))
-                showAlert("{{ session('success') }}");
-            @endif
-        });
-    </script>
+    <livewire:alert />
 
     <div class="container mx-auto p-6 bg-gray-100">
-        <div class="overflow-x-auto shadow-lg rounded-lg">
-            <table class="min-w-full bg-white rounded-lg">
-                <thead>
-                    <tr class="w-full bg-gray-800 text-white">
-                        <th class="py-3 px-6 text-left">Item Code</th>
-                        <th class="py-3 px-6 text-left">Files</th>
-                        <th class="py-3 px-6 text-left">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($items as $item)
-                        <tr class="border-b">
-                            <td class="py-4 px-6">{{ $item->item_code }}</td>
-                            <td class="py-4 px-6">
-                                <!-- Nested table for files -->
-                                @if ($item->files->isNotEmpty())
-                                    <table class="min-w-full bg-gray-100 rounded-lg">
-                                        <thead>
-                                            <tr class="w-full bg-gray-300 text-gray-800">
-                                                <th class="py-3 px-4 text-left">File Name</th>
-                                                <th class="py-3 px-4 text-left">Mime Type</th>
-                                                <th class="py-3 px-4 text-left">Size</th>
-                                                <th class="py-3 px-4 text-left">Action</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach ($item->files as $file)
-                                                <tr class="border-b">
-                                                    <td class="py-3 px-4">{{ $file->name }}</td>
-                                                    <td class="py-3 px-4">{{ $file->mime_type }}</td>
-                                                    <td class="py-3 px-4">{{ $file->size }}</td>
-                                                    <td class="py-3 px-3">
-                                                        <form action="{{ route('file.delete', $file->id) }}"
-                                                            method="post">
-                                                            @csrf @method('delete')
-                                                            <button type="submit"
-                                                                class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg cursor-pointer">Delete</button>
-                                                        </form>
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                @else
-                                    No files uploaded.
-                                @endif
-                            </td>
-                            <td>
-                                <button
-                                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg cursor-pointer"
-                                    onclick="openModal('{{ $item->item_code }}')">Upload Files</button>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
 
-            <!-- Pagination links -->
-            <div class="mt-4 mb-2 mx-3">
-                {{ $items->links() }}
-            </div>
-        </div>
+        <livewire:item-search />
+        <button onclick="Livewire.emit('showAlert', 'Test success message')">Show Alert</button>
 
         <!-- Modal -->
         <div id="uploadModal" class="fixed inset-0 items-center justify-center bg-black bg-opacity-50 hidden">
@@ -174,12 +71,6 @@
                     fileList.appendChild(listItem);
                 }
             });
-
-            // document.addEventListener('DOMContentLoaded', function() {
-            //     @if (session('success'))
-            //         alert("{{ session('success') }}");
-            //     @endif
-            // });
         </script>
     </div>
 </x-app-layout>

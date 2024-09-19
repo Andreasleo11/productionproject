@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\File;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Livewire;
 
 class FileController extends Controller
 {
@@ -29,6 +30,9 @@ class FileController extends Controller
                 ]);
             }
         }
+
+        // Flash a success message to the session
+        session()->flash('success', 'Action completed successfully!');
 
         return redirect()->back()->with('success', 'Files uploaded successfully!');
     }

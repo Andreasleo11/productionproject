@@ -136,9 +136,9 @@ new class extends Component {
                     </x-slot>
 
                     <x-slot name="content">
-                        {{-- <x-dropdown-link :href="route('profile')" wire:navigate>
+                        <x-dropdown-link :href="route('profile')" wire:navigate>
                             {{ __('Profile') }}
-                        </x-dropdown-link> --}}
+                        </x-dropdown-link>
 
                         <!-- Authentication -->
                         <button wire:click="logout" class="w-full text-start">
@@ -183,9 +183,9 @@ new class extends Component {
             </div>
 
             <div class="mt-3 space-y-1">
-                {{-- <x-responsive-nav-link :href="route('profile')" wire:navigate>
+                <!-- <x-responsive-nav-link :href="route('profile')" wire:navigate>
                     {{ __('Profile') }}
-                </x-responsive-nav-link> --}}
+                </x-responsive-nav-link> -->
 
                 <!-- Authentication -->
                 <button wire:click="logout" class="w-full text-start">
@@ -197,3 +197,90 @@ new class extends Component {
         </div>
     </div>
 </nav>
+
+
+{{-- <div x-data="{ open: false }" class="flex">
+    <!-- Sidebar -->
+    <aside class="bg-white w-64 h-screen border-r border-gray-200">
+        <div class="px-6 py-4">
+            <!-- Logo -->
+            <div class="flex items-center">
+                <a href="{{ route('dashboard') }}" wire:navigate>
+                    <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
+                </a>
+            </div>
+        </div>
+
+        <!-- Navigation Links -->
+        <div class="space-y-4 px-6">
+            <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
+                {{ __('Dashboard') }}
+            </x-nav-link>
+
+            @if (auth()->user()->specification->name === 'Operator')
+                <x-nav-link :href="route('barcode.index')" :active="request()->routeIs('barcode.index')" wire:navigate>
+                    {{ __('Barcode Index') }}
+                </x-nav-link>
+
+                <x-nav-link :href="route('so.index')" :active="request()->routeIs('so.index')" wire:navigate>
+                    {{ __('SO Index') }}
+                </x-nav-link>
+
+                <x-nav-link :href="route('daily-item-code.index')" :active="request()->routeIs('daily-item-code.index')" wire:navigate>
+                    {{ __('Daily Item Codes') }}
+                </x-nav-link>
+
+                <!-- Dropdown for Store -->
+                <div x-data="{ dropdownOpen: false }" class="relative">
+                    <button @click="dropdownOpen = ! dropdownOpen" class="w-full text-left inline-flex items-center px-3 py-2 bg-white border border-transparent text-gray-500 hover:text-gray-700">
+                        {{ __('Store') }}
+                        <svg class="ml-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+
+                    <div x-show="dropdownOpen" @click.away="dropdownOpen = false" class="absolute left-0 mt-2 w-full bg-white shadow-lg z-20">
+                        <x-nav-link :href="route('barcodeindex')" :active="request()->routeIs('barcodeindex')" wire:navigate>
+                            {{ __('Create Barcode') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('inandout.index')" :active="request()->routeIs('inandout.index')" wire:navigate>
+                            {{ __('Scan Barcode') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('list.barcode')" :active="request()->routeIs('list.barcode')" wire:navigate>
+                            {{ __('Report History') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('stockallbarcode')" :active="request()->routeIs('stockallbarcode')" wire:navigate>
+                            {{ __('Stock Item') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('updated.barcode.item.position')" :active="request()->routeIs('updated.barcode.item.position')" wire:navigate>
+                            {{ __('List All Item Barcode') }}
+                        </x-nav-link>
+                    </div>
+                </div>
+            @endif
+
+            @if (auth()->user()->specification->name === 'PE')
+                <x-nav-link :href="route('master-item.index')" :active="request()->routeIs('master-item.index')" wire:navigate>
+                    {{ __('Master Item') }}
+                </x-nav-link>
+            @endif
+        </div>
+    </aside>
+
+    <!-- Page Content -->
+    <div class="flex-1 min-h-screen bg-gray-100">
+        <!-- Page Heading -->
+        @if (isset($header))
+            <header class="bg-white shadow">
+                <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                    {{ $header }}
+                </div>
+            </header>
+        @endif
+
+        <!-- Main Content -->
+        <main>
+            {{ $slot }}
+        </main>
+    </div>
+</div> --}}

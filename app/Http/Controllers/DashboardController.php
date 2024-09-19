@@ -20,6 +20,8 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
         $uniquedata = null;
+        $files = collect(); // Initialize $files as an empty collection
+        $itemCode = null;
         // dd($user);
         // Check if the user's specification_id is 2
         if ($user->specification_id == 2) {
@@ -141,18 +143,13 @@ class DashboardController extends Controller
                     }
                     // dd($uniquedata);
 
-                } else {
-                    $files = collect(); // Return an empty collection if no item_code is found
                 }
             }
-        } else {
-            $files = collect(); // Return an empty collection if specification_id is not 2
         }
         // dd($files);
         if ($user->name === 'Administrator' || $user->name === 'PE') {
             return view('dashboard', compact('files'));
         } else {
-            // dd($datas);
             return view('dashboard', compact('files', 'datas', 'itemCode', 'uniquedata'));
             // return view('dashboard', compact('files'));
         }

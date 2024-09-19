@@ -7,13 +7,12 @@ use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 use App\Models\User;
 
-$users = User::get();
-
 new #[Layout('layouts.guest')] class extends Component {
     public LoginForm $form;
     public $users;
+
     /**
-     * Handle an incoming authentication request.
+     * Load the users and initialize.
      */
     public function mount()
     {
@@ -26,6 +25,7 @@ new #[Layout('layouts.guest')] class extends Component {
      */
     public function login(): void
     {
+        // Ensure that email and password fields are set correctly
         $this->validate();
 
         $this->form->authenticate();
@@ -37,7 +37,7 @@ new #[Layout('layouts.guest')] class extends Component {
 };
 ?>
 
-<div>
+<div x-data="{ isOperator: false, selectedUserEmail: '', selectedUserPassword: '' }">
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
@@ -45,22 +45,25 @@ new #[Layout('layouts.guest')] class extends Component {
         <!-- Operator Switch -->
         <div class="mb-4">
             <label for="isOperator" class="inline-flex items-center">
-                <input id="isOperator" type="checkbox"
+                <input id="isOperator" type="checkbox" x-model="isOperator"
                     class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
                 <span class="ms-2 text-sm text-gray-600">{{ __('Are you an Operator?') }}</span>
             </label>
         </div>
 
-        <!-- User Select -->
-        <div>
+        <!-- User Select (Shown when operator mode is active) -->
+        <div x-show="isOperator" class="mb-4">
             <x-input-label for="user" :value="__('Select User')" />
-            <select id="user" disabled
+            <select id="user" x-on:change="
+                selectedUserEmail = $event.target.options[$event.target.selectedIndex].dataset.email;
+                selectedUserPassword = $event.target.options[$event.target.selectedIndex].dataset.name;
+                $wire.set('form.email', selectedUserEmail);
+                $wire.set('form.password', selectedUserPassword);"
                 class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
                 name="user">
                 <option value="">-- Select a user --</option>
                 @foreach ($users as $user)
-                    <option value="{{ $user->id }}" data-email="{{ $user->email }}"
-                        data-name="{{ $user->name }}">
+                    <option value="{{ $user->id }}" data-email="{{ $user->email }}" data-name="{{ $user->name }}">
                         {{ $user->name }}
                     </option>
                 @endforeach
@@ -68,88 +71,35 @@ new #[Layout('layouts.guest')] class extends Component {
             <x-input-error :messages="$errors->get('selectedUser')" class="mt-2" />
         </div>
 
-        <!-- Email Address -->
-        <div class="mt-4 email-group">
+        <!-- Email Address (Hidden when operator mode is active) -->
+        <div class="mt-4" x-show="!isOperator">
             <x-input-label for="email" :value="__('Email')" />
             <x-text-input wire:model.defer="form.email" id="email" class="block mt-1 w-full" type="email"
-                name="email" required autofocus autocomplete="username" />
+                name="email" x-bind:required="!isOperator" autofocus autocomplete="username" />
             <x-input-error :messages="$errors->get('form.email')" class="mt-2" />
         </div>
 
-        <!-- Password -->
-        <div class="mt-4 password-group">
+        <!-- Password (Hidden when operator mode is active) -->
+        <div class="mt-4" x-show="!isOperator">
             <x-input-label for="password" :value="__('Password')" />
             <x-text-input wire:model.defer="form.password" id="password" class="block mt-1 w-full" type="password"
-                name="password" required autocomplete="current-password" />
+                name="password" x-bind:required="!isOperator" autocomplete="current-password" />
             <x-input-error :messages="$errors->get('form.password')" class="mt-2" />
         </div>
 
-        {{-- <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember" class="inline-flex items-center">
-                <input wire:model.defer="form.remember" id="remember" type="checkbox"
-                    class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
-                <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
-            </label>
-        </div> --}}
+        <!-- Pre-fill email and password if operator is selected -->
+        <template x-if="isOperator">
+            <div>
+                <!-- Hidden fields to hold selected email and password -->
+                <x-text-input wire:model.defer="form.email" type="hidden" name="email" />
+                <x-text-input wire:model.defer="form.password" type="hidden" name="password" />
+            </div>
+        </template>
 
         <div class="flex items-center justify-end mt-4">
-            {{-- @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    href="{{ route('password.request') }}" wire:navigate>
-                    {{ __('Forgot your password?') }}
-                </a>
-            @endif --}}
-
             <x-primary-button class="ms-3">
                 {{ __('Log in') }}
             </x-primary-button>
         </div>
     </form>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const isOperatorCheckbox = document.getElementById('isOperator');
-            const userSelect = document.getElementById('user');
-            const emailInput = document.getElementById('email');
-            const passwordInput = document.getElementById('password');
-            const emailFormGroup = document.querySelector('.email-group');
-            const passwordFormGroup = document.querySelector('.password-group');
-
-            userSelect.addEventListener('change', function() {
-                const selectedOption = this.options[this.selectedIndex];
-                const email = selectedOption.getAttribute('data-email');
-                const name = selectedOption.getAttribute('data-name');
-
-                emailInput.value = email;
-                passwordInput.value = name; // Assuming the password is the name for this example
-
-                // Trigger Livewire model updates
-                emailInput.dispatchEvent(new Event('input'));
-                passwordInput.dispatchEvent(new Event('input'));
-            });
-
-
-            function handleOperatorToggle() {
-                if (isOperatorCheckbox.checked) {
-                    emailInput.readOnly = true;
-                    passwordInput.readOnly = true;
-                    userSelect.disabled = false;
-                    emailFormGroup.classList.add('hidden');
-                    passwordFormGroup.classList.add('hidden');
-                } else {
-                    emailFormGroup.classList.remove('hidden')
-                    passwordFormGroup.classList.remove('hidden');
-                    emailInput.readOnly = false;
-                    passwordInput.readOnly = false;
-                    userSelect.disabled = true;
-                    emailInput.value = '';
-                    passwordInput.value = '';
-                    userSelect.value = '';
-                }
-            }
-
-            isOperatorCheckbox.addEventListener('change', handleOperatorToggle);
-        });
-    </script>
 </div>
