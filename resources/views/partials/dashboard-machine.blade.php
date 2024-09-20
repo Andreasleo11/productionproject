@@ -128,6 +128,10 @@
                         <h3 class="text-2xl font-bold mb-4">Scan Barcode</h3>
                         <form action="{{ route('process.productionbarcode') }}" method="POST" class="space-y-6">
                             @csrf
+
+                            <input type="hidden" id="uniqueData" name="uniqueData" value="{{ json_encode($uniquedata) }}">
+                            <input type="hidden" id="datas" name="datas" value="{{ json_encode($datas) }}">
+                            
                             <div>
                                 <label for="spk_code" class="block text-sm font-medium text-gray-700">SPK
                                     Code:</label>
