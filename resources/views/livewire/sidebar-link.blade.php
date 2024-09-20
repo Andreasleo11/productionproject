@@ -15,6 +15,7 @@ new class extends Component {
     }
 }; ?>
 
-<a href="{{ $href }}" class="{{ $active ? 'block w-full px-4 py-2 text-sm font-medium border-l-4 border-indigo-500 text-indigo-400 bg-indigo-100' : 'block w-full px-4 py-2 text-sm font-medium border-l-4 border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+<a href="{{ $href }}"
+    class="{{ $active ? 'block w-full px-4 py-3 text-sm font-medium border-l-4 border-indigo-500 text-indigo-400 bg-indigo-100 rounded' : 'block w-full px-4 py-3 text-sm font-medium border-l-4 border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded' }}">
     {{ $label }}
 </a>
