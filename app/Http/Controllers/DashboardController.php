@@ -134,6 +134,7 @@ class DashboardController extends Controller
 
                     // Convert uniquedata to array format
                     $uniquedata = array_values($uniquedata);
+                    // dd($uniquedata);
                     foreach ($uniquedata as &$data) {
                         // Query the production_scanned_data table for matching spk and item_code
                         $scannedCount = ProductionScannedData::where('spk_code', $data['spk'])
@@ -281,6 +282,7 @@ class DashboardController extends Controller
                     $labels[] = [
                         'spk' => $data->spk_number,
                         'item_code' => $data->item_code,
+                        'item_name' => $masteritem->item_name,
                         'warehouse' => 'FG',
                         'quantity' => $perpack,
                         'label' => $labelstart,
@@ -301,6 +303,7 @@ class DashboardController extends Controller
                         $uniquedata[$key] = [
                             'spk' => $data->spk_number,
                             'item_code' => $data->item_code,
+                            'item_name' => $masteritem->item_name,
                             'count' => 1,
                             'start_label' => $start_label, // Set start_label for this SPK
                             'end_label' => $labelstart, // Initially, end_label is the same as start_label
@@ -315,6 +318,7 @@ class DashboardController extends Controller
                     $labels[] = [
                         'spk' => $data->spk_number,
                         'item_code' => $data->item_code,
+                        'item_name' => $masteritem->item_name,
                         'warehouse' => 'FG',
                         'quantity' => $available_quantity, // Use remaining available quantity
                         'label' => $labelstart,
@@ -328,6 +332,7 @@ class DashboardController extends Controller
                         $uniquedata[$key] = [
                             'spk' => $data->spk_number,
                             'item_code' => $data->item_code,
+                            'item_name' => $masteritem->item_name,
                             'count' => 1,
                             'start_label' => $start_label,
                             'end_label' => $labelstart,
@@ -359,11 +364,19 @@ class DashboardController extends Controller
             $barcodeData1 = implode("\t", [$labelData['spk'], $labelData['item_code'], $labelData['warehouse'], $labelData['quantity'], $labelData['label']]);
 
             // Second barcode with subset of data
-            $barcodeData2 = implode("\t", [$labelData['item_code'], $labelData['warehouse'], $labelData['quantity'], $labelData['label']]);
+            $barcodeData2 = implode("\t", [
+                $labelData['item_code'],
+                $labelData['warehouse'],
+                $labelData['quantity'],
+                $labelData['label']
+            ]);
+
+
+            //BARCODE SIZE IS 1 , 25
 
             $barcodes[] = [
-                'first' => $barcodeGenerator->getBarcodeHTML($barcodeData1, 'C128', 0.8, 30),
-                'second' => $barcodeGenerator->getBarcodeHTML($barcodeData2, 'C128', 0.8, 30),
+                'first' => $barcodeGenerator->getBarcodeHTML($barcodeData1, 'C128', 1, 50),
+                'second' => $barcodeGenerator->getBarcodeHTML($barcodeData2, 'C128', 1, 55)
             ];
         }
 
@@ -382,8 +395,9 @@ class DashboardController extends Controller
     {
         // dd($request->all());
         $datas = json_decode($request->input('datas'));
-        $uniquedata = json_decode($request->input('uniquedata'));
+        $uniquedata = json_decode($request->input('uniqueData'));
         // dd($uniquedata);
+        // dd($datas);
         // dd($uniquedata);
         $request->validate([
             'spk_code' => 'required|string',

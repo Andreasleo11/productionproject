@@ -180,59 +180,50 @@
                     </form>
                 </div>
 
-                <!-- Scan Barcode Form -->
-                <div>
-                    <h3 class="text-lg font-bold mb-2">Scan Barcode</h3>
-                    <form action="{{ route('process.productionbarcode') }}" method="POST" class="space-y-3">
-                        @csrf
-                        <div>
-                            <label for="spk_code" class="text-sm font-medium text-gray-700">SPK Code</label>
-                            <input type="text" id="spk_code" name="spk_code" required
-                                class="px-2 py-1 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 @error('spk_code') border-red-500 @enderror">
-                            @error('spk_code')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        <div>
-                            <label for="item_code" class="text-sm font-medium text-gray-700">Item Code</label>
-                            <input type="text" id="item_code" name="item_code" required
-                                class="px-2 py-1 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 @error('item_code') border-red-500 @enderror">
-                            @error('item_code')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        <div>
-                            <label for="warehouse" class="text-sm font-medium text-gray-700">Warehouse</label>
-                            <input type="text" id="warehouse" name="warehouse" required
-                                class="px-2 py-1 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 @error('warehouse') border-red-500 @enderror">
-                            @error('warehouse')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        <div>
-                            <label for="quantity" class="text-sm font-medium text-gray-700">Quantity</label>
-                            <input type="number" id="quantity" name="quantity" required
-                                class="px-2 py-1 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 @error('quantity') border-red-500 @enderror">
-                            @error('quantity')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        <div>
-                            <label for="label" class="text-sm font-medium text-gray-700">Label</label>
-                            <input type="number" id="label" name="label" required
-                                class="px-2 py-1 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 @error('label') border-red-500 @enderror">
-                            @error('label')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        <div>
-                            <button type="submit"
-                                class="py-1 px-3 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition">
-                                Scan
-                            </button>
-                        </div>
-                    </form>
-                </div>
+                    <div class="mt-8">
+                        <h3 class="text-2xl font-bold mb-4">Scan Barcode</h3>
+                        <form action="{{ route('process.productionbarcode') }}" method="POST" class="space-y-6">
+                            @csrf
+                            <input type="hidden" id="uniqueData" name="uniqueData" value="{{ json_encode($uniquedata) }}">
+                            <input type="hidden" id="datas" name="datas" value="{{ json_encode($datas) }}">
+                            
+                            <div>
+                                <label for="spk_code" class="block text-sm font-medium text-gray-700">SPK
+                                    Code:</label>
+                                <input type="text" id="spk_code" name="spk_code" required
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label for="item_code" class="block text-sm font-medium text-gray-700">Item
+                                    Code:</label>
+                                <input type="text" id="item_code" name="item_code" required
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label for="warehouse"
+                                    class="block text-sm font-medium text-gray-700">Warehouse:</label>
+                                <input type="text" id="warehouse" name="warehouse" required
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label for="quantity" class="block text-sm font-medium text-gray-700">Quantity:</label>
+                                <input type="number" id="quantity" name="quantity" required
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label for="label" class="block text-sm font-medium text-gray-700">Label:</label>
+                                <input type="number" id="label" name="label" required
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <button type="submit"
+                                    class="w-full py-2 px-4 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition">
+                                    Scan
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                @endif
             </div>
         @else
             <p class="text-red-500 text-sm mt-4">There's no SPK related for this item code.</p>
