@@ -152,6 +152,7 @@ class DashboardController extends Controller
         if ($user->name === 'Administrator' || $user->name === 'PE' || $user->name === 'Store') {
             return view('dashboard', compact('files'));
         } else {
+            // dd('masuk sini');
             return view('dashboard', compact('files', 'datas', 'itemCode', 'uniquedata'));
             // return view('dashboard', compact('files'));
         }

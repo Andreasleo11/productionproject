@@ -17,12 +17,12 @@ class SpecificationsTableSeeder extends Seeder
         DB::table('specifications')->truncate();
         DB::table('specifications')->insert([
             [
-                'name' => 'Operator',
+                'name' => 'Admin',
                 'created_at' => $timestamp,
                 'updated_at' => $timestamp,
             ],
             [
-                'name' => 'Machine',
+                'name' => 'Operator',
                 'created_at' => $timestamp,
                 'updated_at' => $timestamp,
             ],
@@ -33,6 +33,11 @@ class SpecificationsTableSeeder extends Seeder
             ],
             [
                 'name' => 'Store',
+                'created_at' => $timestamp,
+                'updated_at' => $timestamp,
+            ],
+            [
+                'name' => 'PPIC',
                 'created_at' => $timestamp,
                 'updated_at' => $timestamp,
             ],
