@@ -7,6 +7,7 @@ use Livewire\Component;
 class Alert extends Component
 {
     public $message = '';
+
     public $visible = false;
 
     protected $listeners = ['showAlert'];

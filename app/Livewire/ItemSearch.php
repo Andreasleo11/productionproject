@@ -14,9 +14,9 @@ class ItemSearch extends Component
 
     public function render()
     {
-        $items = MasterListItem::where('item_code', 'like', '%' . $this->search . '%')
+        $items = MasterListItem::where('item_code', 'like', '%'.$this->search.'%')
             ->orWhereHas('files', function ($query) {
-                $query->where('name', 'like', '%' . $this->search . '%');
+                $query->where('name', 'like', '%'.$this->search.'%');
             })
             ->with('files')
             ->orderByRaw('(select count(*) from files where files.item_code = master_list_items.item_code) desc') // Order by number of files

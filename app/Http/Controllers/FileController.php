@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\File;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Livewire\Livewire;
 
 class FileController extends Controller
 {
@@ -18,7 +17,7 @@ class FileController extends Controller
 
         if ($request->hasFile('files')) {
             foreach ($request->file('files') as $file) {
-                $fileName = time() . '-' . $file->getClientOriginalName();
+                $fileName = time().'-'.$file->getClientOriginalName();
                 $fileSize = $file->getSize();
                 $file->move(public_path('files'), $fileName);
 
@@ -42,9 +41,9 @@ class FileController extends Controller
         $file = File::find($id);
 
         $filename = $file->name;
-        Storage::delete('public/files/' . $filename);
+        Storage::delete('public/files/'.$filename);
         $file->delete();
 
-        return redirect()->back()->with('success', 'Files deleted successfully!');;
+        return redirect()->back()->with('success', 'Files deleted successfully!');
     }
 }

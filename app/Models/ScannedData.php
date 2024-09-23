@@ -14,7 +14,7 @@ class ScannedData extends Model
         'item_code',
         'quantity',
         'warehouse',
-        'label'
+        'label',
     ];
 
     public function soData()

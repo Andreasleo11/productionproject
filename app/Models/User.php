@@ -55,6 +55,6 @@ class User extends Authenticatable
 
     public function jobs()
     {
-        return $this->hasOne(MachineJob::class,'user_id');
+        return $this->hasOne(MachineJob::class, 'user_id');
     }
 }

@@ -2,10 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use App\Models\User;
 
 class MachineJobSeeder extends Seeder
 {
@@ -20,7 +19,7 @@ class MachineJobSeeder extends Seeder
         // Loop through the users and insert data into your table
         foreach ($users as $user) {
             DB::table('machine_jobs')->insert([
-                'user_id' => $user->id
+                'user_id' => $user->id,
             ]);
         }
     }

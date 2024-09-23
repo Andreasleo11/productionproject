@@ -8,12 +8,15 @@ use Illuminate\Database\Eloquent\Model;
 class SoData extends Model
 {
     use HasFactory;
+
     protected $table = 'so_datas';
+
     public $timestamps = false;
+
     protected $fillable = [
         'is_finish',
         'is_done',
-        'updated_at'
+        'updated_at',
     ];
 
     public function scannedData()

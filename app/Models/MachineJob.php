@@ -8,10 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class MachineJob extends Model
 {
     use HasFactory;
-    public $timestamps = false;
-    
-    protected $fillable = [
-        'item_code'
-    ];
 
+    public $timestamps = false;
+
+    protected $fillable = [
+        'item_code',
+    ];
 }

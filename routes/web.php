@@ -1,16 +1,15 @@
 <?php
 
+use App\Http\Controllers\BarcodeController;
 use App\Http\Controllers\DailyItemCodeController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FileController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\OperatorController;
 use App\Http\Controllers\InitialBarcodeController;
 use App\Http\Controllers\MasterItemController;
+use App\Http\Controllers\OperatorController;
 use App\Http\Controllers\SOController;
-use App\Http\Controllers\BarcodeController;
-use App\Livewire\ItemSearch;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -72,17 +71,14 @@ Route::view('profile', 'profile')
     ->middleware(['auth'])
     ->name('profile');
 
-
 Route::get('index', [HomeController::class, 'index'])->name('index');
 
 Route::get('operator/updatepage', [OperatorController::class, 'index'])->name('operator.index');
 
 Route::post('/assign-item-code', [OperatorController::class, 'assignItemCode'])->name('itemcode.assign');
 
-
 Route::get('/initialbarcode', [InitialBarcodeController::class, 'index'])->name('barcode.index');
 Route::post('/barcodes/generate', [InitialBarcodeController::class, 'generate'])->name('barcode.generate');
-
 
 Route::get('/manualbarcodes', [InitialBarcodeController::class, 'manualgenerate'])->name('manualbarcode.index');
 Route::post('/generate-barcode', [InitialBarcodeController::class, 'generateBarcode'])->name('generate.barcode');
@@ -98,4 +94,4 @@ Route::get('/so/process/{docNum}', [SOController::class, 'process'])->name('so.p
 Route::post('/so/scan', [SOController::class, 'scanBarcode'])->name('so.scanBarcode');
 Route::get('/update-so-data/{docNum}', [SOController::class, 'updateSoData'])->name('update.so.data');
 
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';

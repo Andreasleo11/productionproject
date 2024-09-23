@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\SoData;
 use App\Models\ScannedData;
+use App\Models\SoData;
+use Illuminate\Http\Request;
 
 class SOController extends Controller
 {
@@ -13,6 +13,7 @@ class SOController extends Controller
         $docNums = SoData::select('doc_num')
             ->distinct()
             ->get();
+
         return view('soindex', compact('docNums'));
     }
 
@@ -31,7 +32,6 @@ class SOController extends Controller
                     ->orWhereNull('is_done'); // Handle null values as well
             })
             ->doesntExist(); // If no such record exists, then all are done
-
 
         $data = SoData::with('scannedData')->where('doc_num', $docNum)
             ->get()
@@ -64,7 +64,7 @@ class SOController extends Controller
             ->values(); // Reset the keys after grouping
         foreach ($data as $entry) {
             SoData::where('id', $entry->id)->update([
-                'is_finish' => $entry->is_finish
+                'is_finish' => $entry->is_finish,
             ]);
         }
         // dd($data);
@@ -74,9 +74,10 @@ class SOController extends Controller
 
         $scandatas = ScannedData:: // Order by item_code
             orderBy('label')  // Then order by label
-            ->get()
-            ->groupBy('item_code');
-            // dd($data);
+                ->get()
+                ->groupBy('item_code');
+
+        // dd($data);
         return view('soresults', compact('data', 'docNum', 'date', 'customer', 'scandatas', 'allFinished', 'allDone'));
     }
 
@@ -98,7 +99,7 @@ class SOController extends Controller
         // Fetch the item data
         $item = SoData::where('item_code', $item_code)->first();
 
-        if (!$item) {
+        if (! $item) {
             return redirect()->back()->withErrors(['error' => 'Item not found']);
         }
 
@@ -129,8 +130,6 @@ class SOController extends Controller
 
         return redirect()->back()->with('success', 'Barcode scanned successfully');
     }
-
-
 
     public function updateSoData($docNum)
     {

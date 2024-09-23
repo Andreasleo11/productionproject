@@ -22,7 +22,7 @@ class DailyItemCode extends Model
         'start_time',
         'end_time',
         'is_done',
-        'schedule_date'
+        'schedule_date',
     ];
 
     public function user()

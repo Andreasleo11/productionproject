@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\MasterListItem;
-use App\Models\File;
-use App\Models\User;
 use App\Models\DailyItemCode;
+use App\Models\MasterListItem;
+use App\Models\User;
+use Illuminate\Http\Request;
 
 class OperatorController extends Controller
 {

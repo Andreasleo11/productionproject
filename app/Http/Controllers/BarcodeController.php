@@ -2,41 +2,34 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-
-use Milon\Barcode\DNS1D;
-use Milon\Barcode\DNS2D;
-use Ramsey\Uuid\Uuid;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\File;
-use App\Models\BarcodePackagingMaster;
 use App\Models\BarcodePackagingDetail;
-use Illuminate\Support\Str; 
-
+use App\Models\BarcodePackagingMaster;
 use App\Models\MasterDataRogPartName;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
+use Milon\Barcode\DNS1D;
 
 class BarcodeController extends Controller
 {
-
     public function index()
     {
         return view('barcodeinandout.index');
     }
+
     public function indexBarcode()
     {
         $barcodesFolder = public_path('barcodes');
         File::cleanDirectory($barcodesFolder);
         $datas = MasterDataRogPartName::get();
-        
+
         return view('barcodeinandout.indexbarcode', compact('datas'));
     }
 
     public function missingbarcodeindex()
     {
         $datas = MasterDataRogPartName::get();
-        
+
         return view('barcodeinandout.missingbarcodeindex', compact('datas'));
     }
 
@@ -52,48 +45,45 @@ class BarcodeController extends Controller
 
         // Retrieve and convert missing numbers to an array
         $missingNumbers = explode(',', $request->input('missingnumber'));
-    
+
         // Count the number of missing numbers
         $missingNumbersCount = count($missingNumbers);
 
         // dd($missingNumbersCount);
 
-        foreach($missingNumbers as $missingNumber)
-        {
-            
-            $barcodeData = $partNumber . "\t" . $missingNumber;
+        foreach ($missingNumbers as $missingNumber) {
 
-            $barcode = new DNS1D();
-    
-       
+            $barcodeData = $partNumber."\t".$missingNumber;
+
+            $barcode = new DNS1D;
+
             // Use $spkNumber in the filename
-            $filename = $partNumber . '-' . $missingNumber . '.png';
-
+            $filename = $partNumber.'-'.$missingNumber.'.png';
 
             // Save the barcode as a PNG image inside the barcodes folder
             $barcode->getBarcodePNGPath($barcodeData, 'C128', 2, 70, [0, 0, 0], false, $filename);
-            
+
             // Generate the HTML for the barcode
             $barcodeHtml = $barcode->getBarcodeHTML($barcodeData, 'C128');
             // URL to the saved barcode image
-            $barcodeUrl = asset('barcodes/' . $filename);
-        //    dd($barcodeUrl);
-    
+            $barcodeUrl = asset('barcodes/'.$filename);
+            //    dd($barcodeUrl);
+
             // Generate the HTML for the barcode
             $barcodeHtml = $barcode->getBarcodeHTML($barcodeData, 'C128', 2, 70);
-    
+
             $barcodes[] = [
                 'partno' => $partNumber,
                 'partname' => $partName,
                 'missingNumber' => $missingNumber,
                 'barcodeHtml' => $barcodeHtml,
-                'barcodeUrl' => $barcodeUrl,          
+                'barcodeUrl' => $barcodeUrl,
             ];
-            
+
         }
 
-        return view('barcodeinandout.missingbarcode', ['barcodes' => $barcodes,'partno' => $partNo]);
-        
+        return view('barcodeinandout.missingbarcode', ['barcodes' => $barcodes, 'partno' => $partNo]);
+
     }
 
     public function generateBarcode(Request $request)
@@ -102,7 +92,7 @@ class BarcodeController extends Controller
         // $spkNumbers = ['2201222', '2292422', '1299922'];
         // $quantities = ['200', '1200', '100'];
         // $warehouses = ['FG', 'RM', 'RW'];
-        
+
         $partno = $request->partNo;
 
         $partDetails = preg_split('/\//', $partno, 2);
@@ -110,71 +100,66 @@ class BarcodeController extends Controller
         $partName = $partDetails[1] ?? '';
         // dd($partName);
         $defaultquantity = 1;
-        $defaultwarehouse = "IND";
-        
+        $defaultwarehouse = 'IND';
 
         $startnum = $request->startNumber;
         $quantity = $request->quantity;
         $looping = $quantity - $startnum;
         $barcodes = [];
-        
+
         $barcodesFolder = public_path('barcodes');
         File::cleanDirectory($barcodesFolder);
 
-        for($i = 0; $i <= $looping; $i++)
-        {
-            
-        // Format the data as required ( DI SAP HARUS MENGGUNAKAN TAB )
+        for ($i = 0; $i <= $looping; $i++) {
 
-        // $barcodeData = $partno . "\t" . $startnum . "\t" . $warehouse . "\t" . $incrementNumber;
+            // Format the data as required ( DI SAP HARUS MENGGUNAKAN TAB )
 
-        $barcodeData = $partNumber . "\t" . $defaultquantity . "\t" . $defaultwarehouse . "\t" . $startnum;
-        // Generate the barcode using DNS1D (1D Barcode)
-        $barcode = new DNS1D();
-    
-       
-        // Use $spkNumber in the filename
-        $filename = preg_replace('/[()#,.\\s&]+(?<!png)/i', '', $partNumber). '-' .$defaultquantity . '-' . $defaultwarehouse . '-' . $startnum . '.png';
-        $filename = preg_replace('/"/', '-', $filename);
-        $filename = preg_replace('/-+/', '-', $filename);
-        
-        $lowercaseFilename = strtolower($filename);
-        // dd($lowercaseFilename);
+            // $barcodeData = $partno . "\t" . $startnum . "\t" . $warehouse . "\t" . $incrementNumber;
 
-            
-        if (!File::exists($barcodesFolder)) {
-            File::makeDirectory($barcodesFolder, 0755, true); // 0755 is the permission, true for recursive creation
-        }
-       
-        // Save the barcode as a PNG image inside the barcodes folder
-        $barcode->getBarcodePNGPath($barcodeData, 'C128', 1, 40, [0, 0, 0], false);
+            $barcodeData = $partNumber."\t".$defaultquantity."\t".$defaultwarehouse."\t".$startnum;
+            // Generate the barcode using DNS1D (1D Barcode)
+            $barcode = new DNS1D;
 
+            // Use $spkNumber in the filename
+            $filename = preg_replace('/[()#,.\\s&]+(?<!png)/i', '', $partNumber).'-'.$defaultquantity.'-'.$defaultwarehouse.'-'.$startnum.'.png';
+            $filename = preg_replace('/"/', '-', $filename);
+            $filename = preg_replace('/-+/', '-', $filename);
 
-        // Generate the HTML for the barcode
-        $barcodeHtml = $barcode->getBarcodeHTML($barcodeData, 'C128');
-        // URL to the saved barcode image
-        $barcodeUrl = asset('barcodes/' . $lowercaseFilename);
-        // Generate the HTML for the barcode
-        $barcodeHtml = $barcode->getBarcodeHTML($barcodeData, 'C128', 2, 70);
+            $lowercaseFilename = strtolower($filename);
+            // dd($lowercaseFilename);
 
-        $barcodes[] = [
-            'partno' => $partNumber,
-            'partname' => $partName,
-            'quantity' => $quantity,
-            'startnum' => $startnum,
-            'barcodeHtml' => $barcodeHtml,
-            'barcodeUrl' => $barcodeUrl,      
-        ];
-        
-        $startnum += 1;
+            if (! File::exists($barcodesFolder)) {
+                File::makeDirectory($barcodesFolder, 0755, true); // 0755 is the permission, true for recursive creation
+            }
+
+            // Save the barcode as a PNG image inside the barcodes folder
+            $barcode->getBarcodePNGPath($barcodeData, 'C128', 1, 40, [0, 0, 0], false);
+
+            // Generate the HTML for the barcode
+            $barcodeHtml = $barcode->getBarcodeHTML($barcodeData, 'C128');
+            // URL to the saved barcode image
+            $barcodeUrl = asset('barcodes/'.$lowercaseFilename);
+            // Generate the HTML for the barcode
+            $barcodeHtml = $barcode->getBarcodeHTML($barcodeData, 'C128', 2, 70);
+
+            $barcodes[] = [
+                'partno' => $partNumber,
+                'partname' => $partName,
+                'quantity' => $quantity,
+                'startnum' => $startnum,
+                'barcodeHtml' => $barcodeHtml,
+                'barcodeUrl' => $barcodeUrl,
+            ];
+
+            $startnum += 1;
 
         }
 
-        return view('barcodeinandout.barcode', ['barcodes' => $barcodes,'partno' => $partno,
+        return view('barcodeinandout.barcode', ['barcodes' => $barcodes, 'partno' => $partno,
             'quantity' => $quantity,
-            'startnum' => $startnum,]);
+            'startnum' => $startnum, ]);
     }
-    
+
     public function inandoutpage()
     {
         $masters = BarcodePackagingMaster::with('detailBarcode')->get();
@@ -192,88 +177,84 @@ class BarcodeController extends Controller
     }
 
     public function processInAndOut(Request $request)
-        {
-            $barcodePackagingMaster = new BarcodePackagingMaster();
-            $tanggalScanFull = Carbon::now('Asia/Bangkok')->format('Y-m-d H:i:s');
-            $barcodePackagingMaster->dateScan = $tanggalScanFull;
-            $warehouseType = $request->input('warehouseType');
-            $location = $request->input('location');
-            
+    {
+        $barcodePackagingMaster = new BarcodePackagingMaster;
+        $tanggalScanFull = Carbon::now('Asia/Bangkok')->format('Y-m-d H:i:s');
+        $barcodePackagingMaster->dateScan = $tanggalScanFull;
+        $warehouseType = $request->input('warehouseType');
+        $location = $request->input('location');
 
-
-            // Define prefix based on warehouse type and location
-            switch ($warehouseType) {
-                case 'in':
-                    $prefix = 'IN';
-                    break;
-                case 'out':
-                    $prefix = 'OUT';
-                    break;
-                default:
-                    $prefix = '';
-                    break;
-            }
-
-            // Add location suffix based on location
-            switch ($location) {
-                case 'jakarta':
-                    $suffix = 'JKT';
-                    break;
-                case 'karawang':
-                    $suffix = 'KRW';
-                    break;
-                default:
-                    $suffix = '';
-                    break;
-            }
-
-            // Merge prefix and suffix
-            $prefixSuffix = $prefix . '/' . $suffix;
-
-            // Validate and set position based on the merged prefix and suffix
-            switch ($prefixSuffix) {
-                case 'IN/JKT':
-                    $position = 'Jakarta';
-                    $HeaderScan = 'IN JAKARTA';
-                    break;
-                case 'IN/KRW':
-                    $position = 'Karawang';
-                    $HeaderScan = 'IN KARAWANG';
-                    break;
-                case 'OUT/JKT':
-                    $position = 'CustomerJakarta';
-                    $HeaderScan = 'OUT JAKARTA';
-                    break;
-                case 'OUT/KRW':
-                    $position = 'CustomerKarawang';
-                    $HeaderScan = 'OUT KARAWANG';
-                    break;
-                default:
-                    $position = 'Unknown'; // Or handle default case as needed
-                    break;
-            }
-
-            $barcodePackagingMaster->tipeBarcode = $warehouseType;
-            $barcodePackagingMaster->location = $location;
-
-            $barcodePackagingMaster->save();
-
-            // Retrieve the id of the newly created entry
-            $id = $barcodePackagingMaster->id;
-            $currentDate = date('Ymd');
-
-            // Combine prefix, suffix, and random string to form the document number
-            $noDokumen = 'PKG'. '/' . $prefixSuffix . '/' . $id . '/' . $currentDate;
-
-            $barcodePackagingMaster->noDokumen = $noDokumen;
-            // Output the generated document number for testing purposes
-            
-            
-            
-            $barcodePackagingMaster->save();
-        
-            return view('barcodeinandout.scanpage', compact('noDokumen', 'tanggalScanFull', 'position', 'HeaderScan'));
+        // Define prefix based on warehouse type and location
+        switch ($warehouseType) {
+            case 'in':
+                $prefix = 'IN';
+                break;
+            case 'out':
+                $prefix = 'OUT';
+                break;
+            default:
+                $prefix = '';
+                break;
         }
+
+        // Add location suffix based on location
+        switch ($location) {
+            case 'jakarta':
+                $suffix = 'JKT';
+                break;
+            case 'karawang':
+                $suffix = 'KRW';
+                break;
+            default:
+                $suffix = '';
+                break;
+        }
+
+        // Merge prefix and suffix
+        $prefixSuffix = $prefix.'/'.$suffix;
+
+        // Validate and set position based on the merged prefix and suffix
+        switch ($prefixSuffix) {
+            case 'IN/JKT':
+                $position = 'Jakarta';
+                $HeaderScan = 'IN JAKARTA';
+                break;
+            case 'IN/KRW':
+                $position = 'Karawang';
+                $HeaderScan = 'IN KARAWANG';
+                break;
+            case 'OUT/JKT':
+                $position = 'CustomerJakarta';
+                $HeaderScan = 'OUT JAKARTA';
+                break;
+            case 'OUT/KRW':
+                $position = 'CustomerKarawang';
+                $HeaderScan = 'OUT KARAWANG';
+                break;
+            default:
+                $position = 'Unknown'; // Or handle default case as needed
+                break;
+        }
+
+        $barcodePackagingMaster->tipeBarcode = $warehouseType;
+        $barcodePackagingMaster->location = $location;
+
+        $barcodePackagingMaster->save();
+
+        // Retrieve the id of the newly created entry
+        $id = $barcodePackagingMaster->id;
+        $currentDate = date('Ymd');
+
+        // Combine prefix, suffix, and random string to form the document number
+        $noDokumen = 'PKG'.'/'.$prefixSuffix.'/'.$id.'/'.$currentDate;
+
+        $barcodePackagingMaster->noDokumen = $noDokumen;
+        // Output the generated document number for testing purposes
+
+        $barcodePackagingMaster->save();
+
+        return view('barcodeinandout.scanpage', compact('noDokumen', 'tanggalScanFull', 'position', 'HeaderScan'));
+    }
 
     public function storeInAndOut(Request $request)
     {
@@ -285,31 +266,25 @@ class BarcodeController extends Controller
 
         $idmaster = $master->id;
 
-    
-        
         $counter = 1;
-        while (isset($data["partno" . $counter])) {
-            if($data["label" . $counter] === "ADJUST")
-            {
-                $data["quantity" . $counter];
-            }
-            else
-            {
-                $data["quantity" . $counter] = 1;
+        while (isset($data['partno'.$counter])) {
+            if ($data['label'.$counter] === 'ADJUST') {
+                $data['quantity'.$counter];
+            } else {
+                $data['quantity'.$counter] = 1;
             }
 
-            $partNo = $data["partno" . $counter];
-            $label = $data["label" . $counter];
-    
+            $partNo = $data['partno'.$counter];
+            $label = $data['label'.$counter];
+
             // Check for duplicates
             $exists = BarcodePackagingDetail::where('masterId', $idmaster)
-                        ->where('partNo', $partNo)
-                        ->where('label', $label)
-                        ->exists();
+                ->where('partNo', $partNo)
+                ->where('label', $label)
+                ->exists();
 
-            
-            if (!$exists) {
-                $scanTime = $data["scantime" . $counter];
+            if (! $exists) {
+                $scanTime = $data['scantime'.$counter];
                 // Replace comma with space and periods with colons
                 $scanTime = str_replace(['.', ','], [':', ' '], $scanTime);
                 // Parse the corrected date-time string
@@ -318,23 +293,22 @@ class BarcodeController extends Controller
                     'masterId' => $idmaster,
                     'noDokumen' => $data['noDokumen'],
                     'partNo' => $partNo,
-                    'quantity' => $data['quantity'. $counter],
+                    'quantity' => $data['quantity'.$counter],
                     'label' => $label,
                     'position' => $data['position'],
                     'scantime' => $formattedScanTime,
-                    ]);
-                }
+                ]);
+            }
             $counter++;
         }
+
         return redirect()->route('inandout.index')->with('success', 'Data added successfully');
     }
-
-
 
     public function barcodelist()
     {
         $items = BarcodePackagingMaster::with('detailbarcode')->get();
-        
+
         $result = [];
 
         foreach ($items as $item) {
@@ -348,11 +322,11 @@ class BarcodeController extends Controller
                 'dateScan' => $dateScan,
                 'noDokumen' => $noDokumen,
                 'tipeBarcode' => $item->tipeBarcode, // Add tipeBarcode here
-                'location' => $item->location,   
+                'location' => $item->location,
             ];
 
             // Initialize arrays for noDokumen and finishDokumen if not already set
-            if (!isset($result[$masterId][$noDokumen])) {
+            if (! isset($result[$masterId][$noDokumen])) {
                 $result[$masterId][$noDokumen] = [];
             }
 
@@ -373,7 +347,7 @@ class BarcodeController extends Controller
 
         // Convert associative array to simple array
         $result = array_values($result);
-        
+
         return view('barcodeinandout.listfinishbarcode', compact('result'));
     }
 
@@ -415,8 +389,6 @@ class BarcodeController extends Controller
         return view('barcodeinandout.partials.barcode_table', ['result' => $result]);
     }
 
-
-
     public function latestitemdetails(Request $request)
     {
         // Fetch distinct part numbers for the dropdown
@@ -430,10 +402,10 @@ class BarcodeController extends Controller
 
         // Iterate over each item
         foreach ($items as $item) {
-            $key = $item->partNo . '|' . $item->label;
+            $key = $item->partNo.'|'.$item->label;
 
             // If the key doesn't exist or the current item's scantime is later, update the array
-            if (!isset($latestItems[$key]) || $item->scantime > $latestItems[$key]->scantime) {
+            if (! isset($latestItems[$key]) || $item->scantime > $latestItems[$key]->scantime) {
                 $latestItems[$key] = $item;
             }
         }
@@ -449,7 +421,7 @@ class BarcodeController extends Controller
 
         // Sort each group by label
         foreach ($groupedItems as &$group) {
-            usort($group, function($a, $b) {
+            usort($group, function ($a, $b) {
                 return $a->label <=> $b->label;
             });
         }
@@ -459,23 +431,22 @@ class BarcodeController extends Controller
 
         // Apply filters
         if ($request->filled('partNo')) {
-            $sortedItems = array_filter($sortedItems, function($item) use ($request) {
+            $sortedItems = array_filter($sortedItems, function ($item) use ($request) {
                 return $item->partNo == $request->input('partNo');
             });
         }
 
         if ($request->filled('scantime')) {
-            $sortedItems = array_filter($sortedItems, function($item) use ($request) {
+            $sortedItems = array_filter($sortedItems, function ($item) use ($request) {
                 return $item->scantime == $request->input('scantime');
             });
         }
 
         if ($request->filled('position')) {
-            $sortedItems = array_filter($sortedItems, function($item) use ($request) {
+            $sortedItems = array_filter($sortedItems, function ($item) use ($request) {
                 return $item->position == $request->input('position');
             });
         }
-        
 
         return view('barcodeinandout.latestbarcodeitem', compact('sortedItems', 'partNumbers'));
 
@@ -483,7 +454,7 @@ class BarcodeController extends Controller
 
     public function historybarcodelist(Request $request)
     {
-        $query = BarcodePackagingMaster::with(['detailbarcode' => function($query) use ($request) {
+        $query = BarcodePackagingMaster::with(['detailbarcode' => function ($query) use ($request) {
             if ($request->has('partNo') && $request->partNo != '') {
                 $query->where('partNo', $request->partNo);
             }
@@ -493,41 +464,40 @@ class BarcodeController extends Controller
         if ($request->has('datescan') && $request->datescan != '') {
             $query->whereDate('dateScan', $request->datescan);
         }
-    
+
         if ($request->has('barcode_type') && $request->barcode_type != '') {
             $query->where('tipeBarcode', $request->barcode_type);
         }
-    
+
         if ($request->has('location') && $request->location != '') {
             $query->where('location', $request->location);
         }
-    
+
         $items = $query->get();
 
         $distinctPartNos = BarcodePackagingDetail::select('partNo')->distinct()->get();
 
         return view('barcodeinandout.historylisttable', compact('items', 'distinctPartNos'));
     }
-    
 
     public function stockall($location = 'Jakarta')
     {
         // Define position mappings based on location
         $positionMapping = [
             'Jakarta' => ['position' => 'Jakarta', 'customerPosition' => 'CustomerJakarta'],
-            'Karawang' => ['position' => 'Karawang', 'customerPosition' => 'CustomerKarawang']
+            'Karawang' => ['position' => 'Karawang', 'customerPosition' => 'CustomerKarawang'],
         ];
 
         // Check if the location exists in the mapping
-        if (!array_key_exists($location, $positionMapping)) {
+        if (! array_key_exists($location, $positionMapping)) {
             abort(404, 'Location not found');
         }
 
         // Retrieve data based on location mapping
         $locationData = $positionMapping[$location];
         $datas = BarcodePackagingDetail::where('position', $locationData['position'])
-                                    ->orWhere('position', $locationData['customerPosition'])
-                                    ->get();
+            ->orWhere('position', $locationData['customerPosition'])
+            ->get();
 
         $names = MasterDataRogPartName::get();
 
@@ -537,12 +507,12 @@ class BarcodeController extends Controller
         foreach ($partNos as $partNo) {
             // Calculate quantities based on location
             $locationQuantity = $datas->where('partNo', $partNo)
-                                    ->where('position', $locationData['position'])
-                                    ->sum('quantity');
+                ->where('position', $locationData['position'])
+                ->sum('quantity');
 
             $customerQuantity = $datas->where('partNo', $partNo)
-                                    ->where('position', $locationData['customerPosition'])
-                                    ->sum('quantity');
+                ->where('position', $locationData['customerPosition'])
+                ->sum('quantity');
 
             $balance = max($locationQuantity - $customerQuantity, 0);
 

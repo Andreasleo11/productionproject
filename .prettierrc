@@ -1,0 +1,5 @@
+{
+    "plugins": ["./node_modules/prettier-plugin-blade/plugin.js"],
+    "singleQuote": true,
+    "semi": true
+  }

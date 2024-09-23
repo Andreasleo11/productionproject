@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use App\Models\User;
-use App\Models\File;
 use App\Models\DailyItemCode;
+use App\Models\File;
 use App\Models\MachineJob;
 use App\Models\MasterListItem;
-use App\Models\SpkMaster;
-use Milon\Barcode\DNS1D;
 use App\Models\ProductionScannedData;
+use App\Models\SpkMaster;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Milon\Barcode\DNS1D;
 
 class DashboardController extends Controller
 {
@@ -25,7 +25,9 @@ class DashboardController extends Controller
         // dd($user);
         // Check if the user's specification_id is 2
         if ($user->specification_id == 2) {
-            $datas = DailyItemCode::where('user_id', $user->id)->with('masterItem')->get();
+            $datas = DailyItemCode::where('user_id', $user->id)
+                ->with('masterItem')
+                ->get();
             foreach ($datas as $data) {
                 $quantity = $data->first()->quantity;
                 //    dd($quantity);
@@ -142,7 +144,6 @@ class DashboardController extends Controller
                         $data['scannedData'] = $scannedCount;
                     }
                     // dd($uniquedata);
-
                 }
             }
         }
@@ -157,17 +158,43 @@ class DashboardController extends Controller
 
     public function updateMachineJob(Request $request)
     {
+        // Validate the input
         $request->validate([
             'item_code' => 'required|string|max:255',
         ]);
 
+        // Get the authenticated user
         $user = Auth::user();
+
+        // Get the item code from the form input
         $itemCode = $request->input('item_code');
 
+        // Find the DailyItemCode records for the user
         $verified_data = DailyItemCode::where('user_id', $user->id)->get();
+
+        // Check if the item code exists for the user
         $itemCodeExists = $verified_data->contains('item_code', $itemCode);
-        // dd($itemCodeExists);
+
         if ($itemCodeExists) {
+            // Retrieve the specific DailyItemCode for the item code
+            $dailyItemCode = DailyItemCode::where('item_code', $itemCode)->first();
+
+            // Get the current time
+            $currentTime = now();
+
+            // Check if the current time is not within the range of start_time and end_time
+            if ($currentTime->lt($dailyItemCode->start_time) && $currentTime->gt($dailyItemCode->end_time)) {
+                $startTime = \Carbon\Carbon::parse($dailyItemCode->start_time)->format('H:i');
+                $endTime = \Carbon\Carbon::parse($dailyItemCode->end_time)->format('H:i');
+
+                // Return with an error message if the current time is outside the range
+                return redirect()
+                    ->back()
+                    ->withErrors(['item_code' => 'The item code is not valid for the current time.'])
+                    ->withInput()
+                    ->with('error', "The current time is outside the shift time range ($startTime-$endTime) for this item code.");
+            }
+
             // Find the machine job record related to the user
             $machineJob = MachineJob::where('user_id', $user->id)->first();
 
@@ -181,27 +208,60 @@ class DashboardController extends Controller
                 return redirect()->back()->with('error', 'Machine job not found.');
             }
         } else {
-            return redirect()->back()->with('error', 'Item code does not exist for the user.');
+            // Return an error message if the item code does not exist for the user
+            return redirect()
+                ->back()
+                ->withErrors(['item_code' => 'Item code does not exist for the user.'])
+                ->withInput()
+                ->with('error', 'Item code does not exist for the user.');
         }
     }
 
     //generate barcode for each item_code
     public function itemCodeBarcode($item_code, $quantity)
-    {
-
+{
+    try {
+        // Fetch SPK data for the given item code
         $datas = SpkMaster::where('item_code', $item_code)->get();
+
+        if ($datas->isEmpty()) {
+            return redirect()->back()->with('error', 'No SPK data found for the given item code.');
+        }
+
+        // Fetch master item data
         $masteritem = MasterListItem::where('item_code', $item_code)->first();
+
+        if (!$masteritem) {
+            return redirect()->back()->with('error', 'No master item found for the given item code.');
+        }
+
+        // Get the standard packaging list value
         $perpack = $masteritem->standart_packaging_list;
+
+        if (!$perpack || $perpack == 0) {
+            return redirect()->back()->with('error', 'Standard packaging list (per pack) is invalid or zero.');
+        }
+
+        // Calculate the number of labels needed
         $label = (int) ceil($quantity / $perpack);
         $uniquedata = [];
         $previous_spk = null; // Variable to track the previous SPK
         $start_label = null; // Variable to store start_label for each SPK
 
+        $labels = []; // Initialize labels array
+
         foreach ($datas as $data) {
             $available_quantity = $data->planned_quantity - $data->completed_quantity;
+
+            // Check if the available quantity is sufficient
+            if ($available_quantity <= 0) {
+                continue; // Skip this SPK as there's no available quantity
+            }
+
             if ($quantity <= $available_quantity) {
                 $available_quantity = $quantity;
             }
+
             $deficit = 0;
             if ($data->completed_quantity === 0) {
                 $labelstart = 0;
@@ -214,8 +274,8 @@ class DashboardController extends Controller
                 $deficit = 0;
             }
 
-            while ($available_quantity > 0) {
-                if ($available_quantity >= $perpack) {
+            while ($available_quantity > 0 && $quantity > 0) {
+                if ($available_quantity >= $perpack && $quantity >= $perpack) {
                     // Assign a full label to this SPK
                     $labelstart++;
                     $labels[] = [
@@ -256,7 +316,7 @@ class DashboardController extends Controller
                         'spk' => $data->spk_number,
                         'item_code' => $data->item_code,
                         'warehouse' => 'FG',
-                        'quantity' => $perpack,
+                        'quantity' => $available_quantity, // Use remaining available quantity
                         'label' => $labelstart,
                     ];
 
@@ -274,44 +334,49 @@ class DashboardController extends Controller
                         ];
                     }
                     $deficit = $available_quantity;
+                    $quantity -= $available_quantity;
                     $available_quantity = 0;
                 }
             }
+
+            if ($quantity <= 0) {
+                break; // Exit the loop if the required quantity has been processed
+            }
+        }
+
+        if (empty($labels)) {
+            return redirect()->back()->with('error', 'No labels were generated. Please check the available quantity and try again.');
         }
 
         // Convert uniquedata to array format
         $uniquedata = array_values($uniquedata);
 
-        // dd($uniquedata);
-
+        // Generate barcodes
         $barcodeGenerator = new DNS1D();
         $barcodes = [];
         foreach ($labels as $labelData) {
             // First barcode with all data
-            $barcodeData1 = implode("\t", [
-                $labelData['spk'],
-                $labelData['item_code'],
-                $labelData['warehouse'],
-                $labelData['quantity'],
-                $labelData['label']
-            ]);
+            $barcodeData1 = implode("\t", [$labelData['spk'], $labelData['item_code'], $labelData['warehouse'], $labelData['quantity'], $labelData['label']]);
 
             // Second barcode with subset of data
-            $barcodeData2 = implode("\t", [
-                $labelData['item_code'],
-                $labelData['warehouse'],
-                $labelData['quantity'],
-                $labelData['label']
-            ]);
+            $barcodeData2 = implode("\t", [$labelData['item_code'], $labelData['warehouse'], $labelData['quantity'], $labelData['label']]);
 
             $barcodes[] = [
                 'first' => $barcodeGenerator->getBarcodeHTML($barcodeData1, 'C128', 0.8, 30),
-                'second' => $barcodeGenerator->getBarcodeHTML($barcodeData2, 'C128', 0.8, 30)
+                'second' => $barcodeGenerator->getBarcodeHTML($barcodeData2, 'C128', 0.8, 30),
             ];
         }
 
         return view('barcodeMachineJob', compact('labels', 'barcodes'));
+    } catch (\Exception $e) {
+        // Optionally log the error
+        // Log::error('Error generating barcodes: ' . $e->getMessage());
+
+        // Return error message to the user
+        return redirect()->back()->with('error', 'An unexpected error occurred: ' . $e->getMessage());
     }
+}
+
 
     public function procesProductionBarcodes(Request $request)
     {
@@ -367,7 +432,7 @@ class DashboardController extends Controller
                 if ($label < $start_label || $label > $end_label) {
                     // dd('out dari label');
                     $validator->errors()->add('label', "The label must be between $start_label and $end_label for SPK $spk_code and item code $item_code.");
-                };
+                }
                 // dd('dalam range label');
             }
         });
@@ -382,13 +447,12 @@ class DashboardController extends Controller
         $warehouse = $request->input('warehouse');
         $label = $request->input('label');
 
-
-        $existingScan = ProductionScannedData::where('spk_code', $spk_code)->where('item_code', $item_code)
-            ->where('label', $label)
-            ->first();
+        $existingScan = ProductionScannedData::where('spk_code', $spk_code)->where('item_code', $item_code)->where('label', $label)->first();
 
         if ($existingScan) {
-            return redirect()->back()->withErrors(['error' => 'Data already scanned']);
+            return redirect()
+                ->back()
+                ->withErrors(['error' => 'Data already scanned']);
         }
         // dd('aman sampe sini ?');
         ProductionScannedData::create([

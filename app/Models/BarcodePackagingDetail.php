@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class BarcodePackagingDetail extends Model
@@ -23,5 +22,4 @@ class BarcodePackagingDetail extends Model
     {
         return $this->belongsTo(BarcodePackagingMaster::class, 'masterId', 'id');
     }
-
 }

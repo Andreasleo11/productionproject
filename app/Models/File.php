@@ -13,6 +13,6 @@ class File extends Model
         'item_code',
         'name',
         'mime_type',
-        'size'
+        'size',
     ];
 }

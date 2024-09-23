@@ -28,7 +28,7 @@
                 </div>
 
                 <!-- Filter Dropdown -->
-                <div class="flex justify-end mb-4">
+                    <div class="flex justify-end mb-4">
                     <label for="filter" class="mr-2">Filter:</label>
                     <select id="filter" onchange="filterTable()" class="border-gray-300 rounded-md shadow-sm">
                         <option value="all">All</option>

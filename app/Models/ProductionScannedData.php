@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class ProductionScannedData extends Model
 {
     use HasFactory;
+
     protected $table = 'production_scanned_data';
 
     protected $fillable = [
@@ -15,7 +16,6 @@ class ProductionScannedData extends Model
         'item_code',
         'warehouse',
         'quantity',
-        'label'
+        'label',
     ];
-
 }

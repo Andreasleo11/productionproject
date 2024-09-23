@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class BarcodePackagingMaster extends Model
@@ -16,7 +15,6 @@ class BarcodePackagingMaster extends Model
         'location',
     ];
 
-    
     public function detailBarcode()
     {
         return $this->hasMany(BarcodePackagingDetail::class, 'masterId', 'id');
