@@ -119,6 +119,7 @@
                         <thead class="bg-indigo-100">
                             <tr>
                                 <th class="py-1 px-2 text-gray-700">Item Code</th>
+                                <th class="py-1 px-2 text-gray-700">Date</th>
                                 <th class="py-1 px-2 text-gray-700">Shift</th>
                                 <th class="py-1 px-2 text-gray-700">Quantity</th>
                                 <th class="py-1 px-2 text-gray-700">Loss Package Quantity</th>
@@ -137,19 +138,23 @@
 
                                 <tr class="bg-white border-b text-center">
                                     <td class="py-1 px-2">{{ $data->item_code }}</td>
+                                    <td class="py-1 px-2">{{ $data->start_date }} - {{ $data->end_date }}</td>
                                     <td class="py-1 px-2">{{ $data->shift }} ({{ $startTime }} -
                                         {{ $endTime }})</td>
                                     <td class="py-1 px-2">{{ $data->quantity }}</td>
                                     <td class="py-1 px-2">{{ $data->loss_package_quantity }}</td>
                                     <td class="py-1 px-2">{{ $data->actual_quantity }}</td>
                                     @if ($itemCode)
+                                        @php
+                                            $disabled = $data->shift !== $machineJobShift;
+                                        @endphp
                                         <td class="py-1 px-2">
                                             <form
                                                 action="{{ route('generate.itemcode.barcode', ['item_code' => $data->item_code, 'quantity' => $data->quantity]) }}"
                                                 method="get">
                                                 <button
-                                                    class="m-1 p-2 rounded text-white focus:outline-none transition ease-in-out duration-150 {{ $data->item_code !== $itemCode ? 'bg-gray-500 cursor-not-allowed' : 'bg-indigo-500 hover:bg-indigo-800' }}"
-                                                    {{ $data->item_code !== $itemCode ? 'disabled' : '' }}>
+                                                    class="m-1 p-2 rounded text-white focus:outline-none transition ease-in-out duration-150 {{ $disabled ? 'bg-gray-500 cursor-not-allowed' : 'bg-indigo-500 hover:bg-indigo-800' }}"
+                                                    {{ $disabled ? 'disabled' : '' }}>
                                                     Generate Barcode
                                                 </button>
                                             </form>

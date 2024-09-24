@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Milon\Barcode\DNS1D;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
 {
@@ -23,6 +24,7 @@ class DashboardController extends Controller
         $uniquedata = null;
         $files = collect();
         $itemCode = null;
+        $machineJobShift = null;
         // dd($user);
         // Check if the user's specification_id is 2
         if ($user->specification_id == 2) {
@@ -34,6 +36,7 @@ class DashboardController extends Controller
                 //    dd($quantity);
                 // Check if the user has a related dailyItemCode and retrieve the item_code
                 $itemCode = $user->jobs->item_code ?? null;
+                // $machineJobShift = $user->jobs->shift;
 
                 // If an item_code exists, retrieve all files with the same item_code
                 if ($itemCode) {
@@ -149,12 +152,17 @@ class DashboardController extends Controller
                 }
             }
         }
+
+        // Debugging the data you're sending to the view
+        // Log::info('Job Data: ' . json_encode($job));
+
         // dd($files);
         if ($user->name === 'Administrator' || $user->name === 'PE' || $user->name === 'Store') {
             return view('dashboard', compact('files'));
         } else {
             // dd('masuk sini');
-            return view('dashboard', compact('files', 'datas', 'itemCode', 'uniquedata'));
+            $machineJobShift = $user->jobs->shift;
+            return view('dashboard', compact('files', 'datas', 'itemCode', 'uniquedata', 'machineJobShift'));
             // return view('dashboard', compact('files'));
         }
     }
@@ -198,6 +206,8 @@ class DashboardController extends Controller
                     ->with('error', "The current time is outside the shift time range ($startTime-$endTime) for this item code.");
             }
 
+
+
             // Find the machine job record related to the user
             $machineJob = MachineJob::where('user_id', $user->id)->first();
 
@@ -205,18 +215,29 @@ class DashboardController extends Controller
                 // Update the machine job with the new item_code
                 $machineJob->item_code = $itemCode;
 
-                // Get the current time
-                $currentTime = Carbon::now('Asia/Jakarta');
-                $currentHour = $currentTime->hour; // Get only the hour for comparison
+                $currentDateTime = Carbon::now('Asia/Bangkok'); // Get the current date and time
+                $dailyItemCodes = DailyItemCode::where('user_id', auth()->user()->id)->get();
+                // Loop through the DailyItemCode records
 
-                // Set the shift based on the current hour
-                if ($currentHour >= 7 && $currentHour < 15) {
-                    $machineJob->shift = 1; // 07:00 - 15:00
-                } elseif ($currentHour >= 15 && $currentHour < 23) {
-                    $machineJob->shift = 2; // 15:00 - 23:00
-                } else {
-                    // For the shift between 23:00 and 07:00 (spanning midnight)
-                    $machineJob->shift = 3; // 23:00 - 07:00
+                foreach ($dailyItemCodes as $dailyItemCode) {
+                    // Combine the start_date with start_time and end_date with end_time
+                    $startDateTime = Carbon::parse($dailyItemCode->start_date . ' ' . $dailyItemCode->start_time, 'Asia/Bangkok');
+                    $endDateTime = Carbon::parse($dailyItemCode->end_date . ' ' . $dailyItemCode->end_time, 'Asia/Bangkok');
+
+                    // Check if the current time falls between the start and end time
+                    if ($currentDateTime->between($startDateTime, $endDateTime)) {
+                        // dd($currentDateTime);
+                        // Assign the shift from the matching DailyItemCode
+                        $machineJob->shift = $dailyItemCode->shift;
+                        break; // Exit the loop once a matching shift is found
+                    }
+                }
+
+
+
+                // If no matching shift is found, you can set a default value if needed
+                if (!isset($machineJob->shift)) {
+                    return redirect()->back()->with('error', 'No matching shift found!');
                 }
 
                 $machineJob->save();
