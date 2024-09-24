@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,34 +16,45 @@
             margin: 0;
             padding: 0;
             display: flex;
-            flex-direction: column; /* Stack barcodes vertically */
+            flex-direction: column;
+            /* Stack barcodes vertically */
         }
 
         .barcode-label {
             display: flex;
-            align-items: flex-start; /* Align items to the top */
-            border: 1px solid #000; /* Add border */
+            align-items: flex-start;
+            /* Align items to the top */
+            border: 1px solid #000;
+            /* Add border */
             padding: 10px;
             margin-bottom: 20px;
-            width: 100%; /* Full width for each barcode */
+            width: 100%;
+            /* Full width for each barcode */
             page-break-inside: avoid;
-            box-sizing: border-box; /* Include border in width calculation */
+            box-sizing: border-box;
+            /* Include border in width calculation */
         }
 
         .barcode-label img {
-            max-width: 150px; /* Adjusted width for better fit */
-            height: auto; /* Maintain aspect ratio */
-            margin-right: 20px; /* Add space between image and text */
+            max-width: 150px;
+            /* Adjusted width for better fit */
+            height: auto;
+            /* Maintain aspect ratio */
+            margin-right: 20px;
+            /* Add space between image and text */
         }
 
         .barcode-details {
-            flex: 1; /* Allow this section to take the remaining space */
+            flex: 1;
+            /* Allow this section to take the remaining space */
             font-size: 12px;
-            text-align: left; /* Align text to the left */
+            text-align: left;
+            /* Align text to the left */
         }
 
         .barcode-details p {
-            margin: 5px 0; /* Add some space between text lines */
+            margin: 5px 0;
+            /* Add some space between text lines */
         }
 
         h1 {
@@ -58,14 +70,19 @@
             }
 
             .barcode-label {
-                width: 100%; /* Ensure full width for print */
-                margin-right: 0; /* No margin needed for print */
-                border-width: 0.5mm; /* Thinner border for print */
+                width: 100%;
+                /* Ensure full width for print */
+                margin-right: 0;
+                /* No margin needed for print */
+                border-width: 0.5mm;
+                /* Thinner border for print */
             }
 
             .barcode-label img {
-                max-width: 120px; /* Adjusted size for print */
-                margin-right: 15px; /* Adjusted space for print */
+                max-width: 120px;
+                /* Adjusted size for print */
+                margin-right: 15px;
+                /* Adjusted space for print */
             }
 
             .barcode-details {
@@ -78,11 +95,12 @@
         }
     </style>
 </head>
+
 <body>
     <h1>Generated Barcodes</h1>
 
-    @foreach($items as $item)
-        @for($i = 0; $i < $labelCount; $i++)
+    @foreach ($items as $item)
+        @for ($i = 0; $i < $labelCount; $i++)
             <div class="barcode-label">
                 <img src="{{ asset('images/' . $item->item_code . '.png') }}" alt="{{ $item->item_code }}">
                 <div class="barcode-details">
@@ -94,4 +112,5 @@
         @endfor
     @endforeach
 </body>
+
 </html>
