@@ -28,7 +28,7 @@
                 </div>
 
                 <!-- Filter Dropdown -->
-                    <div class="flex justify-end mb-4">
+                <div class="flex justify-end mb-4">
                     <label for="filter" class="mr-2">Filter:</label>
                     <select id="filter" onchange="filterTable()" class="border-gray-300 rounded-md shadow-sm">
                         <option value="all">All</option>
@@ -54,6 +54,7 @@
                                         @php
                                             $hasAssignedData =
                                                 $machine->dailyItemCode && count($machine->dailyItemCode) > 0;
+                                            $availableDates = $machine->dailyItemCode->pluck('schedule_date')->unique();
                                         @endphp
 
                                         <!-- Summary Row (collapsible) -->
@@ -92,19 +93,37 @@
                                                     <div class="p-4 border rounded-lg bg-white shadow-sm">
                                                         <h3 class="text-lg font-semibold mb-3">Details for
                                                             {{ $machine->name }}</h3>
+
+                                                        <!-- Schedule Date Filter -->
+                                                        <label for="date-filter-{{ $machine->id }}"
+                                                            class="mr-2">Filter by Schedule Date:</label>
+                                                        <select id="date-filter-{{ $machine->id }}"
+                                                            onchange="filterDetails({{ $machine->id }})"
+                                                            class="border-gray-300 rounded-md shadow-sm mb-4">
+                                                            <option value="all">All Dates</option>
+                                                            @foreach ($availableDates as $date)
+                                                                <option value="{{ $date }}">
+                                                                    {{ $date }}</option>
+                                                            @endforeach
+                                                        </select>
+
                                                         <table class="w-full text-sm">
                                                             <thead>
                                                                 <tr class="border-b">
                                                                     <th class="py-2 px-4 text-left">Item Code</th>
                                                                     <th class="py-2 px-4 text-left">Quantity</th>
                                                                     <th class="py-2 px-4 text-left">Shift</th>
+                                                                    <th class="py-2 px-4 text-left">Schedule Date</th>
+                                                                    <th class="py-2 px-4 text-left">Start Date</th>
                                                                     <th class="py-2 px-4 text-left">Start Time</th>
+                                                                    <th class="py-2 px-4 text-left">End Date</th>
                                                                     <th class="py-2 px-4 text-left">End Time</th>
                                                                 </tr>
                                                             </thead>
-                                                            <tbody>
+                                                            <tbody id="details-body-{{ $machine->id }}">
                                                                 @foreach ($machine->dailyItemCode as $itemCode)
-                                                                    <tr class="border-b">
+                                                                    <tr class="border-b details-row"
+                                                                        data-schedule-date="{{ $itemCode->schedule_date }}">
                                                                         <td class="py-2 px-4">
                                                                             {{ $itemCode->item_code }}
                                                                         </td>
@@ -112,9 +131,19 @@
                                                                             {{ $itemCode->quantity }}
                                                                         </td>
                                                                         <td class="py-2 px-4">
-                                                                            {{ $itemCode->shift }}</td>
+                                                                            {{ $itemCode->shift }}
+                                                                        </td>
+                                                                        <td class="py-2 px-4">
+                                                                            {{ $itemCode->schedule_date }}
+                                                                        </td>
+                                                                        <td class="py-2 px-4">
+                                                                            {{ $itemCode->start_date }}
+                                                                        </td>
                                                                         <td class="py-2 px-4">
                                                                             {{ $itemCode->start_time }}
+                                                                        </td>
+                                                                        <td class="py-2 px-4">
+                                                                            {{ $itemCode->end_date }}
                                                                         </td>
                                                                         <td class="py-2 px-4">
                                                                             {{ $itemCode->end_time }}
@@ -157,6 +186,23 @@
                 if (filterValue === 'all') {
                     row.style.display = '';
                 } else if (filterValue === status) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        function filterDetails(machineId) {
+            var filterValue = document.getElementById('date-filter-' + machineId).value;
+            var rows = document.querySelectorAll('#details-body-' + machineId + ' .details-row');
+
+            rows.forEach(function(row) {
+                var scheduleDate = row.getAttribute('data-schedule-date');
+
+                if (filterValue === 'all') {
+                    row.style.display = '';
+                } else if (filterValue === scheduleDate) {
                     row.style.display = '';
                 } else {
                     row.style.display = 'none';

@@ -42,95 +42,110 @@ class DailyItemCodeController extends Controller
     }
 
     public function store(StoreDailyItemCodeRequest $request)
-    {
-        // The validated data can be accessed via $request->validated()
-        $validatedData = $request->validated();
+{
+    // The validated data can be accessed via $request->validated()
+    $validatedData = $request->validated();
 
-        // dd($validatedData);
+    // Custom validation for start and end times and dates
+    foreach ($validatedData['shifts'] as $index => $shift) {  // Use $index to loop
+        $startDate = $validatedData['start_dates'][$shift]; // Access arrays by $shift
+        $endDate = $validatedData['end_dates'][$shift];
+        $startTime = $validatedData['start_times'][$shift];
+        $endTime = $validatedData['end_times'][$shift];
 
-        // Custom validation for start and end times
-        foreach ($validatedData['shifts'] as $index => $shift) {
-            $startTime = $validatedData['start_times'][$shift];
-            $endTime = $validatedData['end_times'][$shift];
+        // Custom validation for end time based on the relationship between start and end dates
+        if ($startDate == $endDate && strtotime($endTime) <= strtotime($startTime)) {
+            return back()
+                ->withErrors([
+                    "end_times.$shift" => 'End time must be after the start time when the start and end dates are the same for shift ' . $shift,
+                ])
+                ->withInput()
+                ->with('error', 'There were errors in your form submission. Please correct them and try again.');
+        }
 
-            if (strtotime($endTime) <= strtotime($startTime)) {
+        // Ensure shifts are sequential
+        if ($index > 0) {
+            $previousShift = $validatedData['shifts'][$index - 1];
+            $previousEndTime = strtotime($validatedData['end_times'][$previousShift]);
+            $previousEndDate = strtotime($validatedData['end_dates'][$previousShift]);
+            $currentStartTime = strtotime($startTime);
+            $currentStartDate = strtotime($startDate);
+
+            // Check if the current shift starts after the previous shift ends
+            if ($previousEndDate > $currentStartDate || ($previousEndDate == $currentStartDate && $previousEndTime >= $currentStartTime)) {
                 return back()
                     ->withErrors([
-                        "end_times.$shift" => 'End time must be after the start time for shift '.$shift,
+                        "start_times.$shift" => 'Start time for shift ' . $shift . ' must be after the end time of shift ' . $previousShift,
+                        "start_dates.$shift" => 'Start date for shift ' . $shift . ' must be after the end date of shift ' . $previousShift,
                     ])
                     ->withInput()
-                    ->with('error', 'There were errors in your form submission. Please correct them and try again.');
-            }
-
-            // Additional validation to ensure shifts are sequential
-            if ($index > 0) {
-                $previousShift = $validatedData['shifts'][$index - 1];
-                $previousEndTime = strtotime($validatedData['end_times'][$previousShift]);
-                $currentStartTime = strtotime($startTime);
-
-                if ($previousEndTime >= $currentStartTime) {
-                    return back()
-                        ->withErrors([
-                            "start_times.$shift" => 'Start time for shift '.$shift.' must be after the end time of shift '.$previousShift,
-                        ])
-                        ->withInput()
-                        ->with('error', 'Shift start and end times must be sequential.');
-                }
+                    ->with('error', 'Shift start and end times/dates must be sequential.');
             }
         }
-
-        // Save the data to the DailyItemCodes table
-        foreach ($validatedData['shifts'] as $index => $shift) {
-            $itemCode = $validatedData['item_codes'][$shift];
-            $quantity = $validatedData['quantities'][$shift];
-
-            $datas = SpkMaster::where('item_code', $itemCode)->get();
-            $master = MasterListItem::where('item_code', $itemCode)->first();
-            $stanpack = $master->standart_packaging_list;
-
-            $totalPlannedQuantity = $datas->sum('planned_quantity');
-            $totalCompletedQuantity = $datas->sum('completed_quantity');
-
-            $final = $quantity % $stanpack;
-            $finalQuantity = $quantity;
-
-            $loss_package_quantity = $final === 0 ? 0 : $quantity - $final;
-
-            // Calculate the maximum allowed quantity
-            $max_quantity = $totalPlannedQuantity - $totalCompletedQuantity;
-            if ($quantity > $max_quantity) {
-                return redirect()
-                    ->back()
-                    ->with('alert', "Quantity exceeds SPK with a maximum of $max_quantity.");
-            }
-
-            // Initialize adjustedQuantity with default value
-            $adjustedQuantity = $quantity;
-
-            $dailyItemCode = DailyItemCode::where('user_id', $validatedData['machine_id'])
-                ->where('item_code', $itemCode)
-                ->first();
-
-            if ($dailyItemCode && $dailyItemCode->loss_package_quantity > 0) {
-                // Calculate the adjusted quantity
-                $adjustedQuantity = $quantity - $dailyItemCode->loss_package_quantity;
-            }
-
-            // Create a new DailyItemCode entry with the adjusted quantity
-            DailyItemCode::create([
-                'schedule_date' => $validatedData['schedule_date'],
-                'user_id' => $validatedData['machine_id'],
-                'item_code' => $itemCode,
-                'quantity' => $quantity,
-                'loss_package_quantity' => $loss_package_quantity,
-                'final_quantity' => $quantity,
-                'actual_quantity' => $adjustedQuantity,
-                'start_time' => $startTime,
-                'end_time' => $endTime,
-                'shift' => $shift,
-            ]);
-        }
-
-        return redirect()->back()->with('success', 'Daily item codes have been successfully saved.');
     }
+
+    // Save the data to the DailyItemCodes table
+    foreach ($validatedData['shifts'] as $index => $shift) {  // Use $index to loop
+        $itemCode = $validatedData['item_codes'][$shift];   // Access arrays by $shift
+        $quantity = $validatedData['quantities'][$shift];
+        $startDate = $validatedData['start_dates'][$shift];
+        $endDate = $validatedData['end_dates'][$shift];
+        $startTime = $validatedData['start_times'][$shift];
+        $endTime = $validatedData['end_times'][$shift];
+
+        // Fetch SPK and Master Item Data
+        $datas = SpkMaster::where('item_code', $itemCode)->get();
+        $master = MasterListItem::where('item_code', $itemCode)->first();
+        $stanpack = $master->standart_packaging_list;
+
+        // Calculate the total planned and completed quantities
+        $totalPlannedQuantity = $datas->sum('planned_quantity');
+        $totalCompletedQuantity = $datas->sum('completed_quantity');
+
+        // Calculate the loss package quantity
+        $final = $quantity % $stanpack;
+        $loss_package_quantity = $final === 0 ? 0 : $quantity - $final;
+
+        // Calculate the maximum allowed quantity
+        $max_quantity = $totalPlannedQuantity - $totalCompletedQuantity;
+        if ($quantity > $max_quantity) {
+            return redirect()
+                ->back()
+                ->with('error', "Quantity exceeds SPK with a maximum of $max_quantity.");
+        }
+
+        // Initialize adjusted quantity
+        $adjustedQuantity = $quantity;
+
+        // Check if the machine already has a daily item code assigned
+        $dailyItemCode = DailyItemCode::where('user_id', $validatedData['machine_id'])
+            ->where('item_code', $itemCode)
+            ->first();
+
+        // Adjust the quantity if the machine has a loss package quantity
+        if ($dailyItemCode && $dailyItemCode->loss_package_quantity > 0) {
+            $adjustedQuantity = $quantity - $dailyItemCode->loss_package_quantity;
+        }
+
+        // Create a new DailyItemCode entry
+        DailyItemCode::create([
+            'schedule_date' => $validatedData['schedule_date'],
+            'user_id' => $validatedData['machine_id'],
+            'item_code' => $itemCode,
+            'quantity' => $quantity,
+            'loss_package_quantity' => $loss_package_quantity,
+            'final_quantity' => $quantity,
+            'actual_quantity' => $adjustedQuantity,
+            'start_time' => $startTime,
+            'end_time' => $endTime,
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+            'shift' => $shift,  // Store the shift number
+        ]);
+
+    }
+
+    return redirect()->route('daily-item-code.index')->with('success', 'Daily Item Codes assigned successfully.');
+}
+
 }

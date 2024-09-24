@@ -11,7 +11,6 @@ class StoreDailyItemCodeRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        // Set to true if authorization is not needed for this request
         return true;
     }
 
@@ -24,17 +23,21 @@ class StoreDailyItemCodeRequest extends FormRequest
     {
         return [
             'schedule_date' => 'required|date',
-            'machine_id' => 'required|exists:users,id',
-            'item_codes' => 'required|array|min:1|max:3', // Ensure array and at least 1 shift selected
-            'item_codes.*' => 'required|string|distinct',
+            'machine_id' => 'required|exists:users,id', // machine_id uses users table
+            'item_codes' => 'required|array|min:1|max:3',   // Ensure item_codes is an array
+            'item_codes.*' => 'required|string',            // Remove 'distinct', item_code doesn't have to be unique
             'quantities' => 'required|array|min:1|max:3',
             'quantities.*' => 'required|integer|min:1',
+            'start_dates' => 'required|array|min:1|max:3',
+            'start_dates.*' => 'required|date',
+            'end_dates' => 'required|array|min:1|max:3',
+            'end_dates.*' => 'required|date|after_or_equal:start_dates.*',
             'start_times' => 'required|array|min:1|max:3',
             'start_times.*' => 'required|date_format:H:i',
             'end_times' => 'required|array|min:1|max:3',
-            'end_times.*' => 'required|date_format:H:i|after:start_times.*',
-            'shifts' => 'required|array|min:1|max:3', // Only require 1-3 shifts
-            'shifts.*' => 'required|in:1,2,3|distinct',
+            'end_times.*' => 'required|date_format:H:i',
+            'shifts' => 'required|array|min:1|max:3',
+            'shifts.*' => 'required|in:1,2,3|distinct',    // Shifts must still be distinct
         ];
     }
 
@@ -53,18 +56,23 @@ class StoreDailyItemCodeRequest extends FormRequest
             'item_codes.required' => 'At least one item code is required.',
             'item_codes.*.required' => 'Each shift must have an item code.',
             'item_codes.*.string' => 'Item codes must be valid strings.',
-            'item_codes.*.distinct' => 'Item codes must be unique across shifts.',
             'quantities.required' => 'Quantities are required for all shifts.',
             'quantities.*.required' => 'Each shift must have a quantity.',
             'quantities.*.integer' => 'Quantities must be numeric.',
             'quantities.*.min' => 'Quantities must be at least 1.',
+            'start_dates.required' => 'Start dates are required for all shifts.',
+            'start_dates.*.required' => 'Each shift must have a start date.',
+            'start_dates.*.date' => 'Start dates must be valid dates.',
+            'end_dates.required' => 'End dates are required for all shifts.',
+            'end_dates.*.required' => 'Each shift must have an end date.',
+            'end_dates.*.date' => 'End dates must be valid dates.',
+            'end_dates.*.after_or_equal' => 'End date must be on or after the start date for each shift.',
             'start_times.required' => 'Start times are required for all shifts.',
             'start_times.*.required' => 'Each shift must have a start time.',
             'start_times.*.date_format' => 'Start times must be in the format HH:mm.',
             'end_times.required' => 'End times are required for all shifts.',
             'end_times.*.required' => 'Each shift must have an end time.',
             'end_times.*.date_format' => 'End times must be in the format HH:mm.',
-            'end_times.*.after' => 'End time must be after the start time for each shift.',
             'shifts.required' => 'At least one shift must be selected.',
             'shifts.*.in' => 'Shift numbers must be 1, 2, or 3.',
             'shifts.*.distinct' => 'Shift numbers must be unique across shifts.',

@@ -34,34 +34,36 @@
                     <form method="POST" action="{{ route('daily-item-code.store') }}">
                         @csrf
 
-                        <!-- Schedule Date -->
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700">Schedule Date</label>
-                            <input type="date" name="schedule_date" id="schedule_date"
-                                class="block w-full py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-                                value="{{ old('schedule_date') }}" required>
-                            @error('schedule_date')
-                                <div class="text-red-500 text-sm mt-1">{{ $message }}</div>
-                            @enderror
-                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <!-- Schedule Date -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700">Schedule Date</label>
+                                <input type="date" name="schedule_date" id="schedule_date"
+                                    class="block w-full py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                                    value="{{ old('schedule_date') }}" required>
+                                @error('schedule_date')
+                                    <div class="text-red-500 text-sm mt-1">{{ $message }}</div>
+                                @enderror
+                            </div>
 
-                        <!-- Machine Selector -->
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700">Machine Name</label>
-                            <select id="machine-selector" name="machine_id"
-                                class="block w-full py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-                                required>
-                                <option value="" selected disabled>-- Select Machine Name --</option>
-                                @foreach ($machines as $machine)
-                                    <option value="{{ $machine->id }}" data-tipe-mesin="{{ $machine->tipe_mesin }}"
-                                        {{ old('machine_id') == $machine->id ? 'selected' : '' }}>
-                                        {{ $machine->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('machine_id')
-                                <div class="text-red-500 text-sm mt-1">{{ $message }}</div>
-                            @enderror
+                            <!-- Machine Selector -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700">Machine Name</label>
+                                <select id="machine-selector" name="machine_id"
+                                    class="block w-full py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                                    required>
+                                    <option value="" selected disabled>-- Select Machine Name --</option>
+                                    @foreach ($machines as $machine)
+                                        <option value="{{ $machine->id }}" data-tipe-mesin="{{ $machine->tipe_mesin }}"
+                                            {{ old('machine_id') == $machine->id ? 'selected' : '' }}>
+                                            {{ $machine->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('machine_id')
+                                    <div class="text-red-500 text-sm mt-1">{{ $message }}</div>
+                                @enderror
+                            </div>
                         </div>
 
                         <!-- Shift Checkboxes -->
@@ -120,12 +122,36 @@
                                                 <div class="text-red-500 text-sm mt-1">{{ $message }}</div>
                                             @enderror
                                         </div>
+
+                                        <!-- Start and End Date Inputs -->
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700">Start
+                                                    Date</label>
+                                                <input type="date" name="start_dates[{{ $shift }}]"
+                                                    value="{{ old("start_dates.$shift") }}" required
+                                                    class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                                @error("start_dates.$shift")
+                                                    <div class="text-red-500 text-sm mt-1">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700">End Date</label>
+                                                <input type="date" name="end_dates[{{ $shift }}]"
+                                                    value="{{ old("end_dates.$shift") }}" required
+                                                    class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                                @error("end_dates.$shift")
+                                                    <div class="text-red-500 text-sm mt-1">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                        </div>
+
                                         <div class="grid grid-cols-2 gap-4">
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700">Start
                                                     Time</label>
-                                                <input type="time" name="start_times[{{ $shift }}]"
-                                                    value="{{ old("start_times.$shift") }}" required
+                                                <input type="time" name="start_times[{{ $shift }}]" required
+                                                    value="{{ old("start_times.$shift") }}"
                                                     class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                                                 @error("start_times.$shift")
                                                     <div class="text-red-500 text-sm mt-1">{{ $message }}</div>
@@ -133,8 +159,8 @@
                                             </div>
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700">End Time</label>
-                                                <input type="time" name="end_times[{{ $shift }}]"
-                                                    value="{{ old("end_times.$shift") }}" required
+                                                <input type="time" name="end_times[{{ $shift }}]" required
+                                                    value="{{ old("end_times.$shift") }}"
                                                     class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                                                 @error("end_times.$shift")
                                                     <div class="text-red-500 text-sm mt-1">{{ $message }}</div>
@@ -192,6 +218,21 @@
                                     <input type="number" name="quantities[${shift}]" required
                                         class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                                 </div>
+                                <!-- Start Date and End Date -->
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Start Date</label>
+                                        <input type="date" name="start_dates[${shift}]" required
+                                            class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">End Date</label>
+                                        <input type="date" name="end_dates[${shift}]" required
+                                            class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                    </div>
+                                </div>
+
+                                <!-- Start Time and End Time -->
                                 <div class="grid grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">Start Time</label>
@@ -216,10 +257,6 @@
                     if (!selector.tomselect) {
                         new TomSelect(selector, {
                             create: false,
-                            sortField: {
-                                field: "text",
-                                direction: "asc"
-                            }
                         });
                     }
                 });
