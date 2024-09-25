@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,6 +11,7 @@
             margin: 0;
             padding: 20px;
             background-color: #f4f4f4;
+            -webkit-print-color-adjust: exact;
         }
 
         h1 {
@@ -26,9 +28,11 @@
             padding: 15px;
             display: inline-block;
             vertical-align: top;
-            width: calc(33% - 40px); /* Adjust width for responsive layout */
+            width: calc(33% - 40px);
+            /* Adjust width for responsive layout */
             box-sizing: border-box;
-            position: relative; /* Required for positioning the ROHS FREE card */
+            position: relative;
+            /* Required for positioning the ROHS FREE card */
         }
 
         .card-header {
@@ -49,7 +53,7 @@
             color: #00796b;
         }
 
-        .rohs-free{
+        .rohs-free {
             background: #e0f7fa;
             border: 1px solid #00acc1;
             border-radius: 5px;
@@ -75,7 +79,8 @@
         }
 
         .barcode-container .barcode {
-            margin-bottom: 20px; /* Space between the two barcodes */
+            margin-bottom: 20px;
+            /* Space between the two barcodes */
         }
 
         .barcode-header {
@@ -84,41 +89,56 @@
         }
 
         .special-header {
-            text-align: center; /* Centers the text horizontally */
-            font-size: 18px; /* Adjust font size as needed */
-            font-weight: bold; /* Makes the text bold */
-            margin: 20px 0; /* Adds vertical space above and below the content */
+            text-align: center;
+            /* Centers the text horizontally */
+            font-size: 18px;
+            /* Adjust font size as needed */
+            font-weight: bold;
+            /* Makes the text bold */
+            margin: 20px 0;
+            /* Adds vertical space above and below the content */
         }
 
         .label-container {
-            margin: 10px 0; /* Optional margin for spacing */
+            margin: 10px 0;
+            /* Optional margin for spacing */
         }
 
         .label-row {
             display: flex;
-            justify-content: space-between; /* Ensures the items in the row are spaced out evenly */
-            margin-bottom: 10px; /* Adds some space between rows */
+            justify-content: space-between;
+            /* Ensures the items in the row are spaced out evenly */
+            margin-bottom: 10px;
+            /* Adds some space between rows */
         }
 
         .label-row p {
-            margin: 0 10px; /* Adds some space between the two columns */
-            flex: 1; /* Ensures each element in the row takes up equal width */
+            margin: 0 10px;
+            /* Adds some space between the two columns */
+            flex: 1;
+            /* Ensures each element in the row takes up equal width */
         }
 
         .company-logo {
-            height: 20px; /* Adjust image size */
-            margin-right: 5px; /* Spacing between the logo and the text */
+            height: 20px;
+            /* Adjust image size */
+            margin-right: 5px;
+            /* Spacing between the logo and the text */
         }
 
         @media print {
             body {
-                background-color: white; /* Remove background for print */
+                background-color: white;
+                /* Remove background for print */
             }
 
             .card {
-                width: calc(30% - 10px); /* 50% width for two cards per row */
-                box-shadow: none; /* Remove shadow for print */
-                page-break-inside: avoid; /* Prevent page breaks inside cards */
+                width: calc(30% - 10px);
+                /* 50% width for two cards per row */
+                box-shadow: none;
+                /* Remove shadow for print */
+                page-break-inside: avoid;
+                /* Prevent page breaks inside cards */
             }
 
             .barcode-container .barcode {
@@ -127,7 +147,8 @@
             }
 
             /* Remove margins and paddings to better fit the page */
-            h1, body {
+            h1,
+            body {
                 margin: 0;
                 padding: 0;
             }
@@ -137,9 +158,14 @@
                 display: flex;
                 flex-wrap: wrap;
             }
+
+            @page {
+                size: A3 landscape;
+            }
         }
     </style>
 </head>
+
 <body>
     <h1>Generated Barcodes for Item Codes</h1>
 
@@ -165,19 +191,19 @@
                 </div>
                 <div class="label-row">
                     <p><strong>Prod Date:</strong> </p>
-                    
+
                 </div>
                 <div class="label-row">
-                <p><strong>Operator:</strong></p>
-                  <div class="rohs-free">
-                    <p>ROHS FREE</p>
-                  </div>
+                    <p><strong>Operator:</strong></p>
+                    <div class="rohs-free">
+                        <p>ROHS FREE</p>
+                    </div>
                 </div>
             </div>
             <br>
             <div class="barcode-container">
 
-            <div class="barcode">
+                <div class="barcode">
                     {!! $barcodes[$index]['first'] !!}
                 </div>
                 <div class="barcode-header">Loading Barcode</div>
@@ -188,4 +214,5 @@
         </div>
     @endforeach
 </body>
+
 </html>
