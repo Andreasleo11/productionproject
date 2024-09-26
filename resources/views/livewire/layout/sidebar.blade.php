@@ -21,10 +21,13 @@ new class extends Component {
         <!-- Top Content -->
         <div class="px-6 py-4 flex-grow overflow-y-auto">
             <!-- Logo -->
-            <div class="flex items-center justify-center">
+            <div class="flex items-center justify-between">
                 <a href="{{ route('dashboard') }}" wire:navigate>
-                    <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
+                    <x-application-logo class="block h-20 w-auto fill-current text-gray-800" />
                 </a>
+                <span class="ms-4 text-lg">
+                    Production Project
+                </span>
             </div>
 
             <!-- Navigation Links -->
@@ -83,7 +86,7 @@ new class extends Component {
                 <div x-show="open" @click.away="open = false" x-transition
                     class="absolute right-0 bottom-full mb-2 w-48 bg-white shadow-lg z-10 rounded-md ring-1 ring-black ring-opacity-5">
                     <div class="py-1">
-                        @if (auth()->user()->specification->name === 'Operator')
+                        @if (auth()->user()->specification->name === 'Admin')
                             <!-- Profile Link -->
                             <a href="{{ route('profile') }}"
                                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900">

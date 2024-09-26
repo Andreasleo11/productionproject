@@ -177,7 +177,7 @@ class DashboardController extends Controller
 
         // Check if the item code exists for the user
         $itemCodeExists = $verified_data->contains('item_code', $itemCode);
-        
+
         if ($itemCodeExists) {
             // Retrieve the specific DailyItemCode for the item code
             $dailyItemCode = DailyItemCode::where('item_code', $itemCode)->first();
@@ -207,7 +207,7 @@ class DashboardController extends Controller
 
                 // Get the current time
                 $currentTime = Carbon::now('Asia/Jakarta');
-                $currentHour = $currentTime->hour;  // Get only the hour for comparison
+                $currentHour = $currentTime->hour; // Get only the hour for comparison
 
                 // Set the shift based on the current hour
                 if ($currentHour >= 7 && $currentHour < 15) {
@@ -381,19 +381,13 @@ class DashboardController extends Controller
                 $barcodeData1 = implode("\t", [$labelData['spk'], $labelData['item_code'], $labelData['warehouse'], $labelData['quantity'], $labelData['label']]);
 
                 // Second barcode with subset of data
-                $barcodeData2 = implode("\t", [
-                    $labelData['item_code'],
-                    $labelData['warehouse'],
-                    $labelData['quantity'],
-                    $labelData['label']
-                ]);
-
+                $barcodeData2 = implode("\t", [$labelData['item_code'], $labelData['warehouse'], $labelData['quantity'], $labelData['label']]);
 
                 //BARCODE SIZE IS 1 , 25
 
                 $barcodes[] = [
                     'first' => $barcodeGenerator->getBarcodeHTML($barcodeData1, 'C128', 1, 50),
-                    'second' => $barcodeGenerator->getBarcodeHTML($barcodeData2, 'C128', 1, 55)
+                    'second' => $barcodeGenerator->getBarcodeHTML($barcodeData2, 'C128', 1, 55),
                 ];
             }
 
@@ -403,10 +397,11 @@ class DashboardController extends Controller
             // Log::error('Error generating barcodes: ' . $e->getMessage());
 
             // Return error message to the user
-            return redirect()->back()->with('error', 'An unexpected error occurred: ' . $e->getMessage());
+            return redirect()
+                ->back()
+                ->with('error', 'An unexpected error occurred: ' . $e->getMessage());
         }
     }
-
 
     public function procesProductionBarcodes(Request $request)
     {
@@ -501,22 +496,21 @@ class DashboardController extends Controller
     {
         $uniquedata = json_decode($request->input('uniqueData'), true);
         $datas = json_decode($request->input('datas'));
-       
-        foreach($uniquedata as $spk)
-        {
+
+        foreach ($uniquedata as $spk) {
             $real_spk = SpkMaster::where('spk_number', $spk['spk'])->first();
             // dd($spk);
-            if($spk['start_label'] !== 1)
-            {
-                $count = $spk['count'];           // Assuming 'count' exists in $spk
-                $item_perpack = $spk['item_perpack'];  // Assuming 'item_perpack' exists in $spk
-                $newCompletedQuantity = $real_spk->completed_quantity + ($count * $item_perpack);
+            $count = $spk['count']; // Assuming 'count' exists in $spk
+            $item_perpack = $spk['item_perpack']; // Assuming 'item_perpack' exists in $spk
+
+            if ($spk['start_label'] !== 1) {
+                $newCompletedQuantity = $real_spk->completed_quantity + $count * $item_perpack;
                 dd($newCompletedQuantity);
                 dd($real_spk);
 
                 $real_spk->completed_quantity = $newCompletedQuantity;
                 $real_spk->save(); // Save the updated record
-            }else{
+            } else {
                 $completedQuantity = $count * $item_perpack;
                 dd($completedQuantity);
                 $real_spk->completed_quantity = $newCompletedQuantity;

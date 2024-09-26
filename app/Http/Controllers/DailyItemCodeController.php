@@ -131,7 +131,7 @@ class DailyItemCodeController extends Controller
         $endDate = $validatedData['end_dates'][$shift];
         $startTime = $validatedData['start_times'][$shift];
         $endTime = $validatedData['end_times'][$shift];
-    
+
         // Fetch SPK and Master Item Data
         $datas = SpkMaster::where('item_code', $itemCode)->get();
         $master = MasterListItem::where('item_code', $itemCode)->first();
@@ -158,12 +158,12 @@ class DailyItemCodeController extends Controller
         // Initialize adjusted quantity
         $adjustedQuantity = $quantity;
 
-        
+
         $previousDailyItemCode = DailyItemCode::where('user_id', $validatedData['machine_id'])
         ->where('item_code', $itemCode)
         ->orderBy('id', 'desc') // Ensure we get the latest by id
         ->first();
-       
+
         // dd($previousDailyItemCode);
         // If there's an unresolved loss package, adjust the current quantity
         if ($previousDailyItemCode && $previousDailyItemCode->loss_package_quantity > 0) {

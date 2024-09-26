@@ -1,18 +1,20 @@
 <x-app-layout>
     {{-- Header Slot --}}
     <x-slot name="header">
-        <h2 class="font-semibold text-2xl text-gray-800 leading-tight">
-            {{ __('Dashboard') }}
-        </h2>
+        <div class="mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <h2 class="font-semibold text-2xl text-gray-800 leading-tight">
+                {{ __('Dashboard') }}
+            </h2>
+        </div>
     </x-slot>
 
     {{-- Content --}}
     @if (auth()->user()->specification->name === 'Admin')
-        @include('partials.dashboard-operator')
+        @include('partials.dashboard-admin')
     @elseif (auth()->user()->specification->name === 'Admin' || auth()->user()->specification->name === 'PE')
         <div class="flex justify-center items-center">PE USER</div>
     @elseif (auth()->user()->specification->name === 'Operator')
-        @include('partials.dashboard-machine')
+        @include('partials.dashboard-operator')
     @endif
 
     <script type="module">
@@ -33,7 +35,7 @@
         document.addEventListener('DOMContentLoaded', (event) => {
         const spkCodeElement = document.getElementById('spk_code');
         const itemCodeElement = document.getElementById('item_code');
-        
+
         if (spkCodeElement) {
         // If spk_code element is present, focus on it
         spkCodeElement.focus();
