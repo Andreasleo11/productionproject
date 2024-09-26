@@ -86,6 +86,7 @@ Route::post('/generate-barcode', [InitialBarcodeController::class, 'generateBarc
 Route::get('/daily-item-codes', [DailyItemCodeController::class, 'index'])->name('daily-item-code.index');
 Route::post('/daily-item-code', [DailyItemCodeController::class, 'store'])->name('daily-item-code.store');
 Route::get('/daily-item-code', [DailyItemCodeController::class, 'create'])->name('daily-item-code.create');
+Route::post('/calculate-item', [DailyItemCodeController::class, 'calculateItem'])->name('calculate.item');
 Route::get('/daily-item-codes', [DailyItemCodeController::class, 'index'])->name('daily-item-code.index');
 Route::post('/apply-item-code/{machine_id}', [DailyItemCodeController::class, 'applyItemCode'])->name('apply-item-code');
 

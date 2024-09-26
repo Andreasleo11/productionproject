@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Milon\Barcode\DNS1D;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
@@ -176,7 +177,7 @@ class DashboardController extends Controller
 
         // Check if the item code exists for the user
         $itemCodeExists = $verified_data->contains('item_code', $itemCode);
-
+        
         if ($itemCodeExists) {
             // Retrieve the specific DailyItemCode for the item code
             $dailyItemCode = DailyItemCode::where('item_code', $itemCode)->first();
@@ -203,6 +204,21 @@ class DashboardController extends Controller
             if ($machineJob) {
                 // Update the machine job with the new item_code
                 $machineJob->item_code = $itemCode;
+
+                // Get the current time
+                $currentTime = Carbon::now('Asia/Jakarta');
+                $currentHour = $currentTime->hour;  // Get only the hour for comparison
+
+                // Set the shift based on the current hour
+                if ($currentHour >= 7 && $currentHour < 15) {
+                    $machineJob->shift = 1; // 07:00 - 15:00
+                } elseif ($currentHour >= 15 && $currentHour < 23) {
+                    $machineJob->shift = 2; // 15:00 - 23:00
+                } else {
+                    // For the shift between 23:00 and 07:00 (spanning midnight)
+                    $machineJob->shift = 3; // 23:00 - 07:00
+                }
+
                 $machineJob->save();
 
                 return redirect()->back()->with('success', 'Machine job updated successfully.');
@@ -221,175 +237,175 @@ class DashboardController extends Controller
 
     //generate barcode for each item_code
     public function itemCodeBarcode($item_code, $quantity)
-{
-    try {
-        // Fetch SPK data for the given item code
-        $datas = SpkMaster::where('item_code', $item_code)->get();
+    {
+        try {
+            // Fetch SPK data for the given item code
+            $datas = SpkMaster::where('item_code', $item_code)->get();
 
-        if ($datas->isEmpty()) {
-            return redirect()->back()->with('error', 'No SPK data found for the given item code.');
-        }
-
-        // Fetch master item data
-        $masteritem = MasterListItem::where('item_code', $item_code)->first();
-
-        if (!$masteritem) {
-            return redirect()->back()->with('error', 'No master item found for the given item code.');
-        }
-
-        // Get the standard packaging list value
-        $perpack = $masteritem->standart_packaging_list;
-
-        if (!$perpack || $perpack == 0) {
-            return redirect()->back()->with('error', 'Standard packaging list (per pack) is invalid or zero.');
-        }
-
-        // Calculate the number of labels needed
-        $label = (int) ceil($quantity / $perpack);
-        $uniquedata = [];
-        $previous_spk = null; // Variable to track the previous SPK
-        $start_label = null; // Variable to store start_label for each SPK
-
-        $labels = []; // Initialize labels array
-
-        foreach ($datas as $data) {
-            $available_quantity = $data->planned_quantity - $data->completed_quantity;
-
-            // Check if the available quantity is sufficient
-            if ($available_quantity <= 0) {
-                continue; // Skip this SPK as there's no available quantity
+            if ($datas->isEmpty()) {
+                return redirect()->back()->with('error', 'No SPK data found for the given item code.');
             }
 
-            if ($quantity <= $available_quantity) {
-                $available_quantity = $quantity;
+            // Fetch master item data
+            $masteritem = MasterListItem::where('item_code', $item_code)->first();
+
+            if (!$masteritem) {
+                return redirect()->back()->with('error', 'No master item found for the given item code.');
             }
 
-            $deficit = 0;
-            if ($data->completed_quantity === 0) {
-                $labelstart = 0;
-            } else {
-                $labelstart = ceil($data->completed_quantity / $perpack);
+            // Get the standard packaging list value
+            $perpack = $masteritem->standart_packaging_list;
+
+            if (!$perpack || $perpack == 0) {
+                return redirect()->back()->with('error', 'Standard packaging list (per pack) is invalid or zero.');
             }
 
-            if ($deficit != 0) {
-                $available_quantity -= $deficit;
+            // Calculate the number of labels needed
+            $label = (int) ceil($quantity / $perpack);
+            $uniquedata = [];
+            $previous_spk = null; // Variable to track the previous SPK
+            $start_label = null; // Variable to store start_label for each SPK
+
+            $labels = []; // Initialize labels array
+
+            foreach ($datas as $data) {
+                $available_quantity = $data->planned_quantity - $data->completed_quantity;
+
+                // Check if the available quantity is sufficient
+                if ($available_quantity <= 0) {
+                    continue; // Skip this SPK as there's no available quantity
+                }
+
+                if ($quantity <= $available_quantity) {
+                    $available_quantity = $quantity;
+                }
+
                 $deficit = 0;
-            }
-
-            while ($available_quantity > 0 && $quantity > 0) {
-                if ($available_quantity >= $perpack && $quantity >= $perpack) {
-                    // Assign a full label to this SPK
-                    $labelstart++;
-                    $labels[] = [
-                        'spk' => $data->spk_number,
-                        'item_code' => $data->item_code,
-                        'item_name' => $masteritem->item_name,
-                        'warehouse' => 'FG',
-                        'quantity' => $perpack,
-                        'label' => $labelstart,
-                    ];
-
-                    // Check if SPK has changed
-                    if ($previous_spk !== $data->spk_number) {
-                        // If SPK has changed, set start_label and reset end_label
-                        $start_label = $labelstart;
-                        $previous_spk = $data->spk_number;
-                    }
-
-                    $key = $data->spk_number . '|' . $data->item_code;
-                    if (isset($uniquedata[$key])) {
-                        $uniquedata[$key]['count']++;
-                        $uniquedata[$key]['end_label'] = $labelstart; // Update end_label as it progresses
-                    } else {
-                        $uniquedata[$key] = [
-                            'spk' => $data->spk_number,
-                            'item_code' => $data->item_code,
-                            'item_name' => $masteritem->item_name,
-                            'count' => 1,
-                            'start_label' => $start_label, // Set start_label for this SPK
-                            'end_label' => $labelstart, // Initially, end_label is the same as start_label
-                        ];
-                    }
-
-                    $available_quantity -= $perpack;
-                    $quantity -= $perpack;
+                if ($data->completed_quantity === 0) {
+                    $labelstart = 0;
                 } else {
-                    // Assign a partial label to this SPK and move to the next
-                    $labelstart++;
-                    $labels[] = [
-                        'spk' => $data->spk_number,
-                        'item_code' => $data->item_code,
-                        'item_name' => $masteritem->item_name,
-                        'warehouse' => 'FG',
-                        'quantity' => $available_quantity, // Use remaining available quantity
-                        'label' => $labelstart,
-                    ];
+                    $labelstart = ceil($data->completed_quantity / $perpack);
+                }
 
-                    $key = $data->spk_number . '|' . $data->item_code;
-                    if (isset($uniquedata[$key])) {
-                        $uniquedata[$key]['count']++;
-                        $uniquedata[$key]['end_label'] = $labelstart; // Update end_label for partial labels
-                    } else {
-                        $uniquedata[$key] = [
+                if ($deficit != 0) {
+                    $available_quantity -= $deficit;
+                    $deficit = 0;
+                }
+
+                while ($available_quantity > 0 && $quantity > 0) {
+                    if ($available_quantity >= $perpack && $quantity >= $perpack) {
+                        // Assign a full label to this SPK
+                        $labelstart++;
+                        $labels[] = [
                             'spk' => $data->spk_number,
                             'item_code' => $data->item_code,
                             'item_name' => $masteritem->item_name,
-                            'count' => 1,
-                            'start_label' => $start_label,
-                            'end_label' => $labelstart,
+                            'warehouse' => 'FG',
+                            'quantity' => $perpack,
+                            'label' => $labelstart,
                         ];
+
+                        // Check if SPK has changed
+                        if ($previous_spk !== $data->spk_number) {
+                            // If SPK has changed, set start_label and reset end_label
+                            $start_label = $labelstart;
+                            $previous_spk = $data->spk_number;
+                        }
+
+                        $key = $data->spk_number . '|' . $data->item_code;
+                        if (isset($uniquedata[$key])) {
+                            $uniquedata[$key]['count']++;
+                            $uniquedata[$key]['end_label'] = $labelstart; // Update end_label as it progresses
+                        } else {
+                            $uniquedata[$key] = [
+                                'spk' => $data->spk_number,
+                                'item_code' => $data->item_code,
+                                'item_name' => $masteritem->item_name,
+                                'count' => 1,
+                                'start_label' => $start_label, // Set start_label for this SPK
+                                'end_label' => $labelstart, // Initially, end_label is the same as start_label
+                            ];
+                        }
+
+                        $available_quantity -= $perpack;
+                        $quantity -= $perpack;
+                    } else {
+                        // Assign a partial label to this SPK and move to the next
+                        $labelstart++;
+                        $labels[] = [
+                            'spk' => $data->spk_number,
+                            'item_code' => $data->item_code,
+                            'item_name' => $masteritem->item_name,
+                            'warehouse' => 'FG',
+                            'quantity' => $available_quantity, // Use remaining available quantity
+                            'label' => $labelstart,
+                        ];
+
+                        $key = $data->spk_number . '|' . $data->item_code;
+                        if (isset($uniquedata[$key])) {
+                            $uniquedata[$key]['count']++;
+                            $uniquedata[$key]['end_label'] = $labelstart; // Update end_label for partial labels
+                        } else {
+                            $uniquedata[$key] = [
+                                'spk' => $data->spk_number,
+                                'item_code' => $data->item_code,
+                                'item_name' => $masteritem->item_name,
+                                'count' => 1,
+                                'start_label' => $start_label,
+                                'end_label' => $labelstart,
+                            ];
+                        }
+                        $deficit = $available_quantity;
+                        $quantity -= $available_quantity;
+                        $available_quantity = 0;
                     }
-                    $deficit = $available_quantity;
-                    $quantity -= $available_quantity;
-                    $available_quantity = 0;
+                }
+
+                if ($quantity <= 0) {
+                    break; // Exit the loop if the required quantity has been processed
                 }
             }
 
-            if ($quantity <= 0) {
-                break; // Exit the loop if the required quantity has been processed
+            if (empty($labels)) {
+                return redirect()->back()->with('error', 'No labels were generated. Please check the available quantity and try again.');
             }
+
+            // Convert uniquedata to array format
+            $uniquedata = array_values($uniquedata);
+
+            // Generate barcodes
+            $barcodeGenerator = new DNS1D();
+            $barcodes = [];
+            foreach ($labels as $labelData) {
+                // First barcode with all data
+                $barcodeData1 = implode("\t", [$labelData['spk'], $labelData['item_code'], $labelData['warehouse'], $labelData['quantity'], $labelData['label']]);
+
+                // Second barcode with subset of data
+                $barcodeData2 = implode("\t", [
+                    $labelData['item_code'],
+                    $labelData['warehouse'],
+                    $labelData['quantity'],
+                    $labelData['label']
+                ]);
+
+
+                //BARCODE SIZE IS 1 , 25
+
+                $barcodes[] = [
+                    'first' => $barcodeGenerator->getBarcodeHTML($barcodeData1, 'C128', 1, 50),
+                    'second' => $barcodeGenerator->getBarcodeHTML($barcodeData2, 'C128', 1, 55)
+                ];
+            }
+
+            return view('barcodeMachineJob', compact('labels', 'barcodes'));
+        } catch (\Exception $e) {
+            // Optionally log the error
+            // Log::error('Error generating barcodes: ' . $e->getMessage());
+
+            // Return error message to the user
+            return redirect()->back()->with('error', 'An unexpected error occurred: ' . $e->getMessage());
         }
-
-        if (empty($labels)) {
-            return redirect()->back()->with('error', 'No labels were generated. Please check the available quantity and try again.');
-        }
-
-        // Convert uniquedata to array format
-        $uniquedata = array_values($uniquedata);
-
-        // Generate barcodes
-        $barcodeGenerator = new DNS1D();
-        $barcodes = [];
-        foreach ($labels as $labelData) {
-            // First barcode with all data
-            $barcodeData1 = implode("\t", [$labelData['spk'], $labelData['item_code'], $labelData['warehouse'], $labelData['quantity'], $labelData['label']]);
-
-            // Second barcode with subset of data
-            $barcodeData2 = implode("\t", [
-                $labelData['item_code'],
-                $labelData['warehouse'],
-                $labelData['quantity'],
-                $labelData['label']
-            ]);
-
-
-            //BARCODE SIZE IS 1 , 25
-
-            $barcodes[] = [
-                'first' => $barcodeGenerator->getBarcodeHTML($barcodeData1, 'C128', 1, 50),
-                'second' => $barcodeGenerator->getBarcodeHTML($barcodeData2, 'C128', 1, 55)
-            ];
-        }
-
-        return view('barcodeMachineJob', compact('labels', 'barcodes'));
-    } catch (\Exception $e) {
-        // Optionally log the error
-        // Log::error('Error generating barcodes: ' . $e->getMessage());
-
-        // Return error message to the user
-        return redirect()->back()->with('error', 'An unexpected error occurred: ' . $e->getMessage());
     }
-}
 
 
     public function procesProductionBarcodes(Request $request)
@@ -483,8 +499,31 @@ class DashboardController extends Controller
 
     public function resetJobs(Request $request)
     {
-        $uniquedata = json_decode($request->input('uniquedata'), true);
-        dd($uniquedata);
+        $uniquedata = json_decode($request->input('uniqueData'), true);
+        $datas = json_decode($request->input('datas'));
+       
+        foreach($uniquedata as $spk)
+        {
+            $real_spk = SpkMaster::where('spk_number', $spk['spk'])->first();
+            // dd($spk);
+            if($spk['start_label'] !== 1)
+            {
+                $count = $spk['count'];           // Assuming 'count' exists in $spk
+                $item_perpack = $spk['item_perpack'];  // Assuming 'item_perpack' exists in $spk
+                $newCompletedQuantity = $real_spk->completed_quantity + ($count * $item_perpack);
+                dd($newCompletedQuantity);
+                dd($real_spk);
+
+                $real_spk->completed_quantity = $newCompletedQuantity;
+                $real_spk->save(); // Save the updated record
+            }else{
+                $completedQuantity = $count * $item_perpack;
+                dd($completedQuantity);
+                $real_spk->completed_quantity = $newCompletedQuantity;
+                $real_spk->save();
+            }
+            // dd($spk);
+        }
         // Get the currently authenticated user
         $user = auth()->user();
 

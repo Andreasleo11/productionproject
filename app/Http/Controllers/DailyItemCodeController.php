@@ -7,6 +7,7 @@ use App\Models\DailyItemCode;
 use App\Models\MasterListItem;
 use App\Models\SpkMaster;
 use App\Models\User;
+use Illuminate\Http\Request;
 
 class DailyItemCodeController extends Controller
 {
@@ -39,6 +40,42 @@ class DailyItemCodeController extends Controller
         $itemcodes = MasterListItem::get();
 
         return view('daily-item-codes.create', compact('machines', 'itemcodes'));
+    }
+
+    public function calculateItem(Request $request)
+    {
+        $data = $request->json()->all();
+
+        $itemCode = $data['item_code'] ?? null;
+        $quantity = $data['quantity'] ?? null;
+
+        // Fetch SPK and Master Item Data
+        $datas = SpkMaster::where('item_code', $itemCode)->get();
+        $master = MasterListItem::where('item_code', $itemCode)->first();
+
+        if (!$master) {
+            return response()->json(['error' => 'Invalid item code'], 400);
+        }
+
+        $stanpack = $master->standart_packaging_list;
+
+        // Calculate the total planned and completed quantities
+        $totalPlannedQuantity = $datas->sum('planned_quantity');
+        $totalCompletedQuantity = $datas->sum('completed_quantity');
+
+        // Calculate the loss package quantity
+        $final = $quantity % $stanpack;
+        $lossPackageQuantity = $final === 0 ? 0 : $final;
+
+        // Calculate the maximum allowed quantity
+        $maxQuantity = $totalPlannedQuantity - $totalCompletedQuantity;
+
+        return response()->json([
+            'total_planned_quantity' => $totalPlannedQuantity,
+            'total_completed_quantity' => $totalCompletedQuantity,
+            'loss_package_quantity' => $lossPackageQuantity,
+            'max_quantity' => $maxQuantity,
+        ]);
     }
 
     public function store(StoreDailyItemCodeRequest $request)
@@ -84,6 +121,8 @@ class DailyItemCodeController extends Controller
         }
     }
 
+    // $previousLossPackageQuantity = 0;
+    // $previousItemCode = null;
     // Save the data to the DailyItemCodes table
     foreach ($validatedData['shifts'] as $index => $shift) {  // Use $index to loop
         $itemCode = $validatedData['item_codes'][$shift];   // Access arrays by $shift
@@ -92,7 +131,7 @@ class DailyItemCodeController extends Controller
         $endDate = $validatedData['end_dates'][$shift];
         $startTime = $validatedData['start_times'][$shift];
         $endTime = $validatedData['end_times'][$shift];
-
+    
         // Fetch SPK and Master Item Data
         $datas = SpkMaster::where('item_code', $itemCode)->get();
         $master = MasterListItem::where('item_code', $itemCode)->first();
@@ -104,10 +143,12 @@ class DailyItemCodeController extends Controller
 
         // Calculate the loss package quantity
         $final = $quantity % $stanpack;
-        $loss_package_quantity = $final === 0 ? 0 : $quantity - $final;
+        // dd($final);
+        $loss_package_quantity = $final === 0 ? 0 : $final;
 
         // Calculate the maximum allowed quantity
         $max_quantity = $totalPlannedQuantity - $totalCompletedQuantity;
+        // dd($max_quantity);
         if ($quantity > $max_quantity) {
             return redirect()
                 ->back()
@@ -117,15 +158,22 @@ class DailyItemCodeController extends Controller
         // Initialize adjusted quantity
         $adjustedQuantity = $quantity;
 
-        // Check if the machine already has a daily item code assigned
-        $dailyItemCode = DailyItemCode::where('user_id', $validatedData['machine_id'])
-            ->where('item_code', $itemCode)
-            ->first();
+        
+        $previousDailyItemCode = DailyItemCode::where('user_id', $validatedData['machine_id'])
+        ->where('item_code', $itemCode)
+        ->orderBy('id', 'desc') // Ensure we get the latest by id
+        ->first();
+       
+        // dd($previousDailyItemCode);
+        // If there's an unresolved loss package, adjust the current quantity
+        if ($previousDailyItemCode && $previousDailyItemCode->loss_package_quantity > 0) {
+            // Subtract the previous loss package quantity from the current shift's quantity
+            $adjustedQuantity = $quantity - $previousDailyItemCode->loss_package_quantity;
 
-        // Adjust the quantity if the machine has a loss package quantity
-        if ($dailyItemCode && $dailyItemCode->loss_package_quantity > 0) {
-            $adjustedQuantity = $quantity - $dailyItemCode->loss_package_quantity;
         }
+
+        // Store the current loss package for the next shifts (if applicable)
+        $previousLossPackageQuantity = $loss_package_quantity;
 
         // Create a new DailyItemCode entry
         DailyItemCode::create([

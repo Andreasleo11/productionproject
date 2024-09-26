@@ -248,6 +248,18 @@
                         action="{{ route('reset.jobs') }}"
                         class="mt-4"
                     >
+                        <input
+                            type="hidden"
+                            id="uniqueData"
+                            name="uniqueData"
+                            value="{{ json_encode($uniquedata) }}"
+                        />
+                        <input
+                            type="hidden"
+                            id="datas"
+                            name="datas"
+                            value="{{ json_encode($datas) }}"
+                        />
                         <button
                             type="submit"
                             class="w-full py-2 px-4 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 transition"
