@@ -10,6 +10,7 @@
                 margin: 0;
                 padding: 20px;
                 background-color: #f4f4f4;
+                -webkit-print-color-adjust: exact;
             }
 
             h1 {
@@ -26,11 +27,11 @@
                 padding: 15px;
                 display: inline-block;
                 vertical-align: top;
-                width: calc(
-                    33% - 40px
-                ); /* Adjust width for responsive layout */
+                width: calc(33% - 40px);
+                /* Adjust width for responsive layout */
                 box-sizing: border-box;
-                position: relative; /* Required for positioning the ROHS FREE card */
+                position: relative;
+                /* Required for positioning the ROHS FREE card */
             }
 
             .card-header {
@@ -77,7 +78,8 @@
             }
 
             .barcode-container .barcode {
-                margin-bottom: 20px; /* Space between the two barcodes */
+                margin-bottom: 20px;
+                /* Space between the two barcodes */
             }
 
             .barcode-header {
@@ -86,51 +88,56 @@
             }
 
             .special-header {
-                text-align: center; /* Centers the text horizontally */
-                font-size: 18px; /* Adjust font size as needed */
-                font-weight: bold; /* Makes the text bold */
-                margin: 20px 0; /* Adds vertical space above and below the content */
+                text-align: center;
+                /* Centers the text horizontally */
+                font-size: 18px;
+                /* Adjust font size as needed */
+                font-weight: bold;
+                /* Makes the text bold */
+                margin: 20px 0;
+                /* Adds vertical space above and below the content */
             }
 
             .label-container {
-                margin: 10px 0; /* Optional margin for spacing */
+                margin: 10px 0;
+                /* Optional margin for spacing */
             }
 
             .label-row {
                 display: flex;
-                justify-content: space-between; /* Ensures the items in the row are spaced out evenly */
-                margin-bottom: 10px; /* Adds some space between rows */
+                justify-content: space-between;
+                /* Ensures the items in the row are spaced out evenly */
+                margin-bottom: 10px;
+                /* Adds some space between rows */
             }
 
             .label-row p {
-                margin: 0 10px; /* Adds some space between the two columns */
-                flex: 1; /* Ensures each element in the row takes up equal width */
+                margin: 0 10px;
+                /* Adds some space between the two columns */
+                flex: 1;
+                /* Ensures each element in the row takes up equal width */
             }
 
             .company-logo {
-                height: 20px; /* Adjust image size */
-                margin-right: 5px; /* Spacing between the logo and the text */
+                height: 20px;
+                /* Adjust image size */
+                margin-right: 5px;
+                /* Spacing between the logo and the text */
             }
 
             @media print {
-                @page {
-                    size: A6; /* Set paper size to A6 */
-                    margin: 0; /* Remove page margins */
-                }
-
                 body {
-                    background-color: white; /* Remove background for print */
-                    margin: 0; /* Remove body margin */
-                    padding: 0; /* Remove body padding */
+                    background-color: white;
+                    /* Remove background for print */
                 }
 
                 .card {
-                    width: calc(
-                        45% - 10px
-                    ); /* Adjust card width for A6 paper */
-                    margin: 5px; /* Add small margin around each card */
-                    box-shadow: none; /* Remove shadow for print */
-                    page-break-inside: avoid; /* Prevent page breaks inside cards */
+                    width: calc(30% - 10px);
+                    /* 50% width for two cards per row */
+                    box-shadow: none;
+                    /* Remove shadow for print */
+                    page-break-inside: avoid;
+                    /* Prevent page breaks inside cards */
                 }
 
                 .barcode-container .barcode {
@@ -138,26 +145,26 @@
                     height: auto;
                 }
 
-                /* Ensure two cards per row in print */
-                .card-container {
-                    display: flex;
-                    flex-wrap: wrap;
-                    justify-content: space-between;
-                }
-
+                /* Remove margins and paddings to better fit the page */
                 h1,
                 body {
                     margin: 0;
                     padding: 0;
                 }
 
-                /* Optional: Add a small padding around the printed content */
+                /* Ensure two cards per row in print */
+                .card-container {
+                    display: flex;
+                    flex-wrap: wrap;
+                }
+
                 @page {
-                    padding: 10mm; /* Optional padding inside the page */
+                    size: A3 landscape;
                 }
             }
         </style>
     </head>
+
     <body>
         <h1>Generated Barcodes for Item Codes</h1>
 
