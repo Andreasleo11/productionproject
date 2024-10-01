@@ -2,8 +2,10 @@
 
 return [
     'hierarchy' => [
-        'Admin' => ['Admin', 'PE', 'Store'],
+        'Admin' => ['Admin', 'PE', 'Store', 'Operator'],
         'PE' => ['PE'],
         'Store' => ['Store'],
+        'Operator' => ['Operator'],
+        'PPIC' => ['PPIC']
     ],
 ];

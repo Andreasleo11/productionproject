@@ -28,6 +28,8 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
+require __DIR__.'/auth.php';
+
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
@@ -97,4 +99,16 @@ Route::get('/update-so-data/{docNum}', [SOController::class, 'updateSoData'])->n
 
 Route::post('/import-excel', [SOController::class, 'import'])->name('import.so.data');
 
-require __DIR__.'/auth.php';
+Route::get('/notification', function () {
+    $failedMachineJob = \App\Models\FailedMachineJob::find(1);
+
+    $details = [
+        "machine_id" => 5,
+        "spk_no" => "24011609",
+        "target" => 210,
+        "outstanding" => 5
+    ];
+
+    return (new \App\Notifications\FailedMachineJobCreated($details))->toMail(auth()->user());
+});
+

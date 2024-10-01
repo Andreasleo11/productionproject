@@ -333,55 +333,55 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-                                    const shiftContainer = document.getElementById('shift-container');
-                                    const checkboxes = document.querySelectorAll('.shift-checkbox');
-                                    const maxShifts = 3; // Limit to 3 shifts max
+            const shiftContainer = document.getElementById('shift-container');
+            const checkboxes = document.querySelectorAll('.shift-checkbox');
+            const maxShifts = 3; // Limit to 3 shifts max
 
-                                    const itemCodeMaxQuantities = {};
+            const itemCodeMaxQuantities = {};
 
 
-                                    const form = document.getElementById('input-form');
-                                    const maxQuantityDisplay = document.getElementById('max-quantity-display');
-                                    // Clear the container and add shift inputs dynamically
-                                    function updateShiftInputs() {
-                                        shiftContainer.innerHTML = ''; // Clear the shift container
+            const form = document.getElementById('input-form');
+            const maxQuantityDisplay = document.getElementById('max-quantity-display');
+            // Clear the container and add shift inputs dynamically
+            function updateShiftInputs() {
+                shiftContainer.innerHTML = ''; // Clear the shift container
 
-                                        checkboxes.forEach(checkbox => {
-                                            if (checkbox.checked) {
-                                                const shift = checkbox.value;
-                                                const shiftHtml = `
-                                                    <div class="space-y-4 mb-6 border border-gray-400 rounded-md p-3">
-                                                        <h3 class="text-md font-bold">Shift ${shift}</h3>
-                                                        <div>
-                                                            <label class="block text-sm font-medium text-gray-700">Item Code</label>
-                                                            <select name="item_codes[${shift}]" required
-                                                                class="item-code-selector mt-1 block w-full bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                                                disabled>
-                                                                <option value="" selected disabled>-- Select Item Code --</option>
-                                                                @foreach ($itemcodes as $itemcode)
-                                                                    <option value="{{ $itemcode->item_code }}" data-tipe-mesin="{{ $itemcode->tipe_mesin }}">
-                                                                        {{ $itemcode->item_code }}</option>
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
-                                                        <div>
-                                                            <label class="block text-sm font-medium text-gray-700">Quantity</label>
-                                                            <input type="number" name="quantities[${shift}]" required
-                                                                class="quantity-input mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                                                        </div>
-                                                        <!-- Start Date and End Date -->
-                                                        <div class="grid grid-cols-2 gap-4">
-                                                            <div>
-                                                                <label class="block text-sm font-medium text-gray-700">Start Date</label>
-                                                                <input type="date" name="start_dates[${shift}]" required
-                                                                    class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                                                            </div>
-                                                            <div>
-                                                                <label class="block text-sm font-medium text-gray-700">End Date</label>
-                                                                <input type="date" name="end_dates[${shift}]" required
-                                                                    class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                                                            </div>
-                                                        </div>
+                checkboxes.forEach(checkbox => {
+                    if (checkbox.checked) {
+                        const shift = checkbox.value;
+                        const shiftHtml = `
+                                    <div class="space-y-4 mb-6 border border-gray-400 rounded-md p-3">
+                                        <h3 class="text-md font-bold">Shift ${shift}</h3>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700">Item Code</label>
+                                            <select name="item_codes[${shift}]" required
+                                                class="item-code-selector mt-1 block w-full bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                                disabled>
+                                                <option value="" selected disabled>-- Select Item Code --</option>
+                                                @foreach ($itemcodes as $itemcode)
+                                                    <option value="{{ $itemcode->item_code }}" data-tipe-mesin="{{ $itemcode->tipe_mesin }}">
+                                                        {{ $itemcode->item_code }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700">Quantity</label>
+                                            <input type="number" name="quantities[${shift}]" id="quantity-input-${shift}" required
+                                                class="quantity-input mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                        </div>
+                                        <!-- Start Date and End Date -->
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700">Start Date</label>
+                                                <input type="date" name="start_dates[${shift}]" required
+                                                    class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700">End Date</label>
+                                                <input type="date" name="end_dates[${shift}]" required
+                                                    class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                            </div>
+                                        </div>
 
                                                         <!-- Start Time and End Time -->
                                                         <div class="grid grid-cols-2 gap-4">
@@ -402,16 +402,37 @@
                                             }
                                         });
 
-                                        // Function to trigger AJAX call
-                                        let originalMaxQuantities = {};
+                // Function to trigger AJAX call
+                function triggerAjax(shift, itemCode, quantity) {
+                    // Check if we already have a max_quantity stored for this item_code
+                    let maxQuantity = itemCodeMaxQuantities[itemCode] || null;
 
-                                        function triggerAjax(shift, itemCode, quantity) {
-            // Convert quantity to a number
-            let currentQuantity = parseFloat(quantity);
+                    if (!maxQuantity && itemCode && quantity) {
+                        // Make AJAX call if max_quantity isn't stored yet
+                        fetch("{{ route('calculate.item') }}", {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                },
+                                body: JSON.stringify({
+                                    item_code: itemCode,
+                                    quantity: quantity
+                                })
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.error) {
+                                    alert(data.error);
+                                } else {
+                                    // Store the max_quantity for this item_code
 
-            // Check if we already have a max_quantity stored for this item_code
-            let maxQuantity = itemCodeMaxQuantities[itemCode] || null;
+                                    itemCodeMaxQuantities[itemCode] = data.max_quantity - quantity;
+                                    // Update the UI with the returned data
+                                    console.log('Calculated Data:', data);
 
+                                    // Update the display with item_code and updated max_quantity
+                                    updateMaxQuantityDisplay(itemCode, itemCodeMaxQuantities[itemCode]);
             if (!maxQuantity && itemCode && currentQuantity >= 0) {
                 // Make AJAX call if max_quantity isn't stored yet
                 fetch("{{ route('calculate.item') }}", {
@@ -446,6 +467,20 @@
                             // Update the UI with the remaining quantity
                             updateMaxQuantityDisplay(itemCode, remainingQuantity);
 
+                                    // Check if the next shift has the same item_code, and continue calculation
+                                    processNextShift(shift, itemCode);
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                            });
+                    } else if (maxQuantity !== null) {
+                        // If max_quantity is already stored, use it directly
+                        const newMaxQuantity = maxQuantity - quantity;
+                        itemCodeMaxQuantities[itemCode] = newMaxQuantity; // Update with the new max_quantity
+
+                        // Update the display with item_code and updated max_quantity
+                        updateMaxQuantityDisplay(itemCode, newMaxQuantity);
                             // Check if the next shift has the same item_code, and continue calculation
                             processNextShift(shift, itemCode, remainingQuantity);
                         }
@@ -472,6 +507,10 @@
                         // Update the display with item_code and updated max_quantity
                         updateMaxQuantityDisplay(itemCode, remainingQuantity);
 
+                        // Check if the next shift has the same item_code, and continue calculation
+                        processNextShift(shift, itemCode);
+                    }
+                }
                         // Check if the next shift has the same item_code, and continue calculation
                         processNextShift(shift, itemCode, remainingQuantity);
                     }

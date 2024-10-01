@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DailyItemCode;
+use App\Models\FailedMachineJob;
 use App\Models\File;
 use App\Models\MachineJob;
 use App\Models\MasterListItem;
@@ -14,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Milon\Barcode\DNS1D;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
 {
@@ -23,6 +25,7 @@ class DashboardController extends Controller
         $uniquedata = null;
         $files = collect();
         $itemCode = null;
+        $machineJobShift = null;
         // dd($user);
         // Check if the user's specification_id is 2
         if ($user->specification_id == 2) {
@@ -34,6 +37,7 @@ class DashboardController extends Controller
                 //    dd($quantity);
                 // Check if the user has a related dailyItemCode and retrieve the item_code
                 $itemCode = $user->jobs->item_code ?? null;
+                // $machineJobShift = $user->jobs->shift;
 
                 // If an item_code exists, retrieve all files with the same item_code
                 if ($itemCode) {
@@ -149,12 +153,19 @@ class DashboardController extends Controller
                 }
             }
         }
+
+        $failedMachineJobs = FailedMachineJob::all();
+
+        // Debugging the data you're sending to the view
+        // Log::info('Job Data: ' . json_encode($job));
+
         // dd($files);
-        if ($user->name === 'Administrator' || $user->name === 'PE' || $user->name === 'Store') {
-            return view('dashboard', compact('files'));
+        if ($user->specification->name !== 'Operator') {
+            return view('dashboard', compact('files', 'failedMachineJobs'));
         } else {
             // dd('masuk sini');
-            return view('dashboard', compact('files', 'datas', 'itemCode', 'uniquedata'));
+            $machineJobShift = $user->jobs->shift;
+            return view('dashboard', compact('files', 'datas', 'itemCode', 'uniquedata', 'machineJobShift'));
             // return view('dashboard', compact('files'));
         }
     }
@@ -177,7 +188,7 @@ class DashboardController extends Controller
 
         // Check if the item code exists for the user
         $itemCodeExists = $verified_data->contains('item_code', $itemCode);
-        
+
         if ($itemCodeExists) {
             // Retrieve the specific DailyItemCode for the item code
             $dailyItemCode = DailyItemCode::where('item_code', $itemCode)->first();
@@ -198,6 +209,8 @@ class DashboardController extends Controller
                     ->with('error', "The current time is outside the shift time range ($startTime-$endTime) for this item code.");
             }
 
+
+
             // Find the machine job record related to the user
             $machineJob = MachineJob::where('user_id', $user->id)->first();
 
@@ -205,18 +218,29 @@ class DashboardController extends Controller
                 // Update the machine job with the new item_code
                 $machineJob->item_code = $itemCode;
 
-                // Get the current time
-                $currentTime = Carbon::now('Asia/Jakarta');
-                $currentHour = $currentTime->hour;  // Get only the hour for comparison
+                $currentDateTime = Carbon::now('Asia/Bangkok'); // Get the current date and time
+                $dailyItemCodes = DailyItemCode::where('user_id', auth()->user()->id)->get();
+                // Loop through the DailyItemCode records
 
-                // Set the shift based on the current hour
-                if ($currentHour >= 7 && $currentHour < 15) {
-                    $machineJob->shift = 1; // 07:00 - 15:00
-                } elseif ($currentHour >= 15 && $currentHour < 23) {
-                    $machineJob->shift = 2; // 15:00 - 23:00
-                } else {
-                    // For the shift between 23:00 and 07:00 (spanning midnight)
-                    $machineJob->shift = 3; // 23:00 - 07:00
+                foreach ($dailyItemCodes as $dailyItemCode) {
+                    // Combine the start_date with start_time and end_date with end_time
+                    $startDateTime = Carbon::parse($dailyItemCode->start_date . ' ' . $dailyItemCode->start_time, 'Asia/Bangkok');
+                    $endDateTime = Carbon::parse($dailyItemCode->end_date . ' ' . $dailyItemCode->end_time, 'Asia/Bangkok');
+
+                    // Check if the current time falls between the start and end time
+                    if ($currentDateTime->between($startDateTime, $endDateTime)) {
+                        // dd($currentDateTime);
+                        // Assign the shift from the matching DailyItemCode
+                        $machineJob->shift = $dailyItemCode->shift;
+                        break; // Exit the loop once a matching shift is found
+                    }
+                }
+
+
+
+                // If no matching shift is found, you can set a default value if needed
+                if (!isset($machineJob->shift)) {
+                    return redirect()->back()->with('error', 'No matching shift found!');
                 }
 
                 $machineJob->save();
@@ -381,19 +405,13 @@ class DashboardController extends Controller
                 $barcodeData1 = implode("\t", [$labelData['spk'], $labelData['item_code'], $labelData['warehouse'], $labelData['quantity'], $labelData['label']]);
 
                 // Second barcode with subset of data
-                $barcodeData2 = implode("\t", [
-                    $labelData['item_code'],
-                    $labelData['warehouse'],
-                    $labelData['quantity'],
-                    $labelData['label']
-                ]);
-
+                $barcodeData2 = implode("\t", [$labelData['item_code'], $labelData['warehouse'], $labelData['quantity'], $labelData['label']]);
 
                 //BARCODE SIZE IS 1 , 25
 
                 $barcodes[] = [
                     'first' => $barcodeGenerator->getBarcodeHTML($barcodeData1, 'C128', 1, 50),
-                    'second' => $barcodeGenerator->getBarcodeHTML($barcodeData2, 'C128', 1, 55)
+                    'second' => $barcodeGenerator->getBarcodeHTML($barcodeData2, 'C128', 1, 55),
                 ];
             }
 
@@ -403,10 +421,11 @@ class DashboardController extends Controller
             // Log::error('Error generating barcodes: ' . $e->getMessage());
 
             // Return error message to the user
-            return redirect()->back()->with('error', 'An unexpected error occurred: ' . $e->getMessage());
+            return redirect()
+                ->back()
+                ->with('error', 'An unexpected error occurred: ' . $e->getMessage());
         }
     }
-
 
     public function procesProductionBarcodes(Request $request)
     {
@@ -497,26 +516,54 @@ class DashboardController extends Controller
         return redirect()->back();
     }
 
+    public function finishJob(Request $request){
+
+    }
+
     public function resetJobs(Request $request)
     {
         $uniquedata = json_decode($request->input('uniqueData'), true);
         $datas = json_decode($request->input('datas'));
-       
-        foreach($uniquedata as $spk)
-        {
+
+        // dd($uniquedata);
+        // dd($datas);
+        // dd($request->reason);
+
+        $targetQuantity = $uniquedata[0]['count'];
+        $actualProductionQuantity = $uniquedata[0]['scannedData'];
+
+        if($actualProductionQuantity < $targetQuantity){
+            $dataSendToPpic = [
+                'machine_id' => auth()->user()->id,
+                'spk_no' => $uniquedata[0]['spk'],
+                'target' => $uniquedata[0]['count'],
+                'outstanding' => $uniquedata[0]['scannedData'],
+                'reason' => $request->reason,
+            ];
+
+            FailedMachineJob::create($dataSendToPpic);
+
+            // Send mail notification
+            $ppicUser = User::where('name', 'budiman')->first();
+            $ppicUser->notify(new \App\Notifications\FailedMachineJobCreated($dataSendToPpic));
+
+            return redirect()->back()->with(['success' => 'Data sent to PPIC!']);
+        }
+
+        foreach ($uniquedata as $spk) {
             $real_spk = SpkMaster::where('spk_number', $spk['spk'])->first();
             // dd($spk);
-            if($spk['start_label'] !== 1)
-            {
-                $count = $spk['count'];           // Assuming 'count' exists in $spk
-                $item_perpack = $spk['item_perpack'];  // Assuming 'item_perpack' exists in $spk
-                $newCompletedQuantity = $real_spk->completed_quantity + ($count * $item_perpack);
+            $count = $spk['count']; // Assuming 'count' exists in $spk
+            $item_perpack = $spk['item_perpack']; // Assuming 'item_perpack' exists in $spk
+
+            if ($spk['start_label'] !== 1) {
+                $newCompletedQuantity = $real_spk->completed_quantity + $count * $item_perpack;
                 dd($newCompletedQuantity);
                 dd($real_spk);
 
                 $real_spk->completed_quantity = $newCompletedQuantity;
                 $real_spk->save(); // Save the updated record
-            }else{
+            } else {
                 $completedQuantity = $count * $item_perpack;
                 dd($completedQuantity);
                 $real_spk->completed_quantity = $newCompletedQuantity;
