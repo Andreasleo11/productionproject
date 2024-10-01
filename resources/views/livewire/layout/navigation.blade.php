@@ -58,7 +58,7 @@ new class extends Component {
                             :active="request()->routeIs('so.index')"
                             wire:navigate
                         >
-                            {{ __('DO Index') }}
+                            {{ __('SO Index') }}
                         </x-nav-link>
                     </div>
 
