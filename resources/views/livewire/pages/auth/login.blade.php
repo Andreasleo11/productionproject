@@ -17,7 +17,9 @@ new #[Layout('layouts.guest')] class extends Component {
     public function mount()
     {
         // Load users for the select dropdown
-        $this->users = User::all();
+        $this->users = User::whereHas('specification', function ($query) {
+            $query->where('name', 'Operator');
+        })->get();
     }
 
     /**
@@ -54,7 +56,8 @@ new #[Layout('layouts.guest')] class extends Component {
         <!-- User Select (Shown when operator mode is active) -->
         <div x-show="isOperator" class="mb-4">
             <x-input-label for="user" :value="__('Select User')" />
-            <select id="user" x-on:change="
+            <select id="user"
+                x-on:change="
                 selectedUserEmail = $event.target.options[$event.target.selectedIndex].dataset.email;
                 selectedUserPassword = $event.target.options[$event.target.selectedIndex].dataset.name;
                 $wire.set('form.email', selectedUserEmail);
@@ -63,7 +66,8 @@ new #[Layout('layouts.guest')] class extends Component {
                 name="user">
                 <option value="">-- Select a user --</option>
                 @foreach ($users as $user)
-                    <option value="{{ $user->id }}" data-email="{{ $user->email }}" data-name="{{ $user->name }}">
+                    <option value="{{ $user->id }}" data-email="{{ $user->email }}"
+                        data-name="{{ $user->name }}">
                         {{ $user->name }}
                     </option>
                 @endforeach

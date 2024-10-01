@@ -119,7 +119,7 @@
                         <thead class="bg-indigo-100">
                             <tr>
                                 <th class="py-1 px-2 text-gray-700">Item Code</th>
-                                <th class="py-1 px-2 text-gray-700">Date</th>
+                                <th class="py-1 px-2 text-gray-700">Start Date - End Date</th>
                                 <th class="py-1 px-2 text-gray-700">Shift</th>
                                 <th class="py-1 px-2 text-gray-700">Quantity</th>
                                 <th class="py-1 px-2 text-gray-700">Loss Package Quantity</th>
@@ -134,11 +134,13 @@
                                 @php
                                     $startTime = \Carbon\Carbon::parse($data->start_time)->format('H:i');
                                     $endTime = \Carbon\Carbon::parse($data->end_time)->format('H:i');
+                                    $startDate = \Carbon\Carbon::parse($data->start_date)->format('d/m/Y'); // Format start date as dd/mm/yyyy
+                                    $endDate = \Carbon\Carbon::parse($data->end_date)->format('d/m/Y'); // Format end date as dd/mm/yyyy
                                 @endphp
 
                                 <tr class="bg-white border-b text-center">
                                     <td class="py-1 px-2">{{ $data->item_code }}</td>
-                                    <td class="py-1 px-2">{{ $data->start_date }} - {{ $data->end_date }}</td>
+                                    <td class="py-1 px-2">{{ $startDate }} - {{ $endDate }}</td>
                                     <td class="py-1 px-2">{{ $data->shift }} ({{ $startTime }} -
                                         {{ $endTime }})</td>
                                     <td class="py-1 px-2">{{ $data->quantity }}</td>
@@ -209,17 +211,109 @@
                     </tbody>
                 </table>
 
-                @if ($data['scannedData'] == $data['count'])
-                    <form method="GET" action="{{ route('reset.jobs') }}" class="mt-2">
-                        <input type="hidden" id="uniqueData" name="uniqueData"
-                            value="{{ json_encode($uniquedata) }}" />
-                        <input type="hidden" id="datas" name="datas" value="{{ json_encode($datas) }}" />
-                        <button type="submit"
-                            class="w-full py-2 px-4 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 transition">
-                            Done
-                        </button>
-                    </form>
-                @endif
+                <!-- Modal Structure with Fade and Scale for Modal, Fade for Background -->
+                <div id="reasonModalOverlay"
+                    class="fixed inset-0 bg-black bg-opacity-0 transition-opacity duration-300 hidden flex items-center justify-center">
+                    <div id="reasonModal"
+                        class="bg-white p-4 rounded-md w-96 opacity-0 transform scale-90 transition-all duration-300">
+                        <h3 class="text-lg font-bold mb-2">Provide Reason</h3>
+                        <p class="text-sm mb-2">The scanned quantity does not match the required count. Please provide a
+                            reason:</p>
+                        <textarea id="reason" name="reason" class="border border-gray-300 rounded-md shadow-sm w-full p-2" rows="3"
+                            placeholder="Enter your reason..."></textarea>
+                        <p id="reasonError" class="text-red-500 text-sm hidden mt-1">Reason is required!</p>
+                        <div class="flex justify-end space-x-2 mt-4">
+                            <button id="modalCancel"
+                                class="py-2 px-4 bg-gray-500 text-white rounded-md hover:bg-gray-600">Cancel</button>
+                            <button id="modalSubmit"
+                                class="py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Submit</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form for Reset Jobs -->
+                <form method="GET" action="{{ route('reset.jobs') }}" id="resetJobsForm">
+                    <input type="hidden" id="uniqueData" name="uniqueData"
+                        value="{{ json_encode($uniquedata) }}" />
+                    <input type="hidden" id="datas" name="datas" value="{{ json_encode($datas) }}" />
+                    <input type="hidden" id="reasonInput" name="reason" value="">
+
+                    <button type="button" id="resetJobsButton"
+                        class="w-full py-2 px-4 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 transition mt-4">
+                        Submit
+                    </button>
+                </form>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const resetButton = document.getElementById('resetJobsButton');
+                        const form = document.getElementById('resetJobsForm');
+                        const modalOverlay = document.getElementById('reasonModalOverlay');
+                        const modal = document.getElementById('reasonModal');
+                        const reasonInput = document.getElementById('reasonInput');
+                        const reasonField = document.getElementById('reason');
+                        const reasonError = document.getElementById('reasonError');
+                        const modalSubmit = document.getElementById('modalSubmit');
+                        const modalCancel = document.getElementById('modalCancel');
+
+                        function showModal() {
+                            modalOverlay.classList.remove('hidden');
+                            setTimeout(() => {
+                                modalOverlay.classList.remove('bg-opacity-0');
+                                modalOverlay.classList.add('bg-opacity-50');
+                                modal.classList.remove('opacity-0', 'scale-90');
+                            }, 10); // Small delay for transition to apply
+                        }
+
+                        function hideModal() {
+                            modal.classList.add('opacity-0', 'scale-90');
+                            modalOverlay.classList.remove('bg-opacity-50');
+                            modalOverlay.classList.add('bg-opacity-0');
+                            setTimeout(() => {
+                                modalOverlay.classList.add('hidden');
+                            }, 300); // Match the transition duration
+                        }
+
+                        resetButton.addEventListener('click', function() {
+                            let showReasonModal = false;
+
+                            @foreach ($uniquedata as $data)
+                                if ({{ $data['scannedData'] }} !== {{ $data['count'] }}) {
+                                    showReasonModal = true;
+                                }
+                            @endforeach
+
+                            if (showReasonModal) {
+                                showModal();
+                            } else {
+                                form.submit();
+                            }
+                        });
+
+                        // Handle modal submit
+                        modalSubmit.addEventListener('click', function() {
+                            const reasonValue = reasonField.value.trim();
+
+                            if (reasonValue === '') {
+                                reasonError.classList.remove('hidden');
+                                reasonField.classList.add('border-red-500');
+                            } else {
+                                reasonInput.value = reasonValue;
+                                reasonError.classList.add('hidden');
+                                reasonField.classList.remove('border-red-500');
+                                hideModal();
+                                setTimeout(() => {
+                                    form.submit();
+                                }, 300); // Match the transition duration
+                            }
+                        });
+
+                        // Handle modal cancel
+                        modalCancel.addEventListener('click', function() {
+                            hideModal();
+                        });
+                    });
+                </script>
             </div>
         </div>
 
@@ -286,6 +380,18 @@
         </div>
     </div>
 @endif
+
+<script type="module">
+    Fancybox.bind('[data-fancybox="gallery"]', {
+        Thumbs: {
+            autoStart: true,
+        },
+        Image: {
+            zoom: true,
+        },
+        transitionEffect: 'fade',
+    });
+</script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {

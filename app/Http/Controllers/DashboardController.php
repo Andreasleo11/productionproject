@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DailyItemCode;
+use App\Models\FailedMachineJob;
 use App\Models\File;
 use App\Models\MachineJob;
 use App\Models\MasterListItem;
@@ -153,12 +154,14 @@ class DashboardController extends Controller
             }
         }
 
+        $failedMachineJobs = FailedMachineJob::all();
+
         // Debugging the data you're sending to the view
         // Log::info('Job Data: ' . json_encode($job));
 
         // dd($files);
-        if ($user->name === 'Administrator' || $user->name === 'PE' || $user->name === 'Store') {
-            return view('dashboard', compact('files'));
+        if ($user->specification->name !== 'Operator') {
+            return view('dashboard', compact('files', 'failedMachineJobs'));
         } else {
             // dd('masuk sini');
             $machineJobShift = $user->jobs->shift;
@@ -513,10 +516,39 @@ class DashboardController extends Controller
         return redirect()->back();
     }
 
+    public function finishJob(Request $request){
+
+    }
+
     public function resetJobs(Request $request)
     {
         $uniquedata = json_decode($request->input('uniqueData'), true);
         $datas = json_decode($request->input('datas'));
+
+        // dd($uniquedata);
+        // dd($datas);
+        // dd($request->reason);
+
+        $targetQuantity = $uniquedata[0]['count'];
+        $actualProductionQuantity = $uniquedata[0]['scannedData'];
+
+        if($actualProductionQuantity < $targetQuantity){
+            $dataSendToPpic = [
+                'machine_id' => auth()->user()->id,
+                'spk_no' => $uniquedata[0]['spk'],
+                'target' => $uniquedata[0]['count'],
+                'outstanding' => $uniquedata[0]['scannedData'],
+                'reason' => $request->reason,
+            ];
+
+            FailedMachineJob::create($dataSendToPpic);
+
+            // Send mail notification
+            $ppicUser = User::where('name', 'budiman')->first();
+            $ppicUser->notify(new \App\Notifications\FailedMachineJobCreated($dataSendToPpic));
+
+            return redirect()->back()->with(['success' => 'Data sent to PPIC!']);
+        }
 
         foreach ($uniquedata as $spk) {
             $real_spk = SpkMaster::where('spk_number', $spk['spk'])->first();

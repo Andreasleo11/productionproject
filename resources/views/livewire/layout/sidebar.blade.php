@@ -25,8 +25,8 @@ new class extends Component {
                 <a href="{{ route('dashboard') }}" wire:navigate>
                     <x-application-logo class="block h-20 w-auto fill-current text-gray-800" />
                 </a>
-                <span class="ms-4 text-lg">
-                    Production Project
+                <span class="ms-4 text-md">
+                    Daijo Production Project
                 </span>
             </div>
 
@@ -42,9 +42,6 @@ new class extends Component {
 
                     <livewire:sidebar-link href="{{ route('so.index') }}" label="SO Index" :active="request()->routeIs('so.index')"
                         wire:navigate />
-
-                    <livewire:sidebar-link href="{{ route('daily-item-code.index') }}" label="Daily Production Plan"
-                        :active="request()->routeIs('daily-item-code.index')" wire:navigate />
                 @endif
 
                 <!-- PE Links -->
@@ -62,6 +59,12 @@ new class extends Component {
                         ['name' => 'stockallbarcode', 'label' => 'Stock Item'],
                         ['name' => 'updated.barcode.item.position', 'label' => 'List All Item Barcode'],
                     ]" />
+                @endif
+
+                <!-- PPIC Links -->
+                @if (auth()->user()->can('view-ppic-links'))
+                    <livewire:sidebar-link href="{{ route('daily-item-code.index') }}" label="Daily Production Plan"
+                        :active="request()->routeIs('daily-item-code.index')" wire:navigate />
                 @endif
             </div>
         </div>

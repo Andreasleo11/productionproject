@@ -6,5 +6,6 @@ return [
         'PE' => ['PE'],
         'Store' => ['Store'],
         'Operator' => ['Operator'],
+        'PPIC' => ['PPIC']
     ],
 ];
