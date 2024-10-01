@@ -98,6 +98,11 @@
                                 >
                                     Scanned Box
                                 </th>
+                                <th
+                                    class="border border-gray-300 px-4 py-2 text-left"
+                                >
+                                    Scanned Quantity
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -108,12 +113,16 @@
 
                             @foreach ($data as $item)
                                 @php
+                                    $scannedTotalQuantity = $item->scannedData->where('item_code', $item->item_code)->sum('quantity');
                                     $ctn = ceil($item->quantity / $item->packaging_quantity);
                                     $totalQuantity += $item->quantity;
                                     $totalCTN += $ctn;
+
+                                    // Check if scannedCount is greater than ctn to apply red background
+                                    $rowClass = $item->scannedCount > $ctn ? 'bg-red-500' : '';
                                 @endphp
 
-                                <tr class="hover:bg-gray-50">
+                                <tr class="hover:bg-green-500 {{ $rowClass }}">
                                     <td
                                         class="border border-gray-300 px-4 py-2"
                                     >
@@ -153,6 +162,11 @@
                                         {{ $item->scannedCount }} /
                                         {{ number_format($ctn) }}
                                     </td>
+                                    <td
+                                        class="border border-gray-300 px-4 py-2"
+                                    >
+                                        {{ $scannedTotalQuantity }}
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -174,7 +188,7 @@
                                     {{ number_format($totalCTN) }}
                                 </th>
                                 <th
-                                    colspan="2"
+                                    colspan="3"
                                     class="border border-gray-300 px-4 py-2"
                                 ></th>
                             </tr>
