@@ -95,4 +95,6 @@ Route::get('/so/process/{docNum}', [SOController::class, 'process'])->name('so.p
 Route::post('/so/scan', [SOController::class, 'scanBarcode'])->name('so.scanBarcode');
 Route::get('/update-so-data/{docNum}', [SOController::class, 'updateSoData'])->name('update.so.data');
 
+Route::post('/import-excel', [SOController::class, 'import'])->name('import.so.data');
+
 require __DIR__.'/auth.php';

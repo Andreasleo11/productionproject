@@ -10,13 +10,22 @@ class SoData extends Model
     use HasFactory;
 
     protected $table = 'so_datas';
-
+    // public $incrementing = true;
     public $timestamps = false;
 
     protected $fillable = [
+        'id',
+        'doc_num',
+        'customer',
+        'posting_date',
+        'item_code',
+        'item_name',
+        'quantity',
+        'sales_uom',
+        'packaging_quantity',
+        'sales_pack',
         'is_finish',
         'is_done',
-        'updated_at',
     ];
 
     public function scannedData()
