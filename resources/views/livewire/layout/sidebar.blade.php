@@ -25,7 +25,7 @@ new class extends Component {
                 <a href="{{ route('dashboard') }}" wire:navigate>
                     <x-application-logo class="block h-20 w-auto fill-current text-gray-800" />
                 </a>
-                <span class="ms-4 text-md">
+                <span class="ms-4 font-semibold text-sm">
                     Daijo Production Project
                 </span>
             </div>

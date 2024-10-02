@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class FailedMachineJob extends Model
+class ProductionReport extends Model
 {
     use HasFactory;
 
@@ -13,7 +13,12 @@ class FailedMachineJob extends Model
         'machine_id',
         'spk_no',
         'target',
+        'scanned',
         'outstanding',
-        'reason',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'machine_id');
+    }
 }

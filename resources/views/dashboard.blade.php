@@ -19,26 +19,29 @@
         <div class="mx-auto sm:px-4 lg:px-6 pt-6">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-4">
                 <div class="text-2xl font-semibold my-3">
-                    Failed Machine Jobs
+                    Production Reports
                 </div>
                 <div class="relative overflow-x-auto">
                     <table class="w-full text-sm text-left text-gray-500">
                         <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                             <tr>
                                 <th scope="col" class="px-6 py-3">
-                                    Machine Id
+                                    Machine Name
                                 </th>
                                 <th scope="col" class="px-6 py-3">
-                                    SPK
+                                    SPK No
                                 </th>
                                 <th scope="col" class="px-6 py-3">
-                                    Target
+                                    Target Qty
                                 </th>
                                 <th scope="col" class="px-6 py-3">
-                                    Outstanding
+                                    Scanned Qty
                                 </th>
                                 <th scope="col" class="px-6 py-3">
-                                    Reason
+                                    Outstanding Qty
+                                </th>
+                                <th scope="col" class="px-6 py-3">
+                                    Status
                                 </th>
                                 <th scope="col" class="px-6 py-2">
                                     Action
@@ -46,25 +49,34 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse ($failedMachineJobs as $failedJob)
+                            @forelse ($productionReports as $report)
                                 <tr class="bg-white border-b">
                                     <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
-                                        {{ $failedJob->machine_id }}
+                                        {{ $report->user->name }}
                                     </th>
                                     <td class="px-6 py-4">
-                                        {{ $failedJob->spk_no }}
+                                        {{ $report->spk_no }}
                                     </td>
                                     <td class="px-6 py-4">
-                                        {{ $failedJob->target }}
+                                        {{ $report->target }}
                                     </td>
                                     <td class="px-6 py-4">
-                                        {{ $failedJob->outstanding }}
+                                        {{ $report->scanned }}
                                     </td>
                                     <td class="px-6 py-4">
-                                        {{ $failedJob->reason }}
+                                        {{ $report->outstanding }}
                                     </td>
                                     <td class="px-6 py-4">
-                                        <x-primary-button>Edit</x-primary-button>
+                                        @if ($report->outstanding === 0)
+                                            <span
+                                                class="bg-green-100 text-green-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded">Success</span>
+                                        @else
+                                            <span
+                                                class="bg-red-100 text-red-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded">Failed</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <x-primary-button>Action</x-primary-button>
                                     </td>
                                 </tr>
                             @empty
