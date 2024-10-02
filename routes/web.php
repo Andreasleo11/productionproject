@@ -93,9 +93,12 @@ Route::get('/daily-item-codes', [DailyItemCodeController::class, 'index'])->name
 Route::post('/apply-item-code/{machine_id}', [DailyItemCodeController::class, 'applyItemCode'])->name('apply-item-code');
 
 Route::get('/so/index', [SOController::class, 'index'])->name('so.index');
+Route::get('/so/filter', [SOController::class, 'index'])->name('so.filter');
 Route::get('/so/process/{docNum}', [SOController::class, 'process'])->name('so.process');
 Route::post('/so/scan', [SOController::class, 'scanBarcode'])->name('so.scanBarcode');
 Route::get('/update-so-data/{docNum}', [SOController::class, 'updateSoData'])->name('update.so.data');
+
+Route::post('/import-excel', [SOController::class, 'import'])->name('import.so.data');
 
 Route::get('/notification', function () {
     $failedMachineJob = \App\Models\FailedMachineJob::find(1);

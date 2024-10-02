@@ -565,7 +565,6 @@ class DashboardController extends Controller
             'deactivateScanMode' => true // Add this flag
         ]);
 
-
         foreach ($uniquedata as $spk) {
             $real_spk = SpkMaster::where('spk_number', $spk['spk'])->first();
             // dd($spk);
@@ -598,7 +597,6 @@ class DashboardController extends Controller
             $job->item_code = null; // Or any default value you'd like
             $job->save(); // Save the changes to the database
         }
-
         // Optionally return a message or redirect the user
         return redirect()->back()->with('success', 'Jobs have been reset successfully.');
     }
