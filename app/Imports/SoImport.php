@@ -43,11 +43,9 @@ class SoImport implements ToModel
             return $existingRecord;
         }
 
-        $latestId = SoData::max('id') ?? 0;  // Get the max ID, or default to 0 if the table is empty
-        $newId = $latestId + 1;  // Increment by 1 to get the next ID
 
         return new SoData([
-            'id'                 => $newId,
+            'id'                 => $row[0],
             'doc_num'            => $row[1],
             'customer'           => $row[2],
             'posting_date'       => $row[3],
