@@ -36,14 +36,18 @@ class SoImport implements ToModel
                 'sales_uom'          => $row[7],
                 'packaging_quantity' => $row[8],
                 'sales_pack'         => $row[9],
+                'create_date'        => $row[10],
                 // Leave is_finish and is_done unchanged
             ]);
             
             return $existingRecord;
         }
 
+        $latestId = SoData::max('id') ?? 0;  // Get the max ID, or default to 0 if the table is empty
+        $newId = $latestId + 1;  // Increment by 1 to get the next ID
+
         return new SoData([
-            'id'                 => $row[0],
+            'id'                 => $newId,
             'doc_num'            => $row[1],
             'customer'           => $row[2],
             'posting_date'       => $row[3],
@@ -55,6 +59,7 @@ class SoImport implements ToModel
             'sales_pack'         => $row[9],
             'is_finish'          => 0,  // Automatically set to 0
             'is_done'            => 0,  // Automatically set to 0
+            'create_date'        => $row[10],
         ]);
     }
 }

@@ -26,6 +26,7 @@ class SoData extends Model
         'sales_pack',
         'is_finish',
         'is_done',
+        'create_date',
     ];
 
     public function scannedData()

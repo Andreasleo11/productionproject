@@ -15,12 +15,19 @@ use PhpOffice\PhpSpreadsheet\Shared\Date;
 
 class SOController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $docNums = SoData::select('doc_num', 'is_done')
-            ->distinct()
-            ->get();
-        // dd($docNums);
+        
+        $isDone = $request->query('is_done', 'all');
+    
+        // Build the query based on filter
+        $query = SoData::select('doc_num', 'is_done', 'create_date')->distinct();
+    
+        if ($isDone !== 'all') {
+            $query->where('is_done', $isDone);
+        }
+    
+        $docNums = $query->orderBy('doc_num', 'desc')->get();
 
         return view('soindex', compact('docNums'));
     }
@@ -167,17 +174,17 @@ class SOController extends Controller
 
         // Read the Excel file and process the data
         $data = Excel::toArray([], $filePath)[0];
-
+        
         // Remove the first row (header)
         array_shift($data);
         
         $uniqueRows = [];
-
+        // dd($data);
         // Loop through the data to check for duplicates
         foreach ($data as &$row) {
             // Format the date in column 3 (index 2) to yyyy-mm-dd
             if (isset($row[3]) && !empty($row[3])) {
-                $row[3] = \Carbon\Carbon::createFromFormat('m/d/Y', $row[3])->format('Y-m-d');
+                $row[3] = \Carbon\Carbon::createFromFormat('d/m/Y', $row[3])->format('Y-m-d');
             }
 
             // Convert the number in column 6 (index 5) to integer (without decimal places)
@@ -200,6 +207,10 @@ class SOController extends Controller
                 $row[8] = 0; // Set to a default value if it's not a number
             }
 
+            if (isset($row[10]) && !empty($row[10])) {
+                $row[10] = \Carbon\Carbon::createFromFormat('d/m/Y', $row[10])->format('Y-m-d');
+            }
+           
             // Create a unique key based on columns 1 and 4 (doc_num and item_code)
             $uniqueKey = $row[1] . '-' . $row[4]; 
 

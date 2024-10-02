@@ -73,6 +73,39 @@
                     </form>
                 </div>
 
+                <div class="flex justify-center mb-6">
+                    <form action="{{ route('so.filter') }}" method="GET">
+                        <label for="is_done" class="mr-2 font-semibold text-lg">
+                            Show:
+                        </label>
+                        <select
+                            name="is_done"
+                            id="is_done"
+                            class="border rounded p-2"
+                            onchange="this.form.submit()"
+                        >
+                            <option
+                                value="all"
+                                {{ request('is_done') === 'all' ? 'selected' : '' }}
+                            >
+                                All
+                            </option>
+                            <option
+                                value="1"
+                                {{ request('is_done') === '1' ? 'selected' : '' }}
+                            >
+                                Done
+                            </option>
+                            <option
+                                value="0"
+                                {{ request('is_done') === '0' ? 'selected' : '' }}
+                            >
+                                Not Done
+                            </option>
+                        </select>
+                    </form>
+                </div>
+
                 <h1
                     class="text-2xl font-semibold text-gray-800 mb-6 text-center mt-5"
                 >
