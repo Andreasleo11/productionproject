@@ -117,7 +117,7 @@ class SOController extends Controller
 
         // Fetch the item data
         $item = SoData::where('item_code', $item_code)->where('doc_num', $doc_num)->first();
-        dd($item);
+       
         // dd($item);
         if (! $item) {
             return redirect()->back()->withErrors(['error' => 'Item not found']);
@@ -125,9 +125,9 @@ class SOController extends Controller
 
         $existingScans = ScannedData::where('item_code', $item_code)->get();
         $scannedTotalQuantity = $existingScans->sum('quantity') + $quantity;
-        dd($item->quantity);
+       
         if ($scannedTotalQuantity > $item->quantity) {
-            dd('masuk sini');
+           
             return redirect()->back()->withErrors(['error' => 'All required CTN have been scanned / Quantity Tidak benar']);
         }
 
@@ -229,7 +229,7 @@ class SOController extends Controller
 
         // After processing, $uniqueRows will contain only unique rows with summed quantities and packaging quantities
         $data = array_values($uniqueRows);
-        
+
         // Store the processed file data into a CSV
         $excelFileName = 'sodata.csv';
         $excelFilePath = 'public/' . $excelFileName;
