@@ -29,7 +29,9 @@ new class extends Component {
                         class="block h-20 w-auto fill-current text-gray-800"
                     />
                 </a>
-                <span class="ms-4 text-md">Daijo Production Project</span>
+                <span class="ms-4 font-semibold text-sm">
+                    Daijo Production Project
+                </span>
             </div>
 
             <!-- Navigation Links -->

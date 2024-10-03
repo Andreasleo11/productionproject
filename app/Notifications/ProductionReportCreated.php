@@ -7,7 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class FailedMachineJobCreated extends Notification implements ShouldQueue
+class ProductionReportCreated extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -37,11 +37,12 @@ class FailedMachineJobCreated extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage())
-            ->greeting('Failed Machine Job Notification')
-            ->line('There\'s Failed Machine Job created!')
+            ->greeting('Production Report Notification')
+            ->line('There\'s Production Report created!')
             ->line('- Machine ID : ' . $this->details['machine_id'])
             ->line('- SPK No : ' . $this->details['spk_no'])
             ->line('- Target : ' . $this->details['target'])
+            ->line('- Scanned : ' . $this->details['scanned'])
             ->line('- Outstanding : ' . $this->details['outstanding'])
             ->action('See Detail', url('/'))
             ->line('Thank you for using our application!');
@@ -55,7 +56,7 @@ class FailedMachineJobCreated extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         return [
-                'message' => 'Failed Machine Job with has just been created!',
+                'message' => 'Production Report with has just been created!',
             ];
     }
 }

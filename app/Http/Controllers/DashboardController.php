@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\DailyItemCode;
-use App\Models\FailedMachineJob;
 use App\Models\File;
 use App\Models\MachineJob;
 use App\Models\MasterListItem;
+use App\Models\ProductionReport;
 use App\Models\ProductionScannedData;
 use App\Models\SpkMaster;
 use App\Models\User;
@@ -22,7 +22,7 @@ class DashboardController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $uniquedata = null;
+        $uniquedata = collect();
         $files = collect();
         $itemCode = null;
         $machineJobShift = null;
@@ -51,6 +51,7 @@ class DashboardController extends Controller
                     $labelstart = 0;
                     $previous_spk = null; // Variable to track the previous SPK
                     $start_label = null; // Variable to store start_label for each SPK
+                    // dd($datasnew);
                     foreach ($datasnew as $data) {
                         $available_quantity = $data->planned_quantity - $data->completed_quantity;
                         if ($quantity <= $available_quantity) {
@@ -154,18 +155,23 @@ class DashboardController extends Controller
             }
         }
 
-        $failedMachineJobs = FailedMachineJob::all();
+        $productionReports = ProductionReport::all();
 
         // Debugging the data you're sending to the view
         // Log::info('Job Data: ' . json_encode($job));
 
         // dd($files);
         if ($user->specification->name !== 'Operator') {
-            return view('dashboard', compact('files', 'failedMachineJobs'));
+            return view('dashboard', compact('files', 'productionReports'));
         } else {
+            if(count($uniquedata) > 0){
+                $dataWithSpkNo = ProductionReport::where('spk_no', $uniquedata[0]['spk'])->first();
+            } else {
+                $dataWithSpkNo = null;
+            }
             // dd('masuk sini');
             $machineJobShift = $user->jobs->shift;
-            return view('dashboard', compact('files', 'datas', 'itemCode', 'uniquedata', 'machineJobShift'));
+            return view('dashboard', compact('files', 'datas', 'itemCode', 'uniquedata', 'machineJobShift', 'dataWithSpkNo'));
             // return view('dashboard', compact('files'));
         }
     }
@@ -527,28 +533,37 @@ class DashboardController extends Controller
 
         // dd($uniquedata);
         // dd($datas);
-        // dd($request->reason);
 
-        $targetQuantity = $uniquedata[0]['count'];
-        $actualProductionQuantity = $uniquedata[0]['scannedData'];
+        foreach ($uniquedata as $uniquedatum) {
+            $targetQuantity = $uniquedatum['count'];
+            $actualProductionQuantity = $uniquedatum['scannedData'];
 
-        if($actualProductionQuantity < $targetQuantity){
-            $dataSendToPpic = [
-                'machine_id' => auth()->user()->id,
-                'spk_no' => $uniquedata[0]['spk'],
-                'target' => $uniquedata[0]['count'],
-                'outstanding' => $uniquedata[0]['scannedData'],
-                'reason' => $request->reason,
-            ];
+            if($actualProductionQuantity < $targetQuantity){
+                $dataSendToPpic = [
+                    'machine_id' => auth()->user()->id,
+                    'spk_no' => $uniquedatum['spk'],
+                    'target' => $uniquedatum['count'],
+                    'scanned' => $uniquedatum['scannedData'],
+                    'outstanding' => $uniquedatum['count'] - $uniquedatum['scannedData'],
+                ];
 
-            FailedMachineJob::create($dataSendToPpic);
+                $dataWithSpkNo = ProductionReport::where('spk_no', $uniquedatum['spk'])->first();
+                if($dataWithSpkNo){
+                    return redirect()->back()->with('error', "You already submit spk number $dataWithSpkNo->spk_no!");
+                } else {
+                    ProductionReport::create($dataSendToPpic);
+                    // Send mail notification
+                    $ppicUser = User::where('name', 'budiman')->first();
+                    $ppicUser->notify(new \App\Notifications\ProductionReportCreated($dataSendToPpic));
+                }
+            }
 
-            // Send mail notification
-            $ppicUser = User::where('name', 'budiman')->first();
-            $ppicUser->notify(new \App\Notifications\FailedMachineJobCreated($dataSendToPpic));
-
-            return redirect()->back()->with(['success' => 'Data sent to PPIC!']);
         }
+
+        return redirect()->back()->with([
+            'success' => 'Data sent to PPIC!',
+            'deactivateScanMode' => true // Add this flag
+        ]);
 
         foreach ($uniquedata as $spk) {
             $real_spk = SpkMaster::where('spk_number', $spk['spk'])->first();
@@ -582,7 +597,6 @@ class DashboardController extends Controller
             $job->item_code = null; // Or any default value you'd like
             $job->save(); // Save the changes to the database
         }
-
         // Optionally return a message or redirect the user
         return redirect()->back()->with('success', 'Jobs have been reset successfully.');
     }
