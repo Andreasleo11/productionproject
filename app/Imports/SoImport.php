@@ -9,9 +9,37 @@ class SoImport implements ToModel
 {
     public function model(array $row)
     {
+        $amendRecord = SoData::where('id', $row[0])
+                         ->where('doc_num', $row[1])
+                         ->where('item_code', '!=', $row[4])
+                         ->first();
+
+        // If the record exists, update it with the new data
+        if ($amendRecord) {
+            \Log::info('Found record with matching doc_num but different item_code. Updating...');
+
+            $amendRecord->update([
+                'doc_num'            => $row[1],
+                'customer'           => $row[2],
+                'posting_date'       => $row[3],
+                'item_code'          => $row[4],  // Update to new item_code from the Excel file
+                'item_name'          => $row[5],
+                'quantity'           => $row[6],
+                'sales_uom'          => $row[7],
+                'packaging_quantity' => $row[8],
+                'sales_pack'         => $row[9],
+                'create_date'        => $row[10],
+                'update_date'        => $row[11],
+                'update_fulltime'    => $row[12],
+                'is_finish'          => $amendRecord->is_finish,  // Keep is_finish unchanged
+                'is_done'            => $amendRecord->is_done,    // Keep is_done unchanged
+            ]);
+
+            return $amendRecord;  // Return the updated record
+        }
+
         // // Check if a record with the same doc_num and item_code already exists
-        $existingRecord = SoData::where('id', $row[0])
-                                ->where('doc_num', $row[1])
+        $existingRecord = SoData::where('doc_num', $row[1])
                                 ->where('item_code', $row[4])
                                 ->first();
 
@@ -37,12 +65,15 @@ class SoImport implements ToModel
                 'packaging_quantity' => $row[8],
                 'sales_pack'         => $row[9],
                 'create_date'        => $row[10],
+                'update_date'        => $row[11],
+                'update_fulltime'    => $row[12],
                 // Leave is_finish and is_done unchanged
             ]);
             
             return $existingRecord;
         }
 
+        
 
         return new SoData([
             'id'                 => $row[0],
@@ -58,6 +89,8 @@ class SoImport implements ToModel
             'is_finish'          => 0,  // Automatically set to 0
             'is_done'            => 0,  // Automatically set to 0
             'create_date'        => $row[10],
+            'update_date'        => $row[11],
+            'update_fulltime'    => $row[12],
         ]);
     }
 }

@@ -81,6 +81,7 @@ class SOController extends Controller
                 
             })
             ->values(); // Reset the keys after grouping
+            
         foreach ($data as $entry) {
             SoData::where('id', $entry->id)->update([
                 'is_finish' => $entry->is_finish,
@@ -212,6 +213,10 @@ class SOController extends Controller
             if (isset($row[10]) && !empty($row[10])) {
                 $row[10] = \Carbon\Carbon::createFromFormat('d/m/Y', $row[10])->format('Y-m-d');
             }
+
+            if (isset($row[11]) && !empty($row[11])) {
+                $row[11] = \Carbon\Carbon::createFromFormat('d/m/Y', $row[11])->format('Y-m-d');
+            }
            
             // Create a unique key based on columns 1 and 4 (doc_num and item_code)
             $uniqueKey = $row[1] . '-' . $row[4]; 
@@ -229,7 +234,7 @@ class SOController extends Controller
 
         // After processing, $uniqueRows will contain only unique rows with summed quantities and packaging quantities
         $data = array_values($uniqueRows);
-
+     
         // Store the processed file data into a CSV
         $excelFileName = 'sodata.csv';
         $excelFilePath = 'public/' . $excelFileName;
