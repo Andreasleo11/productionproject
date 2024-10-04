@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ScannedData;
 use App\Models\SoData;
+use App\Models\UpdateLog;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\SoImport;
@@ -243,8 +244,15 @@ class SOController extends Controller
         // Import the processed file into the database
         Excel::import(new SoImport, storage_path('app/' . $excelFilePath));
 
+        UpdateLog::updateOrCreate(
+            [], // Empty array to match all records
+            ['last_upload_time' => now()] // Set the current time
+        );
+    
         // Flash a success message to the session
         session()->flash('success', 'Excel file processed and imported successfully.');
+
+        session(['last_upload_time' => now()]);
 
         // Redirect to the SO index route
         return redirect()->route('so.index');
