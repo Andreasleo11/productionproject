@@ -262,7 +262,20 @@
     </div>
 </div>
 
+<script type="module">
+    Fancybox.bind('[data-fancybox="gallery"]', {
+        Thumbs: {
+            autoStart: true,
+        },
+        Image: {
+            zoom: true,
+        },
+        transitionEffect: "fade",
+    });
+</script>
+
 <script>
+
     function scanModeHandler(deactivateScanModeFlag) {
         return {
             scanMode: true,

@@ -13,20 +13,14 @@ class DailyItemCodeController extends Controller
 {
     public function index()
     {
-        $machines = User::where('specification_id', 2)
-            ->with([
-                'dailyItemCode' => function ($query) {
-                    $query->where(function ($query) {
-                        $query->where('is_done', 0)->orWhereNull('is_done');
-                    });
-                },
-            ])
-            ->get();
-
-        return view('daily-item-codes.index', compact('machines'));
+        $users = User::all();
+        $dailyItemCodes = DailyItemCode::all();
+        $itemCodes = MasterListItem::all()->pluck('item_code');
+        // dd($dailyItemCodes);
+        return view('daily-item-codes.index', compact('dailyItemCodes', 'users', 'itemCodes'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $machines = User::where('specification_id', 2)
             ->with([
@@ -39,8 +33,13 @@ class DailyItemCodeController extends Controller
             ->get();
         $itemcodes = MasterListItem::get();
 
-        return view('daily-item-codes.create', compact('machines', 'itemcodes'));
+        $selected_date = $request->selected_date;
+        $machine_id = $request->machine_id;
+
+        return view('daily-item-codes.create', compact('machines', 'itemcodes', 'selected_date', 'machine_id'));
     }
+
+
 
     public function calculateItem(Request $request)
     {
@@ -84,7 +83,8 @@ class DailyItemCodeController extends Controller
         $validatedData = $request->validated();
 
         // Custom validation for start and end times and dates
-        foreach ($validatedData['shifts'] as $index => $shift) {  // Use $index to loop
+        foreach ($validatedData['shifts'] as $index => $shift) {
+            // Use $index to loop
             $startDate = $validatedData['start_dates'][$shift]; // Access arrays by $shift
             $endDate = $validatedData['end_dates'][$shift];
             $startTime = $validatedData['start_times'][$shift];
@@ -121,21 +121,22 @@ class DailyItemCodeController extends Controller
             }
         }
 
-    // $previousLossPackageQuantity = 0;
-    // $previousItemCode = null;
-    // Save the data to the DailyItemCodes table
-    foreach ($validatedData['shifts'] as $index => $shift) {  // Use $index to loop
-        $itemCode = $validatedData['item_codes'][$shift];   // Access arrays by $shift
-        $quantity = $validatedData['quantities'][$shift];
-        $startDate = $validatedData['start_dates'][$shift];
-        $endDate = $validatedData['end_dates'][$shift];
-        $startTime = $validatedData['start_times'][$shift];
-        $endTime = $validatedData['end_times'][$shift];
+        // $previousLossPackageQuantity = 0;
+        // $previousItemCode = null;
+        // Save the data to the DailyItemCodes table
+        foreach ($validatedData['shifts'] as $index => $shift) {
+            // Use $index to loop
+            $itemCode = $validatedData['item_codes'][$shift]; // Access arrays by $shift
+            $quantity = $validatedData['quantities'][$shift];
+            $startDate = $validatedData['start_dates'][$shift];
+            $endDate = $validatedData['end_dates'][$shift];
+            $startTime = $validatedData['start_times'][$shift];
+            $endTime = $validatedData['end_times'][$shift];
 
-        // Fetch SPK and Master Item Data
-        $datas = SpkMaster::where('item_code', $itemCode)->get();
-        $master = MasterListItem::where('item_code', $itemCode)->first();
-        $stanpack = $master->standart_packaging_list;
+            // Fetch SPK and Master Item Data
+            $datas = SpkMaster::where('item_code', $itemCode)->get();
+            $master = MasterListItem::where('item_code', $itemCode)->first();
+            $stanpack = $master->standart_packaging_list;
 
             // Calculate the total planned and completed quantities
             $totalPlannedQuantity = $datas->sum('planned_quantity');
@@ -158,18 +159,16 @@ class DailyItemCodeController extends Controller
             // Initialize adjusted quantity
             $adjustedQuantity = $quantity;
 
+            $previousDailyItemCode = DailyItemCode::where('user_id', $validatedData['machine_id'])
+                ->where('item_code', $itemCode)
+                ->orderBy('id', 'desc') // Ensure we get the latest by id
+                ->first();
 
-        $previousDailyItemCode = DailyItemCode::where('user_id', $validatedData['machine_id'])
-        ->where('item_code', $itemCode)
-        ->orderBy('id', 'desc') // Ensure we get the latest by id
-        ->first();
-
-        // dd($previousDailyItemCode);
-        // If there's an unresolved loss package, adjust the current quantity
-        if ($previousDailyItemCode && $previousDailyItemCode->loss_package_quantity > 0) {
-            // Subtract the previous loss package quantity from the current shift's quantity
-            $adjustedQuantity = $quantity - $previousDailyItemCode->loss_package_quantity;
-
+            // dd($previousDailyItemCode);
+            // If there's an unresolved loss package, adjust the current quantity
+            if ($previousDailyItemCode && $previousDailyItemCode->loss_package_quantity > 0) {
+                // Subtract the previous loss package quantity from the current shift's quantity
+                $adjustedQuantity = $quantity - $previousDailyItemCode->loss_package_quantity;
             }
 
             // Store the current loss package for the next shifts (if applicable)
@@ -188,12 +187,40 @@ class DailyItemCodeController extends Controller
                 'end_time' => $endTime,
                 'start_date' => $startDate,
                 'end_date' => $endDate,
-                'shift' => $shift,  // Store the shift number
+                'shift' => $shift, // Store the shift number
             ]);
-
         }
 
         return redirect()->route('daily-item-code.index')->with('success', 'Daily Item Codes assigned successfully.');
     }
 
+    public function daily(Request $request)
+    {
+        $selectedDate = $request->query('date'); // Get the date from the query parameter
+        $machines = User::where('specification_id', 2)
+            ->with([
+                'dailyItemCode' => function ($query) {
+                    $query->where(function ($query) {
+                        $query->where('is_done', 0)->orWhereNull('is_done');
+                    });
+                },
+            ])
+            ->get();
+        return view('daily-item-codes.daily', compact('selectedDate', 'machines'));
+    }
+
+    public function update(Request $request, $id){
+        $validatedData = $request->validate([
+            'item_code' => 'required|string|max:255',
+            'quantity' => 'required|integer',
+            'shift' => 'required|integer',
+            'start_time' => 'required',
+            'end_time' => 'required',
+        ]);
+
+        $dailyItemCode = DailyItemCode::findOrFail($id);
+        $dailyItemCode->update($validatedData);
+
+        return redirect()->back()->with('success', 'Daily Item Code updated successfully.');
+    }
 }

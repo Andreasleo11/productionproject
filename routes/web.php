@@ -91,6 +91,8 @@ Route::get('/daily-item-code', [DailyItemCodeController::class, 'create'])->name
 Route::post('/calculate-item', [DailyItemCodeController::class, 'calculateItem'])->name('calculate.item');
 Route::get('/daily-item-codes', [DailyItemCodeController::class, 'index'])->name('daily-item-code.index');
 Route::post('/apply-item-code/{machine_id}', [DailyItemCodeController::class, 'applyItemCode'])->name('apply-item-code');
+Route::get('/daily-item-codes/daily', [DailyItemCodeController::class, 'daily'])->name('daily-item-code.daily');
+Route::put('/daily-item-codes/{id}', [DailyItemCodeController::class, 'update'])->name('daily-item-code.update');
 
 Route::get('/so/index', [SOController::class, 'index'])->name('so.index');
 Route::get('/so/filter', [SOController::class, 'index'])->name('so.filter');
@@ -101,7 +103,7 @@ Route::get('/update-so-data/{docNum}', [SOController::class, 'updateSoData'])->n
 Route::post('/import-excel', [SOController::class, 'import'])->name('import.so.data');
 
 Route::get('/notification', function () {
-    $failedMachineJob = \App\Models\FailedMachineJob::find(1);
+    $productionReport = \App\Models\ProductionReport::find(1);
 
     $details = [
         "machine_id" => 5,
@@ -110,6 +112,6 @@ Route::get('/notification', function () {
         "outstanding" => 5
     ];
 
-    return (new \App\Notifications\FailedMachineJobCreated($details))->toMail(auth()->user());
+    return (new \App\Notifications\ProductionReportCreated($details))->toMail(auth()->user());
 });
 
