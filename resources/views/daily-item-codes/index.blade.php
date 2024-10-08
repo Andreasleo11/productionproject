@@ -163,8 +163,7 @@
                         <div>
                             <label for="edit-item-code" class="block text-sm font-medium text-gray-700">Item
                                 Code</label>
-                            <select name="item_code" id="edit-item-code"
-                                class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md" required>
+                            <select name="item_code" id="edit-item-code" class="w-full mt-1" required>
                                 @foreach ($itemCodes as $itemCode)
                                     <option value="{{ $itemCode }}">{{ $itemCode }}</option>
                                 @endforeach
@@ -229,6 +228,19 @@
         </div>
 
         <script>
+            // Initialize Tom Select on the select element
+            document.addEventListener('DOMContentLoaded', function() {
+                new TomSelect("#edit-item-code", {
+                    create: false, // Prevent adding new options
+                    sortField: {
+                        field: "text",
+                        direction: "asc"
+                    },
+                    maxOptions: 1000, // Customize how many options to show
+                    placeholder: "Select Item Code"
+                });
+            });
+
             const dailyItemCodes = @json($dailyItemCodes);
             const userList =
                 @json($users); // Assuming you have a list of users passed in from your Laravel controller

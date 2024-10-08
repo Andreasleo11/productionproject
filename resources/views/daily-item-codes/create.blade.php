@@ -272,9 +272,33 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
+
+
             const shiftContainer = document.getElementById('shift-container');
             const checkboxes = document.querySelectorAll('.shift-checkbox');
             const maxShifts = 3; // Limit to 3 shifts max
+
+            // Function to initialize Tom Select on dynamically added select elements
+            function initializeTomSelectForNewElements() {
+                document.querySelectorAll('.item-code-selector').forEach((selectElement) => {
+                    // Check if Tom Select is already initialized on this element
+                    if (!selectElement.tomselect) {
+                        try {
+                            new TomSelect(selectElement, {
+                                create: false,
+                                sortField: {
+                                    field: "text",
+                                    direction: 'asc',
+                                },
+                                maxOptions: 1000,
+                                placeholder: "Select item code",
+                            });
+                        } catch (error) {
+                            console.error("Error initializing TomSelect: ", error);
+                        }
+                    }
+                });
+            }
 
             const itemCodeMaxQuantities = {};
 
@@ -336,6 +360,9 @@
                             </div>
                         `;
                         shiftContainer.insertAdjacentHTML('beforeend', shiftHtml);
+
+                        // Initialize Tom Select after elements are dynamically added
+                        initializeTomSelectForNewElements();
                     }
                 });
 
