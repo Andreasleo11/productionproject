@@ -27,6 +27,8 @@ class SoData extends Model
         'is_finish',
         'is_done',
         'create_date',
+        'update_date',
+        'update_fulltime',
     ];
 
     public function scannedData()

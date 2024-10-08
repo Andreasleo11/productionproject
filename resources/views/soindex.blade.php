@@ -24,6 +24,24 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                @php
+                    $lastUploadTime = \App\Models\UpdateLog::latest()->first();
+                @endphp
+
+                @if ($lastUploadTime)
+                    <div class="flex justify-end mt-4">
+                        <div
+                            class="bg-gray-200 border border-gray-300 rounded-lg p-4 max-w-xs"
+                        >
+                            <p class="text-right text-gray-600">
+                                <strong>LAST UPLOAD</strong>
+                                <br />
+                                {{ \Carbon\Carbon::parse($lastUploadTime->last_upload_time)->timezone('Asia/Jakarta')->format('Y-m-d H:i:s') }}
+                            </p>
+                        </div>
+                    </div>
+                @endif
+
                 <div class="flex justify-center mt-4">
                     <form action="{{ route('import.so.data') }}" method="POST" enctype="multipart/form-data"
                         class="ml-4">

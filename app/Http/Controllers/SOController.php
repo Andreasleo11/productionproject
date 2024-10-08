@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ScannedData;
 use App\Models\SoData;
+use App\Models\UpdateLog;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\SoImport;
@@ -81,6 +82,7 @@ class SOController extends Controller
                 
             })
             ->values(); // Reset the keys after grouping
+            
         foreach ($data as $entry) {
             SoData::where('id', $entry->id)->update([
                 'is_finish' => $entry->is_finish,
@@ -212,6 +214,10 @@ class SOController extends Controller
             if (isset($row[10]) && !empty($row[10])) {
                 $row[10] = \Carbon\Carbon::createFromFormat('d/m/Y', $row[10])->format('Y-m-d');
             }
+
+            if (isset($row[11]) && !empty($row[11])) {
+                $row[11] = \Carbon\Carbon::createFromFormat('d/m/Y', $row[11])->format('Y-m-d');
+            }
            
             // Create a unique key based on columns 1 and 4 (doc_num and item_code)
             $uniqueKey = $row[1] . '-' . $row[4]; 
@@ -229,7 +235,7 @@ class SOController extends Controller
 
         // After processing, $uniqueRows will contain only unique rows with summed quantities and packaging quantities
         $data = array_values($uniqueRows);
-
+     
         // Store the processed file data into a CSV
         $excelFileName = 'sodata.csv';
         $excelFilePath = 'public/' . $excelFileName;
@@ -238,8 +244,15 @@ class SOController extends Controller
         // Import the processed file into the database
         Excel::import(new SoImport, storage_path('app/' . $excelFilePath));
 
+        UpdateLog::updateOrCreate(
+            [], // Empty array to match all records
+            ['last_upload_time' => now()] // Set the current time
+        );
+    
         // Flash a success message to the session
         session()->flash('success', 'Excel file processed and imported successfully.');
+
+        session(['last_upload_time' => now()]);
 
         // Redirect to the SO index route
         return redirect()->route('so.index');
