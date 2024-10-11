@@ -24,7 +24,7 @@
                         <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
                             <li class="inline-flex items-center">
                                 <a href="{{ route('daily-item-code.index') }}"
-                                    class="inline-flex items-center text-sm font-medium text-gray-400 hover:text-gray-300">
+                                    class="inline-flex items-center text-sm font-medium text-gray-400 hover:underline">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                         stroke-width="1.5" stroke="currentColor" class="w-3 h-3 me-2.5 size-4">
                                         <path stroke-linecap="round" stroke-linejoin="round"

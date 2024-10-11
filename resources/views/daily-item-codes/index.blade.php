@@ -231,6 +231,7 @@
             // Initialize Tom Select on the select element
             document.addEventListener('DOMContentLoaded', function() {
                 new TomSelect("#edit-item-code", {
+                    plugins: ['dropdown_input'],
                     create: false, // Prevent adding new options
                     sortField: {
                         field: "text",

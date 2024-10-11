@@ -66,6 +66,7 @@ new class extends Component {
                         ['name' => 'updated.barcode.item.position', 'label' => 'List All Item Barcode'],
                     ]" />
                 @endif
+
             </div>
         </div>
 

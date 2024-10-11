@@ -34,7 +34,7 @@
                         <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
                             <li class="inline-flex items-center">
                                 <a href="{{ route('daily-item-code.index') }}"
-                                    class="inline-flex items-center text-sm font-medium text-gray-400 hover:text-gray-300">
+                                    class="inline-flex items-center text-sm font-medium text-gray-400 hover:underline">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                         stroke-width="1.5" stroke="currentColor" class="w-3 h-3 me-2.5 size-4">
                                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -50,8 +50,8 @@
                                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
                                             stroke-width="2" d="m1 9 4-4-4-4" />
                                     </svg>
-                                    <a href="{{ route('daily-item-code.daily', ['date' => $selected_date]) }}"
-                                        class="ms-1 text-sm font-medium md:ms-2 text-gray-400 hover:text-300">Daily
+                                    <a href="{{ route('daily-item-code.daily', ['date' => $selectedDate]) }}"
+                                        class="ms-1 text-sm font-medium md:ms-2 text-gray-400 hover:underline">Daily
                                         Production Plan</a>
                                 </div>
                             </li>
@@ -69,10 +69,10 @@
                         </ol>
                     </nav>
                 </div>
-                <div class="bg-white shadow-md rounded-lg p-6">
-                    <h2 class="text-lg font-semibold mb-4">
-                        Assign Item Codes to Machines
-                    </h2>
+                <h2 class="text-2xl mb-4">
+                    Assign Item Codes to <span class="font-semibold">{{ $selectedMachine->name }}</span>
+                </h2>
+                <div class="bg-white shadow-md rounded-lg mt-8 p-6">
                     <form id="input-form" method="POST" action="{{ route('daily-item-code.store') }}">
                         @csrf
 
@@ -83,8 +83,8 @@
                                     Schedule Date
                                 </label>
                                 <input type="date" name="schedule_date" id="schedule_date"
-                                    class="block w-full py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-                                    value="{{ old('schedule_date', $selected_date) }}" required />
+                                    class="block w-full py-2 text-base border-gray-300 focus:outline-none sm:text-sm rounded-md bg-gray-100"
+                                    value="{{ old('schedule_date', $selectedDate) }}" required readonly />
                                 @error('schedule_date')
                                     <div class="text-red-500 text-sm mt-1">
                                         {{ $message }}
@@ -97,25 +97,29 @@
                                 <label class="block text-sm font-medium text-gray-700">
                                     Machine Name
                                 </label>
-                                <select id="machine-selector" name="machine_id"
-                                    class="block w-full py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-                                    required>
+                                <select id="machine-selector" name="machine_id_display"
+                                    class="block w-full py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md bg-gray-100"
+                                    disabled>
                                     <option value="" selected disabled>
                                         -- Select Machine Name --
                                     </option>
                                     @foreach ($machines as $machine)
-                                        <option value="{{ $machine->id }}" data-tipe-mesin="{{ $machine->tipe_mesin }}"
-                                            {{ old('machine_id', $machine_id) == $machine->id ? 'selected' : '' }}>
+                                        <option value="{{ $machine->id }}"
+                                            data-tipe-mesin="{{ $machine->tipe_mesin }}"
+                                            {{ old('machine_id', $selectedMachine->id) == $machine->id ? 'selected' : '' }}>
                                             {{ $machine->name }}
                                         </option>
                                     @endforeach
                                 </select>
+                                <input type="hidden" name="machine_id"
+                                    value="{{ old('machine_id', $selectedMachine->id) }}">
                                 @error('machine_id')
                                     <div class="text-red-500 text-sm mt-1">
                                         {{ $message }}
                                     </div>
                                 @enderror
                             </div>
+
                         </div>
 
                         <!-- Shift Checkboxes -->
@@ -272,8 +276,6 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-
-
             const shiftContainer = document.getElementById('shift-container');
             const checkboxes = document.querySelectorAll('.shift-checkbox');
             const maxShifts = 3; // Limit to 3 shifts max
@@ -285,6 +287,7 @@
                     if (!selectElement.tomselect) {
                         try {
                             new TomSelect(selectElement, {
+                                plugins: ['dropdown_input'],
                                 create: false,
                                 sortField: {
                                     field: "text",
@@ -300,10 +303,12 @@
                 });
             }
 
-            const itemCodeMaxQuantities = {};
+            const itemCodeMaxQuantities = {}; // Store max quantities for each item code
+            const shiftQuantities = {}; // Store quantities for each shift and item code
 
             const form = document.getElementById('input-form');
             const maxQuantityDisplay = document.getElementById('max-quantity-display');
+
             // Clear the container and add shift inputs dynamically
             function updateShiftInputs() {
                 shiftContainer.innerHTML = ''; // Clear the shift container
@@ -311,54 +316,101 @@
                 checkboxes.forEach(checkbox => {
                     if (checkbox.checked) {
                         const shift = checkbox.value;
-                        const shiftHtml = `
-                            <div class="space-y-4 mb-6 border border-gray-400 rounded-md p-3">
-                                <h3 class="text-md font-bold">Shift ${shift}</h3>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Item Code</label>
-                                    <select name="item_codes[${shift}]" required
-                                        class="item-code-selector mt-1 block w-full bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                                        <option value="" selected disabled>-- Select Item Code --</option>
-                                        @foreach ($itemcodes as $itemcode)
-                                            <option value="{{ $itemcode->item_code }}" data-tipe-mesin="{{ $itemcode->tipe_mesin }}">
-                                                {{ $itemcode->item_code }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Quantity</label>
-                                    <input type="number" name="quantities[${shift}]" id="quantity-input-${shift}" required
-                                        class="quantity-input mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                                </div>
-                                <!-- Start Date and End Date -->
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700">Start Date</label>
-                                        <input type="date" name="start_dates[${shift}]" required
-                                            class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700">End Date</label>
-                                        <input type="date" name="end_dates[${shift}]" required
-                                            class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                                    </div>
-                                </div>
 
-                                <!-- Start Time and End Time -->
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700">Start Time</label>
-                                        <input type="time" name="start_times[${shift}]" required
-                                            class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700">End Time</label>
-                                        <input type="time" name="end_times[${shift}]" required
-                                            class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                                    </div>
-                                </div>
+                        // Get the current date
+                        const today = new Date();
+
+                        // Helper function to format date as YYYY-MM-DD
+                        function formatDate(date) {
+                            const year = date.getFullYear();
+                            const month = ('0' + (date.getMonth() + 1)).slice(-2);
+                            const day = ('0' + date.getDate()).slice(-2);
+                            return `${year}-${month}-${day}`;
+                        }
+
+                        // Get tomorrow's date
+                        const tomorrow = new Date(today);
+                        tomorrow.setDate(today.getDate() + 1);
+
+                        // Define default values for each shift based on the current date
+                        const defaultStartDates = {
+                            'shift1': formatDate(today),
+                            'shift2': formatDate(today),
+                            'shift3': formatDate(today)
+                        };
+
+                        const defaultEndDates = {
+                            'shift1': formatDate(today),
+                            'shift2': formatDate(today),
+                            'shift3': formatDate(tomorrow)
+                        };
+
+                        const defaultStartTimes = {
+                            'shift1': '07:30',
+                            'shift2': '16:30',
+                            'shift3': '23:30'
+                        };
+
+                        const defaultEndTimes = {
+                            'shift1': '15:30',
+                            'shift2': '22:30',
+                            'shift3': '07:30'
+                        };
+
+                        // Retrieve the default values for this shift from the backend (blade syntax)
+                        const defaultStartDate = defaultStartDates['shift' + shift];
+                        const defaultEndDate = defaultEndDates['shift' + shift];
+                        const defaultStartTime = defaultStartTimes['shift' + shift];
+                        const defaultEndTime = defaultEndTimes['shift' + shift];
+
+                        const shiftHtml = `
+                    <div class="space-y-4 mb-6 border border-gray-400 rounded-md p-3">
+                        <h3 class="text-md font-bold">Shift ${shift}</h3>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Item Code</label>
+                            <select name="item_codes[${shift}]" required
+                                class="item-code-selector mt-1 block w-full bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                <option value="" selected disabled>-- Select Item Code --</option>
+                                @foreach ($itemcodes as $itemcode)
+                                    <option value="{{ $itemcode->item_code }}" data-tipe-mesin="{{ $itemcode->tipe_mesin }}">
+                                        {{ $itemcode->item_code }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Quantity</label>
+                            <input type="number" name="quantities[${shift}]" id="quantity-input-${shift}" required
+                                class="quantity-input mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        </div>
+                        <!-- Start Date and End Date -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Start Date</label>
+                                <input type="date" name="start_dates[${shift}]" value="${defaultStartDate}" required
+                                    class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                             </div>
-                        `;
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">End Date</label>
+                                <input type="date" name="end_dates[${shift}]" value="${defaultEndDate}" required
+                                    class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            </div>
+                        </div>
+
+                        <!-- Start Time and End Time -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Start Time</label>
+                                <input type="time" name="start_times[${shift}]" value="${defaultStartTime}" required
+                                    class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">End Time</label>
+                                <input type="time" name="end_times[${shift}]" value="${defaultEndTime}" required
+                                    class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            </div>
+                        </div>
+                    </div>
+                `;
                         shiftContainer.insertAdjacentHTML('beforeend', shiftHtml);
 
                         // Initialize Tom Select after elements are dynamically added
@@ -366,132 +418,34 @@
                     }
                 });
 
-                // Function to trigger AJAX call
-                function triggerAjax(shift, itemCode, quantity) {
-                    // Check if we already have a max_quantity stored for this item_code
-                    let maxQuantity = itemCodeMaxQuantities[itemCode] || null;
+                // Add event listeners for item code changes and quantity inputs
+                addItemCodeAndQuantityListeners();
+            }
 
-                    if (!maxQuantity && itemCode && quantity) {
-                        // Make AJAX call if max_quantity isn't stored yet
-                        fetch("{{ route('calculate.item') }}", {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                                },
-                                body: JSON.stringify({
-                                    item_code: itemCode,
-                                    quantity: quantity
-                                })
-                            })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.error) {
-                                    alert(data.error);
-                                } else {
-                                    // Store the max_quantity for this item_code
-                                    itemCodeMaxQuantities[itemCode] = data.max_quantity - quantity;
-                                    console.log('Calculated Data:', data);
-
-                                    // Update the display with item_code and updated max_quantity
-                                    updateMaxQuantityDisplay(itemCode, itemCodeMaxQuantities[itemCode]);
-
-                                    if (!maxQuantity && itemCode && quantity >= 0) {
-                                        fetch("{{ route('calculate.item') }}", {
-                                                method: 'POST',
-                                                headers: {
-                                                    'Content-Type': 'application/json',
-                                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                                                },
-                                                body: JSON.stringify({
-                                                    item_code: itemCode,
-                                                    quantity: quantity
-                                                })
-                                            })
-                                            .then(response => response.json())
-                                            .then(data => {
-                                                if (data.error) {
-                                                    alert(data.error);
-                                                } else {
-                                                    let remainingQuantity = data.max_quantity - quantity;
-                                                    itemCodeMaxQuantities[itemCode] = remainingQuantity;
-
-                                                    // Update the UI with the remaining quantity
-                                                    updateMaxQuantityDisplay(itemCode, remainingQuantity);
-                                                    // Check if the next shift has the same item_code, and continue calculation
-                                                    processNextShift(shift, itemCode);
-                                                }
-                                            })
-                                            .catch(error => {
-                                                console.error('Error:', error);
-                                            });
-                                    }
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Error:', error);
-                            });
-                    }
-                    // Handle existing maxQuantity logic (not shown for brevity)
-                }
-
-                // Helper function to reset all quantities for the given item_code
-                function resetAllQuantitiesForItem(itemCode) {
-                    itemCodeMaxQuantities[itemCode] = originalMaxQuantities[itemCode];
-                    updateMaxQuantityDisplay(itemCode, '');
-                    document.querySelectorAll(`select[name^="item_codes"]`).forEach((selector) => {
-                        if (selector.value === itemCode) {
-                            const shift = selector.name.match(/\d+/)[0];
-                            const quantityInput = document.querySelector(
-                                `input[name="quantities[${shift}]"]`);
-                            if (quantityInput) {
-                                quantityInput.value = ''; // Clear the quantity input field
-                            }
-                        }
-                    });
-                }
-
-                function updateMaxQuantityDisplay(itemCode, maxQuantity) {
-                    const displayContainer = document.getElementById('max-quantity-display');
-                    let itemDisplay = document.querySelector(`[data-item-code="${itemCode}"]`);
-                    if (!itemDisplay) {
-                        itemDisplay = document.createElement('div');
-                        itemDisplay.setAttribute('data-item-code', itemCode);
-                        displayContainer.appendChild(itemDisplay);
-                    }
-                    itemDisplay.textContent = `${itemCode}: ${maxQuantity}`;
-                }
-
-                // Function to process the next shift with the same item_code
-                function processNextShift(currentShift, itemCode) {
-                    const nextShift = parseInt(currentShift) + 1;
-                    const nextItemCodeSelector = document.querySelector(`select[name="item_codes[${nextShift}]"]`);
-                    const nextQuantityInput = document.querySelector(`input[name="quantities[${nextShift}]"]`);
-
-                    if (nextItemCodeSelector && nextItemCodeSelector.value === itemCode && nextQuantityInput) {
-                        const nextQuantity = parseFloat(nextQuantityInput.value);
-                        if (nextQuantity) {
-                            triggerAjax(nextShift, itemCode, nextQuantity);
-                        }
-                    }
-                }
-
+            // Function to add event listeners to item code and quantity inputs
+            function addItemCodeAndQuantityListeners() {
                 // Add event listener for item code change
                 document.querySelectorAll('.item-code-selector').forEach(selector => {
                     selector.addEventListener('change', function() {
                         const itemCode = this.value;
                         const shift = this.name.match(/\d+/)[
                             0]; // Extract shift number from name attribute
-                        const quantity = document.querySelector(
-                            `input[name="quantities[${shift}]"]`).value;
+                        const quantityInput = document.querySelector(
+                            `input[name="quantities[${shift}]"]`);
 
-                        // Trigger AJAX when both item_code and quantity are provided
-                        if (itemCode && quantity) {
-                            triggerAjax(shift, itemCode, quantity);
+                        // Clear the quantity input when item code changes
+                        if (quantityInput) {
+                            quantityInput.value = '';
+                        }
+
+                        // Trigger AJAX to fetch max quantity when the item code is selected
+                        if (itemCode) {
+                            triggerAjax(shift, itemCode);
                         }
                     });
                 });
 
+                // Add event listener for quantity inputs
                 document.querySelectorAll('.quantity-input').forEach(input => {
                     let typingTimer; // Timer identifier
                     const doneTypingInterval = 500; // Time in ms, 0.5 seconds
@@ -505,7 +459,7 @@
                                 `select[name="item_codes[${shift}]"]`).value;
                             const quantity = this.value;
 
-                            // Only call triggerAjax if both itemCode and quantity are present
+                            // Trigger AJAX and check max quantity for the input value
                             if (itemCode && quantity) {
                                 triggerAjax(shift, itemCode, quantity);
                             }
@@ -518,20 +472,116 @@
                 });
             }
 
+            // Function to trigger AJAX call for max quantity
+            function triggerAjax(shift, itemCode, quantity = 0) {
+                // Check if we already have a max_quantity stored for this item_code
+                let maxQuantity = itemCodeMaxQuantities[itemCode] || null;
+
+                // If no max quantity is stored, fetch it from the server
+                if (!maxQuantity) {
+                    fetch("{{ route('calculate.item') }}", {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({
+                                item_code: itemCode
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.error) {
+                                alert(data.error);
+                            } else {
+                                itemCodeMaxQuantities[itemCode] = data.max_quantity; // Store the max quantity
+                                updateQuantityCheck(shift, itemCode, quantity);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                        });
+                } else {
+                    updateQuantityCheck(shift, itemCode, quantity); // Use stored max quantity
+                }
+            }
+
+            // Function to check and update quantity for the same item code across shifts
+            function updateQuantityCheck(currentShift, itemCode, quantity) {
+                const quantityInputs = document.querySelectorAll(`input[name^="quantities"]`);
+                let totalQuantity = 0;
+
+                // Track the input field for the current shift
+                const currentQuantityInput = document.querySelector(`input[name="quantities[${currentShift}]"]`);
+
+                // Sum the quantities for the same item code across shifts
+                quantityInputs.forEach(input => {
+                    const shift = input.name.match(/\d+/)[0]; // Get the shift number
+                    const selectedItemCode = document.querySelector(`select[name="item_codes[${shift}]"]`)
+                        .value;
+
+                    if (selectedItemCode === itemCode) {
+                        const shiftQuantity = parseFloat(input.value) || 0;
+                        totalQuantity += shiftQuantity;
+                    }
+                });
+
+                // Get the max quantity for the item code
+                const maxQuantity = itemCodeMaxQuantities[itemCode];
+
+                // Compare the total quantity to the max quantity
+                if (totalQuantity > maxQuantity) {
+                    alert(
+                        `The total quantity for item code ${itemCode} exceeds the max quantity of ${maxQuantity}.`
+                    );
+
+                    // Reset the quantity input for the current shift if exceeded
+                    if (currentQuantityInput) {
+                        const remainingQuantity = maxQuantity - (totalQuantity -
+                            quantity); // Calculate remaining quantity before the current input
+                        currentQuantityInput.value = remainingQuantity > 0 ? remainingQuantity :
+                            ''; // Set to remaining quantity or empty if none
+                    }
+
+                    // After the alert is dismissed, reset the max quantity display for this item code
+                    updateMaxQuantityDisplay(itemCode, maxQuantity);
+                } else {
+                    // Update the display of remaining quantity if no alert is shown
+                    updateMaxQuantityDisplay(itemCode, maxQuantity - totalQuantity);
+                }
+                // Update the display of remaining quantity or alert if exceeded
+            }
+
+            // Function to update the max quantity display based on the selected item code and shift
+            function updateMaxQuantityDisplay(shift, itemCode, maxQuantity) {
+                const displayContainer = document.getElementById('max-quantity-display');
+
+                // Clear the previous max quantity for this shift before adding a new one
+                let existingDisplay = document.querySelector(`[data-shift="${shift}"]`);
+                if (existingDisplay) {
+                    existingDisplay.remove(); // Remove old display for this shift
+                }
+
+                // Show the new max quantity for the selected item code
+                const itemDisplay = document.createElement('div');
+                itemDisplay.setAttribute('data-shift', shift); // Associate display with the shift
+                itemDisplay.textContent = `Shift ${shift} - ${itemCode}: Max quantity: ${maxQuantity}`;
+                displayContainer.appendChild(itemDisplay);
+            }
+
+            // Function to clear max quantity display when item code is changed or cleared
+            function clearMaxQuantityDisplay(shift) {
+                let existingDisplay = document.querySelector(`[data-shift="${shift}"]`);
+                if (existingDisplay) {
+                    existingDisplay.remove();
+                }
+            }
+
             // Update shift inputs on checkbox change
             checkboxes.forEach(checkbox => {
                 checkbox.addEventListener('change', function() {
-                    if (checkbox.checked) {
-                        const checkedCount = Array.from(checkboxes).filter(chk => chk.checked)
-                            .length;
-                        if (checkedCount <= maxShifts) {
-                            updateShiftInputs();
-                        } else {
-                            checkbox.checked = false; // Prevent selecting more than maxShifts
-                        }
-                    } else {
-                        updateShiftInputs(); // Update the UI
-                    }
+                    updateShiftInputs
+                        (); // Update the shift inputs dynamically when checkboxes are changed
                 });
             });
         });

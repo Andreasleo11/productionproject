@@ -33,10 +33,12 @@ class DailyItemCodeController extends Controller
             ->get();
         $itemcodes = MasterListItem::get();
 
-        $selected_date = $request->selected_date;
-        $machine_id = $request->machine_id;
+        $selectedDate = $request->selected_date;
+        $machineId = $request->machine_id;
 
-        return view('daily-item-codes.create', compact('machines', 'itemcodes', 'selected_date', 'machine_id'));
+        $selectedMachine = User::where('id', $machineId)->first();
+
+        return view('daily-item-codes.create', compact('machines', 'itemcodes', 'selectedDate', 'selectedMachine'));
     }
 
 
