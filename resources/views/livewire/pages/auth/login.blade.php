@@ -47,15 +47,18 @@ new #[Layout('layouts.guest')] class extends Component {
         <!-- Operator Switch -->
         <div class="mb-4">
             <label for="isOperator" class="inline-flex items-center">
+                <x-input-label for="isOperator" :value="__('Are you an Operator?')"></x-input-label>
                 <input id="isOperator" type="checkbox" x-model="isOperator"
-                    class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
-                <span class="ms-2 text-sm text-gray-600">{{ __('Are you an Operator?') }}</span>
+                    class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500 ml-2">
+                <span class="ms-2 text-sm text-gray-600">{{ __('Yes') }}</span>
             </label>
         </div>
 
+        <hr>
+
         <!-- User Select (Shown when operator mode is active) -->
-        <div x-show="isOperator" class="mb-4">
-            <x-input-label for="user" :value="__('Select User')" />
+        <div x-show="isOperator" class="mt-4">
+            <x-input-label for="user" :value="__('Select Machine')" />
             <select id="user"
                 x-on:change="
                 selectedUserEmail = $event.target.options[$event.target.selectedIndex].dataset.email;
@@ -64,7 +67,7 @@ new #[Layout('layouts.guest')] class extends Component {
                 $wire.set('form.password', selectedUserPassword);"
                 class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
                 name="user">
-                <option value="">-- Select a user --</option>
+                <option value="">-- Select a machine --</option>
                 @foreach ($users as $user)
                     <option value="{{ $user->id }}" data-email="{{ $user->email }}"
                         data-name="{{ $user->name }}">

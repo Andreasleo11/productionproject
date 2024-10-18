@@ -34,3 +34,20 @@
         </div>
     </div>
 </div>
+
+<a href="https://wa.me/+6285347666903?text=Your%20predefined%20message" target="_blank"
+    class="hover:underline text-blue-500 hover:text-blue-600">
+    Send Message via WhatsApp
+</a>
+
+<script type="module">
+    Fancybox.bind('[data-fancybox="gallery"]', {
+        Thumbs: {
+            autoStart: true,
+        },
+        Image: {
+            zoom: true,
+        },
+        transitionEffect: "fade",
+    });
+</script>

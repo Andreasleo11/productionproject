@@ -43,5 +43,10 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('view-ppic-links', function ($user) {
             return $user->hasRoleAccess('PPIC');
         });
+
+        // Define gate for Maintenance links
+        Gate::define('view-maintenance-links', function($user) {
+            return $user->hasRoleAccess('Maintenance');
+        });
     }
 }
