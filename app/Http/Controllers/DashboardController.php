@@ -30,6 +30,7 @@ class DashboardController extends Controller
         // Check if the user's specification_id is 2
         if ($user->specification_id == 2) {
             $datas = DailyItemCode::where('user_id', $user->id)
+                ->whereDate('schedule_date', Carbon::today())
                 ->with('masterItem')
                 ->get();
             foreach ($datas as $data) {
@@ -549,7 +550,8 @@ class DashboardController extends Controller
 
                 $dataWithSpkNo = ProductionReport::where('spk_no', $uniquedatum['spk'])->first();
                 if($dataWithSpkNo){
-                    return redirect()->back()->with('error', "You already submit spk number $dataWithSpkNo->spk_no!");
+                    $dataWithSpkNo->update($dataSendToPpic);
+                    return redirect()->back()->with('success', "Successfully updating spk number $dataWithSpkNo->spk_no");
                 } else {
                     ProductionReport::create($dataSendToPpic);
                     // Send mail notification
@@ -559,6 +561,12 @@ class DashboardController extends Controller
             }
 
         }
+
+        // Reset the machine job
+        $machineJob = MachineJob::where('user_id', auth()->user()->id)->first();
+        $machineJob->update([
+            'item_code' => null,
+        ]);
 
         return redirect()->back()->with([
             'success' => 'Data sent to PPIC!',
@@ -586,11 +594,9 @@ class DashboardController extends Controller
             }
             // dd($spk);
         }
-        // Get the currently authenticated user
-        $user = auth()->user();
 
         // Find all jobs related to the user
-        $jobs = MachineJob::where('user_id', $user->id)->get();
+        $jobs = MachineJob::where('user_id', auth()->user()->id)->get();
 
         // Loop through the jobs and reset the item_code (or other relevant fields)
         foreach ($jobs as $job) {

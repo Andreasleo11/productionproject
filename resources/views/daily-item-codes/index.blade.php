@@ -230,7 +230,7 @@
         <script>
             // Initialize Tom Select on the select element
             document.addEventListener('DOMContentLoaded', function() {
-                new TomSelect("#edit-item-code", {
+                const editItemCodeTomSelect = new TomSelect("#edit-item-code", {
                     plugins: ['dropdown_input'],
                     create: false, // Prevent adding new options
                     sortField: {
@@ -464,9 +464,12 @@
                     // Find the event data using the event ID from dailyItemCodes
                     const eventData = dailyItemCodes.find(item => item.id === eventId);
 
+                    // Get the existing TomSelect instance
+                    const editItemCodeTomSelect = document.getElementById("edit-item-code").tomselect;
+
                     // Populate the form with the event data
                     document.getElementById("edit-daily-item-id").value = eventData.id;
-                    document.getElementById("edit-item-code").value = eventData.item_code;
+                    editItemCodeTomSelect.setValue(eventData.item_code); // Set TomSelect value
                     document.getElementById("edit-quantity").value = eventData.quantity;
                     document.getElementById("edit-shift").value = eventData.shift;
                     document.getElementById("edit-start-date").value = eventData.start_date;

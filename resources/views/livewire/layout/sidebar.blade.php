@@ -67,6 +67,13 @@ new class extends Component {
                     ]" />
                 @endif
 
+                <!-- Maintenance Links -->
+                @if (auth()->user()->can('view-maintenance-links'))
+                    <!-- Example -->
+                    <livewire:sidebar-link href="{{ route('daily-item-code.index') }}" label="Daily Production Plan"
+                        :active="request()->routeIs('daily-item-code.index')" wire:navigate />
+                @endif
+
             </div>
         </div>
 

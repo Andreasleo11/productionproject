@@ -145,14 +145,15 @@
                                                                 </tr>
                                                             </thead>
                                                             <tbody id="details-body-{{ $machine->id }}">
-                                                                @foreach ($machine->dailyItemCode as $itemCode)
+                                                                @foreach ($machine->dailyItemCode->filter(function ($itemCode) use ($selectedDate) {
+        return $itemCode->schedule_date == $selectedDate;
+    }) as $itemCode)
                                                                     <tr class="border-b details-row"
                                                                         data-schedule-date="{{ $itemCode->schedule_date }}">
                                                                         <td class="py-2 px-4">
                                                                             {{ $itemCode->item_code }}</td>
                                                                         <td class="py-2 px-4">
-                                                                            {{ $itemCode->quantity }}
-                                                                        </td>
+                                                                            {{ $itemCode->quantity }}</td>
                                                                         <td class="py-2 px-4">{{ $itemCode->shift }}
                                                                         </td>
                                                                         <td class="py-2 px-4">
@@ -162,11 +163,9 @@
                                                                         <td class="py-2 px-4">
                                                                             {{ $itemCode->start_time }}</td>
                                                                         <td class="py-2 px-4">
-                                                                            {{ $itemCode->end_date }}
-                                                                        </td>
+                                                                            {{ $itemCode->end_date }}</td>
                                                                         <td class="py-2 px-4">
-                                                                            {{ $itemCode->end_time }}
-                                                                        </td>
+                                                                            {{ $itemCode->end_time }}</td>
                                                                     </tr>
                                                                 @endforeach
                                                             </tbody>

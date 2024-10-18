@@ -41,6 +41,11 @@ class SpecificationsTableSeeder extends Seeder
                 'created_at' => $timestamp,
                 'updated_at' => $timestamp,
             ],
+            [
+                'name' => 'Maintenance',
+                'created_at' => $timestamp,
+                'updated_at' => $timestamp,
+            ],
             // Add more entries if needed
         ]);
     }

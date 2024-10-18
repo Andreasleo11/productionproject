@@ -127,9 +127,6 @@
                             <label class="block text-sm font-medium text-gray-700">
                                 Select Shifts
                             </label>
-                            <div id="max-quantity-display" class="max-quantity-display">
-                                Available Quantity :
-                            </div>
                             <div class="flex space-x-4">
                                 <label class="flex items-center">
                                     <input type="checkbox" class="shift-checkbox" name="shifts[]" value="1"
@@ -154,111 +151,13 @@
                             @enderror
                         </div>
 
+                        <div id="max-quantity-display" class="max-quantity-display">
+
+                        </div>
+
                         <!-- Dynamic Shift Inputs -->
                         <div id="shift-container">
-                            @if (old('shifts'))
-                                @foreach (old('shifts') as $shift)
-                                    <div class="space-y-4 mb-6 border border-gray-400 rounded-md p-3">
-                                        <h3 class="text-md font-bold">
-                                            Shift {{ $shift }}
-                                        </h3>
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700">
-                                                Item Code
-                                            </label>
-                                            <select name="item_codes[{{ $shift }}]" required
-                                                class="item-code-selector mt-1 block w-full bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                                                <option value="" disabled>
-                                                    -- Select Item Code --
-                                                </option>
-                                                @foreach ($itemcodes as $itemcode)
-                                                    <option value="{{ $itemcode->item_code }}"
-                                                        {{ old("item_codes.$shift") == $itemcode->item_code ? 'selected' : '' }}>
-                                                        {{ $itemcode->item_code }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                            @error("item_codes.$shift")
-                                                <div class="text-red-500 text-sm mt-1">
-                                                    {{ $message }}
-                                                </div>
-                                            @enderror
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700">
-                                                Quantity
-                                            </label>
-                                            <input type="number" name="quantities[{{ $shift }}]"
-                                                value="{{ old("quantities.$shift") }}" required
-                                                class="quantity-input mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
-                                            @error("quantities.$shift")
-                                                <div class="text-red-500 text-sm mt-1">
-                                                    {{ $message }}
-                                                </div>
-                                            @enderror
-                                        </div>
 
-                                        <!-- Start and End Date Inputs -->
-                                        <div class="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <label class="block text-sm font-medium text-gray-700">
-                                                    Start Date
-                                                </label>
-                                                <input type="date" name="start_dates[{{ $shift }}]"
-                                                    value="{{ old("start_dates.$shift") }}" required
-                                                    class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
-                                                @error("start_dates.$shift")
-                                                    <div class="text-red-500 text-sm mt-1">
-                                                        {{ $message }}
-                                                    </div>
-                                                @enderror
-                                            </div>
-                                            <div>
-                                                <label class="block text-sm font-medium text-gray-700">
-                                                    End Date
-                                                </label>
-                                                <input type="date" name="end_dates[{{ $shift }}]"
-                                                    value="{{ old("end_dates.$shift") }}" required
-                                                    class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
-                                                @error("end_dates.$shift")
-                                                    <div class="text-red-500 text-sm mt-1">
-                                                        {{ $message }}
-                                                    </div>
-                                                @enderror
-                                            </div>
-                                        </div>
-
-                                        <div class="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <label class="block text-sm font-medium text-gray-700">
-                                                    Start Time
-                                                </label>
-                                                <input type="time" name="start_times[{{ $shift }}]"
-                                                    required value="{{ old("start_times.$shift") }}"
-                                                    class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
-                                                @error("start_times.$shift")
-                                                    <div class="text-red-500 text-sm mt-1">
-                                                        {{ $message }}
-                                                    </div>
-                                                @enderror
-                                            </div>
-                                            <div>
-                                                <label class="block text-sm font-medium text-gray-700">
-                                                    End Time
-                                                </label>
-                                                <input type="time" name="end_times[{{ $shift }}]" required
-                                                    value="{{ old("end_times.$shift") }}"
-                                                    class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
-                                                @error("end_times.$shift")
-                                                    <div class="text-red-500 text-sm mt-1">
-                                                        {{ $message }}
-                                                    </div>
-                                                @enderror
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            @endif
                         </div>
 
                         <!-- Submit Button -->
@@ -287,7 +186,6 @@
                     if (!selectElement.tomselect) {
                         try {
                             new TomSelect(selectElement, {
-                                plugins: ['dropdown_input'],
                                 create: false,
                                 sortField: {
                                     field: "text",
@@ -307,26 +205,61 @@
             const shiftQuantities = {}; // Store quantities for each shift and item code
 
             const form = document.getElementById('input-form');
+
+            let formChanged = false;
+            let formSubmitting = false;
+
+            form.addEventListener('input', function() {
+                formChanged = true;
+            });
+
+            // Beforeunload event to show confirmation dialog
+            window.addEventListener('beforeunload', function(event) {
+                if (formChanged && !formSubmitting) {
+                    // Standard message for modern browsers
+                    event.preventDefault();
+                    event.returnValue = '';
+
+                    // Custom message won't always show in all browsers but can still be used
+                    return "Changes you made may not be saved.";
+                }
+            });
+
+            // Disable the alert when the form is submitted
+            form.addEventListener('submit', function() {
+                formSubmitting = true; // Set this to true to prevent the alert from showing
+            });
+
             const maxQuantityDisplay = document.getElementById('max-quantity-display');
 
             // Clear the container and add shift inputs dynamically
             function updateShiftInputs() {
                 shiftContainer.innerHTML = ''; // Clear the shift container
 
+                // Assuming checkboxes is a NodeList or HTMLCollection, convert it to an array
+                const checkboxesArray = Array.from(checkboxes);
+
+                // Get the max-quantity-display element
+                const maxQuantityDisplay = document.getElementById('max-quantity-display');
+
+                // Check if any checkbox is checked
+                const anyCheckboxChecked = checkboxesArray.some(checkbox => checkbox.checked);
+
+                // Show or hide the max-quantity-display based on the checkbox status
+                if (anyCheckboxChecked) {
+                    maxQuantityDisplay.style.display = 'block'; // Show the element
+                } else {
+                    maxQuantityDisplay.style.display = 'none'; // Hide the element
+                }
+
+
                 checkboxes.forEach(checkbox => {
                     if (checkbox.checked) {
                         const shift = checkbox.value;
+                        const selectedDate = new Date("{{ $selectedDate }}");
 
                         // Get the current date
-                        const today = new Date();
-
-                        // Helper function to format date as YYYY-MM-DD
-                        function formatDate(date) {
-                            const year = date.getFullYear();
-                            const month = ('0' + (date.getMonth() + 1)).slice(-2);
-                            const day = ('0' + date.getDate()).slice(-2);
-                            return `${year}-${month}-${day}`;
-                        }
+                        const today = new Date(selectedDate);
 
                         // Get tomorrow's date
                         const tomorrow = new Date(today);
@@ -364,34 +297,150 @@
                         const defaultEndTime = defaultEndTimes['shift' + shift];
 
                         const shiftHtml = `
-                    <div class="space-y-4 mb-6 border border-gray-400 rounded-md p-3">
-                        <h3 class="text-md font-bold">Shift ${shift}</h3>
+                            <div class="shift-wrapper space-y-4 mb-6 border border-gray-400 rounded-md p-3" data-shift="${shift}">
+                                <h3 class="text-md font-bold">Shift ${shift}</h3>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Item Code</label>
+                                    <select name="item_codes[${shift}][]" required
+                                        class="item-code-selector mt-1 block w-full bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                        <option value="" selected disabled>-- Select Item Code --</option>
+                                        @foreach ($masterListItem as $masterItem)
+                                            <option value="{{ $masterItem->item_code }}" data-tipe-mesin="{{ $masterItem->tipe_mesin }}">
+                                                {{ $masterItem->item_code }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Quantity</label>
+                                    <input type="number" name="quantities[${shift}][]" id="quantity-input-${shift}" required
+                                        class="quantity-input mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                </div>
+                                <!-- Start Date and End Date -->
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Start Date</label>
+                                        <input type="date" name="start_dates[${shift}][]" value="${defaultStartDate}" required
+                                            class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">End Date</label>
+                                        <input type="date" name="end_dates[${shift}][]" value="${defaultEndDate}" required
+                                            class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                    </div>
+                                </div>
+
+                                <!-- Start Time and End Time -->
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Start Time</label>
+                                        <input type="time" name="start_times[${shift}][]" value="${defaultStartTime}" required
+                                            class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">End Time</label>
+                                        <input type="time" name="end_times[${shift}][]" value="${defaultEndTime}" required
+                                            class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                    </div>
+                                </div>
+                                <button type="button" class="add-more-button-${shift} bg-indigo-500 text-white px-4 py-2 mt-4 rounded-md">Add Another Item</button>
+                            </div>
+                            `;
+                        shiftContainer.insertAdjacentHTML('beforeend', shiftHtml);
+
+                        // Initialize Tom Select after elements are dynamically added
+                        initializeTomSelectForNewElements();
+
+                        // Add the event listener for "Add Another Item" button
+                        document.querySelectorAll(`.add-more-button-${shift}`).forEach(button => {
+                            button.addEventListener('click', function() {
+                                const shiftWrapper = this.closest('.shift-wrapper');
+                                addAdditionalInputs(shiftWrapper, shift);
+                            });
+                        });
+                    }
+                });
+
+                // Add event listeners for item code changes and quantity inputs
+                addItemCodeAndQuantityListeners();
+            }
+
+            // Helper function to format date as YYYY-MM-DD
+            function formatDate(date) {
+                const year = date.getFullYear();
+                const month = ('0' + (date.getMonth() + 1)).slice(-2);
+                const day = ('0' + date.getDate()).slice(-2);
+                return `${year}-${month}-${day}`;
+            }
+
+            // Function to add additional inputs dynamically
+            function addAdditionalInputs(shiftWrapper, shift) {
+                const selectedDate = new Date("{{ $selectedDate }}");
+
+                // Get the current date
+                const today = new Date(selectedDate);
+
+                // Get tomorrow's date
+                const tomorrow = new Date(today);
+                tomorrow.setDate(today.getDate() + 1);
+
+                // Define default values for each shift based on the current date
+                const defaultStartDates = {
+                    'shift1': formatDate(today),
+                    'shift2': formatDate(today),
+                    'shift3': formatDate(today)
+                };
+
+                const defaultEndDates = {
+                    'shift1': formatDate(today),
+                    'shift2': formatDate(today),
+                    'shift3': formatDate(tomorrow)
+                };
+
+                const defaultStartTimes = {
+                    'shift1': '07:30',
+                    'shift2': '16:30',
+                    'shift3': '23:30'
+                };
+
+                const defaultEndTimes = {
+                    'shift1': '15:30',
+                    'shift2': '22:30',
+                    'shift3': '07:30'
+                };
+
+                const defaultStartDate = defaultStartDates['shift' + shift];
+                const defaultEndDate = defaultEndDates['shift' + shift];
+                const defaultStartTime = defaultStartTimes['shift' + shift];
+                const defaultEndTime = defaultEndTimes['shift' + shift];
+
+                const additionalHtml = `
+                    <div class="additional-inputs space-y-4 border border-gray-300 rounded-md p-3 mt-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Item Code</label>
-                            <select name="item_codes[${shift}]" required
+                            <select name="item_codes[${shift}][]" required
                                 class="item-code-selector mt-1 block w-full bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                                 <option value="" selected disabled>-- Select Item Code --</option>
-                                @foreach ($itemcodes as $itemcode)
-                                    <option value="{{ $itemcode->item_code }}" data-tipe-mesin="{{ $itemcode->tipe_mesin }}">
-                                        {{ $itemcode->item_code }}</option>
+                                @foreach ($masterListItem as $masterItem)
+                                    <option value="{{ $masterItem->item_code }}" data-tipe-mesin="{{ $masterItem->tipe_mesin }}">
+                                        {{ $masterItem->item_code }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Quantity</label>
-                            <input type="number" name="quantities[${shift}]" id="quantity-input-${shift}" required
+                            <input type="number" name="quantities[${shift}][]" required
                                 class="quantity-input mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                         </div>
                         <!-- Start Date and End Date -->
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Start Date</label>
-                                <input type="date" name="start_dates[${shift}]" value="${defaultStartDate}" required
+                                <input type="date" name="start_dates[${shift}][]" value="${defaultStartDate}" required
                                     class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">End Date</label>
-                                <input type="date" name="end_dates[${shift}]" value="${defaultEndDate}" required
+                                <input type="date" name="end_dates[${shift}][]" value="${defaultEndDate}" required
                                     class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                             </div>
                         </div>
@@ -400,27 +449,26 @@
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Start Time</label>
-                                <input type="time" name="start_times[${shift}]" value="${defaultStartTime}" required
+                                <input type="time" name="start_times[${shift}][]" value="${defaultStartTime}" required
                                     class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">End Time</label>
-                                <input type="time" name="end_times[${shift}]" value="${defaultEndTime}" required
+                                <input type="time" name="end_times[${shift}][]" value="${defaultEndTime}" required
                                     class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                             </div>
                         </div>
                     </div>
-                `;
-                        shiftContainer.insertAdjacentHTML('beforeend', shiftHtml);
+                    `;
 
-                        // Initialize Tom Select after elements are dynamically added
-                        initializeTomSelectForNewElements();
-                    }
-                });
+                shiftWrapper.insertAdjacentHTML('beforeend', additionalHtml);
 
-                // Add event listeners for item code changes and quantity inputs
+                // Reinitialize any necessary event listeners or plugins for the new inputs
+                initializeTomSelectForNewElements();
                 addItemCodeAndQuantityListeners();
             }
+
+
 
             // Function to add event listeners to item code and quantity inputs
             function addItemCodeAndQuantityListeners() {
@@ -456,7 +504,7 @@
                             const shift = this.name.match(/\d+/)[
                                 0]; // Extract shift number from name attribute
                             const itemCode = document.querySelector(
-                                `select[name="item_codes[${shift}]"]`).value;
+                                `select[name="item_codes[${shift}][]"]`).value;
                             const quantity = this.value;
 
                             // Trigger AJAX and check max quantity for the input value
@@ -499,7 +547,7 @@
                             }
                         })
                         .catch(error => {
-                            console.error('Error:', error);
+                            console.error('Error fetching max quantity:', error);
                         });
                 } else {
                     updateQuantityCheck(shift, itemCode, quantity); // Use stored max quantity
@@ -517,7 +565,7 @@
                 // Sum the quantities for the same item code across shifts
                 quantityInputs.forEach(input => {
                     const shift = input.name.match(/\d+/)[0]; // Get the shift number
-                    const selectedItemCode = document.querySelector(`select[name="item_codes[${shift}]"]`)
+                    const selectedItemCode = document.querySelector(`select[name="item_codes[${shift}][]"]`)
                         .value;
 
                     if (selectedItemCode === itemCode) {
@@ -544,10 +592,16 @@
                     }
 
                     // After the alert is dismissed, reset the max quantity display for this item code
-                    updateMaxQuantityDisplay(itemCode, maxQuantity);
+                    updateMaxQuantityDisplay(currentShift, itemCode, maxQuantity);
                 } else {
                     // Update the display of remaining quantity if no alert is shown
-                    updateMaxQuantityDisplay(itemCode, maxQuantity - totalQuantity);
+                    updateMaxQuantityDisplay(currentShift, itemCode, maxQuantity - totalQuantity);
+                }
+
+                // Handle when maxQuantity is 0 gracefully, still allow displaying shift container
+                if (maxQuantity === 0) {
+                    alert(`The item code ${itemCode} has no available quantity.`);
+                    updateMaxQuantityDisplay(currentShift, itemCode, 0);
                 }
                 // Update the display of remaining quantity or alert if exceeded
             }
@@ -556,16 +610,19 @@
             function updateMaxQuantityDisplay(shift, itemCode, maxQuantity) {
                 const displayContainer = document.getElementById('max-quantity-display');
 
-                // Clear the previous max quantity for this shift before adding a new one
-                let existingDisplay = document.querySelector(`[data-shift="${shift}"]`);
+                // Clear the previous max quantity for this shift by targeting the specific id
+                let existingDisplay = document.getElementById(`item-max-quantity-display-${shift}`);
                 if (existingDisplay) {
                     existingDisplay.remove(); // Remove old display for this shift
                 }
 
                 // Show the new max quantity for the selected item code
                 const itemDisplay = document.createElement('div');
+                itemDisplay.id = `item-max-quantity-display-${shift}`; // Assign dynamic ID
                 itemDisplay.setAttribute('data-shift', shift); // Associate display with the shift
-                itemDisplay.textContent = `Shift ${shift} - ${itemCode}: Max quantity: ${maxQuantity}`;
+                itemDisplay.textContent = `Shift: ${shift} -- Max Quantity of ${itemCode}: ${maxQuantity}`;
+
+                // Append the new div to the container
                 displayContainer.appendChild(itemDisplay);
             }
 
@@ -580,8 +637,7 @@
             // Update shift inputs on checkbox change
             checkboxes.forEach(checkbox => {
                 checkbox.addEventListener('change', function() {
-                    updateShiftInputs
-                        (); // Update the shift inputs dynamically when checkboxes are changed
+                    updateShiftInputs();
                 });
             });
         });
