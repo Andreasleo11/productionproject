@@ -39,6 +39,9 @@ Route::middleware('auth')->group(function (){
     Route::get('/generate-barcode/{item_code}/{quantity}', [DashboardController::class, 'itemCodeBarcode'])->name('generate.itemcode.barcode');
     Route::post('/process/itemproduction', [DashboardController::class, 'procesProductionBarcodes'])->name('process.productionbarcode');
     Route::get('/reset-jobs', [DashboardController::class, 'resetJobs'])->name('reset.jobs');
+    Route::post('/update-employee-name/{id}', [DashboardController::class, 'updateEmployeeName'])->name('updateEmployeeName');
+
+    Route::get('/dashboardplastic', [DashboardController::class, 'dashboardPlastic']);
 
     Route::get('barcode/index', [BarcodeController::class, 'index'])->name('barcode.base.index');
     Route::get('barcode/inandout/index', [BarcodeController::class, 'inandoutpage'])->name('inandout.index');

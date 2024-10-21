@@ -41,4 +41,14 @@ class DailyItemCode extends Model
     {
         return $this->hasOne(MasterListItem::class, 'item_code', 'item_code');
     }
+
+    public function machinerelation()
+    {
+        return $this->hasOne(MachineJob::class, 'user_id', 'user_id');
+    }
+
+    public function scannedData()
+    {
+        return $this->hasMany(ProductionScannedData::class, 'dic_id', 'id');
+    }
 }

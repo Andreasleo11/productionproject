@@ -1,6 +1,20 @@
 <!-- Display Success and Error Messages -->
 <div class="p-3">
-    @if (session('success'))
+        @if (is_null($machinejobid->employee_name))
+            <td>
+                <form action="{{ route('updateEmployeeName', ['id' => $machinejobid->id]) }}" method="POST">
+                    @csrf
+                    <!-- Text field for user to input their name -->
+                    <input type="text" name="employee_name" placeholder="Enter your name" required>
+                    <!-- Submit button -->
+                    <button type="submit">Submit</button>
+                </form>
+            </td>
+        @else
+            <!-- Show the employee name if it exists -->
+            <h1>{{ $machinejobid->employee_name }}</h1>
+
+            @if (session('success'))
         <div class="bg-green-100 border border-green-400 text-green-700 px-3 py-2 rounded mb-2" role="alert">
             <strong class="font-bold">Success!</strong>
             <span class="block sm:inline">{{ session('success') }}</span>
@@ -267,6 +281,9 @@
         </div>
     </div>
 </div>
+        @endif
+
+   
 
 <script type="module">
     Fancybox.bind('[data-fancybox="gallery"]', {

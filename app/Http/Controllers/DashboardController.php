@@ -26,7 +26,7 @@ class DashboardController extends Controller
         $files = collect();
         $itemCode = null;
         $machineJobShift = null;
-        // dd($user);
+        $machinejobid = MachineJob::where('user_id', $user->id)->first();
         // Check if the user's specification_id is 2
         if ($user->specification_id == 2) {
             $datas = DailyItemCode::where('user_id', $user->id)
@@ -172,9 +172,22 @@ class DashboardController extends Controller
             }
             // dd('masuk sini');
             $machineJobShift = $user->jobs->shift;
-            return view('dashboard', compact('files', 'datas', 'itemCode', 'uniquedata', 'machineJobShift', 'dataWithSpkNo'));
+           
+            return view('dashboard', compact('files', 'datas', 'itemCode', 'uniquedata', 'machineJobShift', 'dataWithSpkNo', 'machinejobid'));
             // return view('dashboard', compact('files'));
         }
+    }
+
+    public function updateEmployeeName(Request $request, $id)
+    {
+        $machineJob = MachineJob::where('user_id', $id)->first();
+    
+        // Update the employee_name
+        $machineJob->employee_name = $request->input('employee_name');
+        $machineJob->save();
+        
+        // Redirect back or wherever needed
+        return redirect()->back()->with('success', 'Employee name updated successfully.');
     }
 
     public function updateMachineJob(Request $request)
@@ -439,6 +452,7 @@ class DashboardController extends Controller
         // dd($request->all());
         $datas = json_decode($request->input('datas'));
         $uniquedata = json_decode($request->input('uniqueData'));
+        $firstData = $datas[0];
         // dd($uniquedata);
         // dd($datas);
         // dd($uniquedata);
@@ -514,6 +528,7 @@ class DashboardController extends Controller
         // dd('aman sampe sini ?');
         ProductionScannedData::create([
             'spk_code' => $spk_code,
+            'dic_id' => $firstData->id,
             'item_code' => $item_code,
             'quantity' => $quantity,
             'warehouse' => $warehouse,
@@ -605,5 +620,13 @@ class DashboardController extends Controller
         }
         // Optionally return a message or redirect the user
         return redirect()->back()->with('success', 'Jobs have been reset successfully.');
+    }
+
+    public function dashboardPlastic()
+    {   
+        $datas = DailyItemCode::with('machinerelation', 'user', 'scannedData')->get();
+    //    dd($datas);
+
+        return view('dashboard_plasticinjection', compact('datas'));
     }
 }

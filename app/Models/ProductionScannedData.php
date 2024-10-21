@@ -13,6 +13,7 @@ class ProductionScannedData extends Model
 
     protected $fillable = [
         'spk_code',
+        'dic_id',
         'item_code',
         'warehouse',
         'quantity',
