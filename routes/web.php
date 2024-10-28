@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InitialBarcodeController;
+use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\MasterItemController;
 use App\Http\Controllers\OperatorController;
 use App\Http\Controllers\SOController;
@@ -103,6 +104,8 @@ Route::middleware('auth')->group(function (){
     Route::get('/so/process/{docNum}', [SOController::class, 'process'])->name('so.process');
     Route::post('/so/scan', [SOController::class, 'scanBarcode'])->name('so.scanBarcode');
     Route::get('/update-so-data/{docNum}', [SOController::class, 'updateSoData'])->name('update.so.data');
+
+    Route::get('/maintenance/oindex', [MaintenanceController::class, 'index'])->name('maintenance.index');
 
     Route::post('/import-excel', [SOController::class, 'import'])->name('import.so.data');
 
