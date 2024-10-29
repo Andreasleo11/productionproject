@@ -19,7 +19,8 @@ class FileController extends Controller
             foreach ($request->file('files') as $file) {
                 $fileName = time().'-'.$file->getClientOriginalName();
                 $fileSize = $file->getSize();
-                $file->move(public_path('files'), $fileName);
+                $file->storeAs('public/files', $fileName);
+                // $file->move(public_path('files'), $fileName);
 
                 File::create([
                     'item_code' => $request->item_code,

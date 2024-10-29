@@ -27,6 +27,7 @@ class DashboardController extends Controller
         $itemCode = null;
         $machineJobShift = null;
         $machinejobid = MachineJob::where('user_id', $user->id)->first();
+        // dd($machinejobid);
         // Check if the user's specification_id is 2
         if ($user->specification_id == 2) {
             $datas = DailyItemCode::where('user_id', $user->id)
@@ -172,20 +173,20 @@ class DashboardController extends Controller
             }
             // dd('masuk sini');
             $machineJobShift = $user->jobs->shift;
-           
+
             return view('dashboard', compact('files', 'datas', 'itemCode', 'uniquedata', 'machineJobShift', 'dataWithSpkNo', 'machinejobid'));
             // return view('dashboard', compact('files'));
         }
     }
 
-    public function updateEmployeeName(Request $request, $id)
+    public function updateEmployeeName(Request $request)
     {
-        $machineJob = MachineJob::where('user_id', $id)->first();
-    
+        $machineJob = MachineJob::where('user_id', auth()->user()->id)->first();
+
         // Update the employee_name
         $machineJob->employee_name = $request->input('employee_name');
         $machineJob->save();
-        
+
         // Redirect back or wherever needed
         return redirect()->back()->with('success', 'Employee name updated successfully.');
     }
@@ -623,10 +624,20 @@ class DashboardController extends Controller
     }
 
     public function dashboardPlastic()
-    {   
+    {
         $datas = DailyItemCode::with('machinerelation', 'user', 'scannedData')->get();
     //    dd($datas);
 
         return view('dashboard_plasticinjection', compact('datas'));
+    }
+
+    public function resetJob()
+    {
+        MachineJob::where('user_id', auth()->user()->id)->update([
+            'item_code' => null,
+            'shift' => null,
+        ]);
+
+        return redirect()->back()->with('success', 'Job has been resetted!');
     }
 }

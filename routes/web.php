@@ -41,7 +41,7 @@ Route::middleware('auth')->group(function (){
     Route::get('/generate-barcode/{item_code}/{quantity}', [DashboardController::class, 'itemCodeBarcode'])->name('generate.itemcode.barcode');
     Route::post('/process/itemproduction', [DashboardController::class, 'procesProductionBarcodes'])->name('process.productionbarcode');
     Route::get('/reset-jobs', [DashboardController::class, 'resetJobs'])->name('reset.jobs');
-    Route::post('/update-employee-name/{id}', [DashboardController::class, 'updateEmployeeName'])->name('updateEmployeeName');
+    Route::post('/update-employee-name', [DashboardController::class, 'updateEmployeeName'])->name('updateEmployeeName');
 
     Route::get('/dashboardplastic', [DashboardController::class, 'dashboardPlastic']);
 
@@ -125,6 +125,8 @@ Route::middleware('auth')->group(function (){
 
         return (new \App\Notifications\ProductionReportCreated($details))->toMail(auth()->user());
     });
+
+    Route::get('/reset-job', [DashboardController::class, 'resetJob'])->name('reset.job');
 });
 
 
