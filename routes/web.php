@@ -10,6 +10,7 @@ use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\MasterItemController;
 use App\Http\Controllers\OperatorController;
 use App\Http\Controllers\SOController;
+use App\Http\Controllers\SecondDailyController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -108,6 +109,9 @@ Route::middleware('auth')->group(function (){
     Route::get('/maintenance/oindex', [MaintenanceController::class, 'index'])->name('maintenance.index');
 
     Route::post('/import-excel', [SOController::class, 'import'])->name('import.so.data');
+
+    Route::get('/second-daily-process', [SecondDailyController::class, 'index']);
+    Route::post('/planning/store', [SecondDailyController::class, 'store'])->name('second.store');
 
     Route::get('/notification', function () {
         $productionReport = \App\Models\ProductionReport::find(1);
