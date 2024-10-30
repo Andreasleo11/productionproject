@@ -48,5 +48,10 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('view-maintenance-links', function($user) {
             return $user->hasRoleAccess('Maintenance');
         });
+
+        // Define gate for Second links
+        Gate::define('view-second-process-links', function($user){
+            return $user->hasRoleAccess('SecondProcess');
+        });
     }
 }

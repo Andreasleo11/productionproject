@@ -11,7 +11,7 @@
     {{-- Content --}}
     @if (auth()->user()->specification->name === 'Admin')
         @include('partials.dashboard-admin')
-    @elseif (auth()->user()->specification->name === 'Admin' || auth()->user()->specification->name === 'PE')
+    @elseif (auth()->user()->specification->name === 'PE')
         <div class="flex justify-center items-center">PE USER</div>
     @elseif (auth()->user()->specification->name === 'Operator')
         @include('partials.dashboard-operator')
@@ -90,5 +90,7 @@
 
             </div>
         </div>
+    @elseif(auth()->user()->specification->name === 'SecondProcess')
+        @include('second.index')
     @endif
 </x-app-layout>

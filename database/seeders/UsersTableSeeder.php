@@ -578,6 +578,16 @@ class UsersTableSeeder extends Seeder
                 'created_at' => $timestamp,
                 'updated_at' => $timestamp,
             ],
+            [
+                'specification_id' => 7,
+                'name' => 'secondprocess',
+                'email' => 'secondprocess@daijo.co.id',
+                'email_verified_at' => $timestamp,
+                'password' => Hash::make('secondprocess1234'),
+                'remember_token' => Str::random(10),
+                'created_at' => $timestamp,
+                'updated_at' => $timestamp,
+            ],
         ]);
     }
 }

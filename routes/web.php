@@ -110,8 +110,10 @@ Route::middleware('auth')->group(function (){
 
     Route::post('/import-excel', [SOController::class, 'import'])->name('import.so.data');
 
-    Route::get('/second-daily-process', [SecondDailyController::class, 'index']);
-    Route::post('/planning/store', [SecondDailyController::class, 'store'])->name('second.store');
+    Route::get('/second-daily-process', [SecondDailyController::class, 'index'])->name('second.daily.process.index');
+    Route::get('/second-daily-process/create', [SecondDailyController::class, 'create'])->name('second.daily.process.create');
+    Route::post('/second-daily-process/store', [SecondDailyController::class, 'store'])->name('second.daily.process.store');
+    Route::get('/api/items', [SecondDailyController::class, 'searchItems'])->name('api.items'); 
 
     Route::get('/notification', function () {
         $productionReport = \App\Models\ProductionReport::find(1);

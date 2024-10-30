@@ -10,11 +10,26 @@ class SecondDailyController extends Controller
 {
     public function index()
     {
-        $schedule = SecondDailyProcess::get();
-        $master = MasterAllItem::get();
-        
-        return view('second.index', compact('master'));
+        return view('second.index');
     }
+
+    public function create()
+    {
+        $schedule = SecondDailyProcess::get();
+
+        return view('second.create');
+    }
+
+    public function searchItems(Request $request)
+{
+    $query = $request->input('query');
+    $items = MasterAllItem::where('item_code', 'like', "%{$query}%")
+            ->orWhere('item_description', 'like', "%{$query}%")
+            ->limit(50) // Limit results to improve performance
+            ->get();
+
+    return response()->json($items);
+}
 
     public function store(Request $request)
     {
