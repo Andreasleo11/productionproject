@@ -114,6 +114,7 @@ Route::middleware('auth')->group(function (){
     Route::get('/second-daily-process/create', [SecondDailyController::class, 'create'])->name('second.daily.process.create');
     Route::post('/second-daily-process/store', [SecondDailyController::class, 'store'])->name('second.daily.process.store');
     Route::get('/api/items', [SecondDailyController::class, 'searchItems'])->name('api.items'); 
+    Route::get('/api/item/description', [SecondDailyController::class, 'getItemDescription'])->name('api.item.description');
 
     Route::get('/notification', function () {
         $productionReport = \App\Models\ProductionReport::find(1);
