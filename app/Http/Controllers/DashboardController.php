@@ -8,6 +8,7 @@ use App\Models\MachineJob;
 use App\Models\MasterListItem;
 use App\Models\ProductionReport;
 use App\Models\ProductionScannedData;
+use App\Models\SecondDailyProcess;
 use App\Models\SpkMaster;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -159,19 +160,44 @@ class DashboardController extends Controller
 
         $productionReports = ProductionReport::all();
 
-        // Debugging the data you're sending to the view
-        // Log::info('Job Data: ' . json_encode($job));
-
-        // dd($files);
         if ($user->specification->name !== 'Operator') {
-            return view('dashboard', compact('files', 'productionReports'));
+            if(auth()->user()->specification->name === 'SecondProcess') {
+                $data = SecondDailyProcess::all();
+
+                // Calculate efficiency and utilization
+                $totalQuantity = $data->sum('quantity_plan');
+                $totalHours = $data->sum('quantity_hour');
+                $efficiency = $totalHours ? $totalQuantity / $totalHours : 0;
+                $totalProcessTime = $data->sum('process_time');
+                $utilization = $totalHours ? ($totalProcessTime / $totalHours) * 100 : 0;
+
+                // Total quantity planned
+                $totalQuantityPlanned = $data->sum('quantity_plan');
+
+                // Group by line for production breakdown
+                $productionData = $data;
+
+                // Group by shift
+                $shiftData = $data->groupBy('shift')->map(function ($shiftData) {
+                    return [
+                        'quantity' => $shiftData->sum('quantity_plan'),
+                    ];
+                });
+
+                // Group by customer
+                $customerData = $data->groupBy('customer')->map->sum('quantity_plan');
+
+                // return view('second.index', compact('efficiency', 'utilization', 'totalQuantityPlanned', 'productionData', 'shiftData', 'customerData'));
+                return view('dashboard', compact('efficiency', 'utilization', 'totalQuantityPlanned', 'productionData', 'shiftData', 'customerData', 'productionReports'));
+            } else {
+            }
         } else {
             if(count($uniquedata) > 0){
                 $dataWithSpkNo = ProductionReport::where('spk_no', $uniquedata[0]['spk'])->first();
             } else {
                 $dataWithSpkNo = null;
             }
-            // dd('masuk sini');
+
             $machineJobShift = $user->jobs->shift;
 
             return view('dashboard', compact('files', 'datas', 'itemCode', 'uniquedata', 'machineJobShift', 'dataWithSpkNo', 'machinejobid'));
