@@ -11,6 +11,7 @@ use App\Http\Controllers\MasterItemController;
 use App\Http\Controllers\OperatorController;
 use App\Http\Controllers\SOController;
 use App\Http\Controllers\SecondDailyController;
+use App\Http\Controllers\AssemblyDailyController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -115,6 +116,11 @@ Route::middleware('auth')->group(function (){
     Route::post('/second-daily-process/store', [SecondDailyController::class, 'store'])->name('second.daily.process.store');
     Route::get('/api/items', [SecondDailyController::class, 'searchItems'])->name('api.items'); 
     Route::get('/api/item/description', [SecondDailyController::class, 'getItemDescription'])->name('api.item.description');
+
+    Route::get('/assembly-daily-process', [AssemblyDailyController::class, 'index'])->name('assembly.daily.process.index');
+    Route::get('/assembly-daily-process/create', [AssemblyDailyController::class, 'create'])->name('assembly.daily.process.create');
+    Route::post('/assembly-daily-process/store', [AssemblyDailyController::class, 'store'])->name('assembly.daily.process.store');
+
 
     Route::get('/notification', function () {
         $productionReport = \App\Models\ProductionReport::find(1);
