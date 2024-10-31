@@ -10,7 +10,8 @@ class SecondDailyController extends Controller
 {
     public function index()
     {
-        return view('second.index');
+        $datas = SecondDailyProcess::get();
+        return view('second.index', compact('datas'));
     }
 
     public function create()

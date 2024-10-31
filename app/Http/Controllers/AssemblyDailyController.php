@@ -10,7 +10,8 @@ class AssemblyDailyController extends Controller
 {
     public function index()
     {
-        return view('assembly.index');
+        $datas = AssemblyDailyProcess::get();
+        return view('assembly.index', compact('datas'));
     }
 
     public function create()
