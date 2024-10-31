@@ -9,6 +9,7 @@ use App\Models\MasterListItem;
 use App\Models\ProductionReport;
 use App\Models\ProductionScannedData;
 use App\Models\SecondDailyProcess;
+use App\Models\AssemblyDailyProcess;
 use App\Models\SpkMaster;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -186,10 +187,12 @@ class DashboardController extends Controller
 
                 // Group by customer
                 $customerData = $data->groupBy('customer')->map->sum('quantity_plan');
-
+                
                 // return view('second.index', compact('efficiency', 'utilization', 'totalQuantityPlanned', 'productionData', 'shiftData', 'customerData'));
                 return view('dashboard', compact('efficiency', 'utilization', 'totalQuantityPlanned', 'productionData', 'shiftData', 'customerData', 'productionReports'));
             } else {
+                $datas = AssemblyDailyProcess::get();
+                return view('dashboard', compact('datas'));
             }
         } else {
             if(count($uniquedata) > 0){
@@ -199,7 +202,7 @@ class DashboardController extends Controller
             }
 
             $machineJobShift = $user->jobs->shift;
-
+         
             return view('dashboard', compact('files', 'datas', 'itemCode', 'uniquedata', 'machineJobShift', 'dataWithSpkNo', 'machinejobid'));
             // return view('dashboard', compact('files'));
         }

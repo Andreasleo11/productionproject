@@ -23,14 +23,14 @@
                 </div>
                 <div class="relative overflow-x-auto">
                     <table class="w-full text-sm text-left text-gray-500">
-                        <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                        <thead
+                            class="text-xs text-gray-700 uppercase bg-gray-50"
+                        >
                             <tr>
                                 <th scope="col" class="px-6 py-3">
                                     Machine Name
                                 </th>
-                                <th scope="col" class="px-6 py-3">
-                                    SPK No
-                                </th>
+                                <th scope="col" class="px-6 py-3">SPK No</th>
                                 <th scope="col" class="px-6 py-3">
                                     Target Qty
                                 </th>
@@ -40,18 +40,17 @@
                                 <th scope="col" class="px-6 py-3">
                                     Outstanding Qty
                                 </th>
-                                <th scope="col" class="px-6 py-3">
-                                    Status
-                                </th>
-                                <th scope="col" class="px-6 py-2">
-                                    Action
-                                </th>
+                                <th scope="col" class="px-6 py-3">Status</th>
+                                <th scope="col" class="px-6 py-2">Action</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse ($productionReports as $report)
                                 <tr class="bg-white border-b">
-                                    <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                                    <th
+                                        scope="row"
+                                        class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
+                                    >
                                         {{ $report->user->name }}
                                     </th>
                                     <td class="px-6 py-4">
@@ -69,14 +68,22 @@
                                     <td class="px-6 py-4">
                                         @if ($report->outstanding === 0)
                                             <span
-                                                class="bg-green-100 text-green-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded">Success</span>
+                                                class="bg-green-100 text-green-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded"
+                                            >
+                                                Success
+                                            </span>
                                         @else
                                             <span
-                                                class="bg-red-100 text-red-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded">Failed</span>
+                                                class="bg-red-100 text-red-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded"
+                                            >
+                                                Failed
+                                            </span>
                                         @endif
                                     </td>
                                     <td class="px-6 py-4">
-                                        <x-primary-button>Action</x-primary-button>
+                                        <x-primary-button>
+                                            Action
+                                        </x-primary-button>
                                     </td>
                                 </tr>
                             @empty
@@ -87,10 +94,11 @@
                         </tbody>
                     </table>
                 </div>
-
             </div>
         </div>
-    @elseif(auth()->user()->specification->name === 'SecondProcess')
+    @elseif (auth()->user()->specification->name === 'SecondProcess')
         @include('second.index')
+    @elseif (auth()->user()->specification->name === 'AssemblyProcess')
+        @include('assembly.index')
     @endif
 </x-app-layout>

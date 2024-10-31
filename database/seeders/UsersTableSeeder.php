@@ -588,6 +588,16 @@ class UsersTableSeeder extends Seeder
                 'created_at' => $timestamp,
                 'updated_at' => $timestamp,
             ],
+            [
+                'specification_id' => 8,
+                'name' => 'assemblyprocess',
+                'email' => 'assemblyprocess@daijo.co.id',
+                'email_verified_at' => $timestamp,
+                'password' => Hash::make('assemblyprocess1234'),
+                'remember_token' => Str::random(10),
+                'created_at' => $timestamp,
+                'updated_at' => $timestamp,
+            ],
         ]);
     }
 }
