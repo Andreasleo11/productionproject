@@ -191,8 +191,30 @@ class DashboardController extends Controller
                 // return view('second.index', compact('efficiency', 'utilization', 'totalQuantityPlanned', 'productionData', 'shiftData', 'customerData'));
                 return view('dashboard', compact('efficiency', 'utilization', 'totalQuantityPlanned', 'productionData', 'shiftData', 'customerData', 'productionReports'));
             } else {
-                $datas = AssemblyDailyProcess::get();
-                return view('dashboard', compact('datas'));
+                $assemblyData  = AssemblyDailyProcess::get();
+
+                $totalQuantityAssembled = $assemblyData ->sum('quantity');
+
+                // Calculate average assembly per line
+                $averageAssemblyPerLine = $assemblyData ->groupBy('line')->map->sum('quantity')->average();
+            
+                // Count total unique lines
+                $totalLines = $assemblyData ->groupBy('line')->count();
+            
+                // Data for "Quantity Assembled by Line" chart
+                $lineData = $assemblyData ->groupBy('line')->map->sum('quantity');
+            
+                // Data for "Daily Assembly Quantity" chart
+                $dailyData = $assemblyData ->groupBy('plan_date')->map->sum('quantity');
+
+                return view('dashboard', compact(
+                    'assemblyData', 
+                    'totalQuantityAssembled', 
+                    'averageAssemblyPerLine', 
+                    'totalLines', 
+                    'lineData', 
+                    'dailyData'
+                ));
             }
         } else {
             if(count($uniquedata) > 0){
