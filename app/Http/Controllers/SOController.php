@@ -58,6 +58,7 @@ class SOController extends Controller
 
                 // Keep one entry and update the quantity
                 $entry = $group->first();
+                
                 $entry->quantity = $totalQuantity;
 
                 $scannedCount = ScannedData::where('doc_num', $docNum)
@@ -84,7 +85,7 @@ class SOController extends Controller
             ->values(); // Reset the keys after grouping
             
         foreach ($data as $entry) {
-            SoData::where('id', $entry->id)->update([
+            SoData::where('doc_num', $entry->doc_num)->update([
                 'is_finish' => $entry->is_finish,
             ]);
         }
@@ -181,64 +182,71 @@ class SOController extends Controller
         
         // Remove the first row (header)
         array_shift($data);
-        
+    
         $uniqueRows = [];
-        // dd($data);
+       
         // Loop through the data to check for duplicates
         foreach ($data as &$row) {
+            array_shift($row);
             // Format the date in column 3 (index 2) to yyyy-mm-dd
-            if (isset($row[3]) && !empty($row[3])) {
-                $row[3] = \Carbon\Carbon::createFromFormat('d/m/Y', $row[3])->format('Y-m-d');
+            if (isset($row[2]) && !empty($row[2])) {
+                $row[2] = \Carbon\Carbon::createFromFormat('d/m/Y', $row[2])->format('Y-m-d');
             }
 
             // Convert the number in column 6 (index 5) to integer (without decimal places)
-            if (isset($row[6])) {
+            if (isset($row[5])) {
                 // Remove any commas and decimals, then convert to integer
-                $deliveryQuantity = str_replace(',', '', $row[6]); // Remove commas
+                $deliveryQuantity = str_replace(',', '', $row[5]); // Remove commas
                 $deliveryQuantity = (int)number_format((float)$deliveryQuantity, 0, '.', ''); // Convert to integer
-                $row[6] = $deliveryQuantity; // Update the row
+                $row[5] = $deliveryQuantity; // Update the row
             } else {
-                $row[6] = 0; // Set to a default value if it's not a number
+                $row[5] = 0; // Set to a default value if it's not a number
             }
 
             // Convert the number in column 8 (index 7) to integer (without decimal places)
-            if (isset($row[8])) {
+            if (isset($row[7])) {
                 // Remove any commas and decimals, then convert to integer
-                $packagingQuantity = str_replace(',', '', $row[8]); // Remove commas
+                $packagingQuantity = str_replace(',', '', $row[7]); // Remove commas
                 $packagingQuantity = (int)number_format((float)$packagingQuantity, 0, '.', ''); // Convert to integer
-                $row[8] = $packagingQuantity; // Update the row
+                $row[7] = $packagingQuantity; // Update the row
             } else {
-                $row[8] = 0; // Set to a default value if it's not a number
+                $row[7] = 0; // Set to a default value if it's not a number
+            }
+
+            if (isset($row[9]) && !empty($row[9])) {
+                $row[9] = \Carbon\Carbon::createFromFormat('d/m/Y', $row[9])->format('Y-m-d');
             }
 
             if (isset($row[10]) && !empty($row[10])) {
                 $row[10] = \Carbon\Carbon::createFromFormat('d/m/Y', $row[10])->format('Y-m-d');
             }
-
-            if (isset($row[11]) && !empty($row[11])) {
-                $row[11] = \Carbon\Carbon::createFromFormat('d/m/Y', $row[11])->format('Y-m-d');
-            }
            
             // Create a unique key based on columns 1 and 4 (doc_num and item_code)
-            $uniqueKey = $row[1] . '-' . $row[4]; 
+            $uniqueKey = $row[0] . '-' . $row[3]; 
 
             // Check if this unique key already exists in the $uniqueRows array
             if (isset($uniqueRows[$uniqueKey])) {
                 // If a duplicate is found, sum columns 6 and 8
-                $uniqueRows[$uniqueKey][6] += $row[6]; // Sum the quantities
+                $uniqueRows[$uniqueKey][5] += $row[5]; // Sum the quantities
                 // $uniqueRows[$uniqueKey][8] += $row[8];  Sum the packaging quantities
             } else {
                 // If not a duplicate, store the row in the $uniqueRows array
                 $uniqueRows[$uniqueKey] = $row;
             }
         }
+        
 
         // After processing, $uniqueRows will contain only unique rows with summed quantities and packaging quantities
         $data = array_values($uniqueRows);
-     
+        
         // Store the processed file data into a CSV
         $excelFileName = 'sodata.csv';
         $excelFilePath = 'public/' . $excelFileName;
+
+        $import = new SoImport();
+
+        // Delete old data where is_finish and is_done are 0
+        $import->deleteOldData();
 
         Excel::store(new SoDataExport($data), 'public/' . $excelFileName);
         // Import the processed file into the database

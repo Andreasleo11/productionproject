@@ -14,7 +14,6 @@ class SoData extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'id',
         'doc_num',
         'customer',
         'posting_date',
