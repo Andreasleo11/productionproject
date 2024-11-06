@@ -18,19 +18,24 @@ class SOController extends Controller
 {
     public function index(Request $request)
     {
-        
-
         $isDone = $request->query('is_done', 'all');
+        $docNum = $request->query('doc_num', '');
     
         // Build the query based on filter
         $query = SoData::select('doc_num', 'is_done', 'create_date')->distinct();
     
+        if (!empty($docNum)) {
+            $query->where('doc_num', $docNum);
+        }
+    
+        // Apply filter for `is_done` if specified
         if ($isDone !== 'all') {
             $query->where('is_done', $isDone);
         }
     
-        $docNums = $query->orderBy('doc_num', 'desc')->get();
-
+        // Paginate the results
+        $docNums = $query->orderBy('doc_num', 'desc')->paginate(10);
+    
         return view('soindex', compact('docNums'));
     }
 
