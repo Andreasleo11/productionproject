@@ -19,6 +19,7 @@ class SOController extends Controller
     public function index(Request $request)
     {
         
+
         $isDone = $request->query('is_done', 'all');
     
         // Build the query based on filter
@@ -167,6 +168,7 @@ class SOController extends Controller
 
     public function import(Request $request)
     {
+        set_time_limit(3000);       
         // dd($request->file('import_file'));
 
         // $file = $request->file('import_file')->store('temp'); // Store temporarily
